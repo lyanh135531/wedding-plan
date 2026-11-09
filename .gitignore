@@ -33,3 +33,7 @@ pnpm-debug.log*
 
 # Teamwork subagent runtime logs (optional / temporary)
 .agents/
+
+# Backups & drill artifacts
+backups/
+backups_test_temp/
