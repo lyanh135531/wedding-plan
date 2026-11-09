@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Color Tokens */
+    --bg-page: #F7F5F0;
+    --bg-surface: #FFFFFF;
+    --color-primary: #23483E;
+    --color-primary-hover: #19382F;
+    --color-text-main: #1F2933;
+    --color-text-muted: #52616B;
+    --border-control: #7A8881;
+    --border-subtle: #E2E8E4;
+
+    /* Semantic Tokens */
+    --color-success: #166534;
+    --bg-success: #ECFDF3;
+    --color-warning: #854D0E;
+    --bg-warning: #FFF8E1;
+    --color-danger: #B42318;
+    --bg-danger: #FEF3F2;
+    --color-info: #175CD3;
+    --bg-info: #EFF8FF;
+    --color-focus: #1D4ED8;
+
+    /* Layout Dimensions */
+    --sidebar-width: 240px;
+    --header-height: 64px;
+    --bottom-nav-height: 64px;
+    --touch-target-min: 44px;
+  }
+
+  /* Self-hosted font declarations (Zero runtime CDN calls) */
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('/fonts/be-vietnam-pro/BeVietnamPro-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('/fonts/be-vietnam-pro/BeVietnamPro-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('/fonts/be-vietnam-pro/BeVietnamPro-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Be Vietnam Pro';
+    src: url('/fonts/be-vietnam-pro/BeVietnamPro-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  html {
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--color-text-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Focus ring rule */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Number formatting utilities */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+}

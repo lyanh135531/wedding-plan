@@ -1,0 +1,84 @@
+version: "3.8"
+
+networks:
+  wedding-internal:
+    driver: bridge
+    internal: false # Permits outbound calls if needed for OAuth token exchange
+
+services:
+  # -------------------------------------------------------------
+  # Database Service: PostgreSQL 16 Alpine
+  # -------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: wedding_db
+    restart: unless-stopped
+    networks:
+      - wedding-internal
+    environment:
+      POSTGRES_DB: ${DB_NAME:-wedding}
+      POSTGRES_USER: ${DB_USER:-wedding_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - /srv/wedding/data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-wedding_app} -d ${DB_NAME:-wedding}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # -------------------------------------------------------------
+  # Application Service: Next.js Standalone
+  # -------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wedding_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wedding-internal
+    ports:
+      # Bind exclusively to localhost loopback; host reverse proxy forwards HTTPS
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${DB_USER:-wedding_app}:${DB_PASSWORD}@db:5432/${DB_NAME:-wedding}?sslmode=disable
+      DB_POOL_MIN: ${DB_POOL_MIN:-2}
+      DB_POOL_MAX: ${DB_POOL_MAX:-10}
+      DB_IDLE_TIMEOUT_MS: ${DB_IDLE_TIMEOUT_MS:-30000}
+      DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS:-5000}
+      UPLOAD_DIR: /data/uploads
+      APP_URL: ${APP_URL:?APP_URL must be set}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}
+      BETTER_AUTH_URL: ${APP_URL:?APP_URL must be set}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID must be set}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET must be set}
+      OWNER_EMAIL_1: ${OWNER_EMAIL_1:?OWNER_EMAIL_1 must be set}
+      OWNER_EMAIL_2: ${OWNER_EMAIL_2:?OWNER_EMAIL_2 must be set}
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - /srv/wedding/data/uploads:/data/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
