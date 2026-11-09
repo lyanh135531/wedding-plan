@@ -10,8 +10,12 @@ import { GuestCountersBar } from './GuestCountersBar';
 import { GuestFilterBar } from './GuestFilterBar';
 import { GuestCardMobile, GuestItemDisplay } from './GuestCardMobile';
 import { GuestListDesktop } from './GuestListDesktop';
+import { AddGuestModal, AddGuestDraft } from './AddGuestModal';
 import { AddFamilyModal } from './AddFamilyModal';
-import { RsvpUpdateDrawer } from './RsvpUpdateDrawer';
+import { RsvpUpdateDrawer, MemberRsvpState } from './RsvpUpdateDrawer';
+import { GuestDetailDrawer, GuestDetailData } from './GuestDetailDrawer';
+import { DuplicateBanner } from './DuplicateBanner';
+import { MergeGuestsModal, DuplicatePairSummary } from './MergeGuestsModal';
 import { UserPlus, Users } from 'lucide-react';
 
 const h = React.createElement;
@@ -101,19 +105,72 @@ export const INITIAL_GUESTS: GuestItemDisplay[] = [
     tableName: null,
     isRepresentative: false,
   },
+  {
+    id: 'tuan_duplicate',
+    displayName: 'Nguyễn Anh Tuấn',
+    side: 'groom',
+    groupName: 'Bạn Cấp 3',
+    ageTier: 'adult',
+    phone: '0912345678',
+    rsvpStatus: 'pending_reply',
+    needsSeat: true,
+    needsMeal: true,
+    mealDietaryTier: 'regular',
+    tableName: null,
+    isRepresentative: false,
+  },
+];
+
+export const INITIAL_DUPLICATES: DuplicatePairSummary[] = [
+  {
+    guest_a: {
+      id: 'anh_tuan',
+      displayName: 'Anh Tuấn',
+      side: 'groom',
+      groupName: 'Gia đình Bác Thành',
+      ageTier: 'adult',
+      phone: '0912345678',
+      email: 'anhtuan@example.com',
+      address: 'Hà Nội',
+      privateNotes: 'Ăn chay trường',
+      subTags: ['Nhà trai'],
+    },
+    guest_b: {
+      id: 'tuan_duplicate',
+      displayName: 'Nguyễn Anh Tuấn',
+      side: 'groom',
+      groupName: 'Bạn Cấp 3',
+      ageTier: 'adult',
+      phone: '0912345678',
+      email: 'tuan.nguyen@example.com',
+      address: 'Hà Nội',
+      privateNotes: 'Bạn học cấp 3 của chú rể',
+      subTags: ['Bạn bè'],
+    },
+    similarity_score: 0.85,
+    match_reasons: ['Tên tương đồng cao và trùng số điện thoại (0912345678)'],
+  },
 ];
 
 export interface GuestsDirectoryProps {
   initialState?: PrototypeState;
+  initialGuests?: GuestItemDisplay[];
+  initialDuplicates?: DuplicatePairSummary[];
+  enableApiFetch?: boolean;
 }
 
 export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
   initialState = 'populated',
+  initialGuests = INITIAL_GUESTS,
+  initialDuplicates = INITIAL_DUPLICATES,
+  enableApiFetch = false,
 }) => {
   const { isOwner } = useRole();
   const [state, setState] = React.useState<PrototypeState>(initialState);
-  const [guests, setGuests] = React.useState<GuestItemDisplay[]>(INITIAL_GUESTS);
+  const [guests, setGuests] = React.useState<GuestItemDisplay[]>(initialGuests);
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
+  const [duplicateCandidates, setDuplicateCandidates] =
+    React.useState<DuplicatePairSummary[]>(initialDuplicates);
 
   // Search & filter state
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -121,13 +178,71 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
   const [selectedRsvp, setSelectedRsvp] = React.useState('all');
 
   // Modals state
+  const [isAddGuestOpen, setIsAddGuestOpen] = React.useState(false);
   const [isAddFamilyOpen, setIsAddFamilyOpen] = React.useState(false);
   const [isRsvpDrawerOpen, setIsRsvpDrawerOpen] = React.useState(false);
+  const [isDetailDrawerOpen, setIsDetailDrawerOpen] = React.useState(false);
+  const [isMergeModalOpen, setIsMergeModalOpen] = React.useState(false);
+
   const [activeGuestId, setActiveGuestId] = React.useState<string | null>(null);
+  const [activeGuestDetail, setActiveGuestDetail] = React.useState<GuestDetailData | null>(null);
+  const [activeDuplicatePair, setActiveDuplicatePair] =
+    React.useState<DuplicatePairSummary | null>(null);
 
   React.useEffect(() => {
     setState(initialState);
   }, [initialState]);
+
+  // Live API Fetch (if enabled)
+  React.useEffect(() => {
+    if (!enableApiFetch) return;
+
+    let isMounted = true;
+    async function loadData() {
+      try {
+        const [guestsRes, dupesRes] = await Promise.all([
+          fetch('/api/v1/guests'),
+          isOwner ? fetch('/api/v1/duplicate-candidates') : Promise.resolve(null),
+        ]);
+
+        if (guestsRes.ok) {
+          const guestsData = await guestsRes.json();
+          if (isMounted && Array.isArray(guestsData.data)) {
+            setGuests(
+              guestsData.data.map((g: any) => ({
+                id: g.id,
+                displayName: g.display_name,
+                side: g.side,
+                groupName: g.group_name || 'Khách mời',
+                ageTier: g.age_tier,
+                phone: g.phone || null,
+                rsvpStatus: 'pending_reply',
+                needsSeat: g.age_tier !== 'baby',
+                needsMeal: true,
+                mealDietaryTier: 'regular',
+                tableName: null,
+                isRepresentative: false,
+              }))
+            );
+          }
+        }
+
+        if (dupesRes && dupesRes.ok) {
+          const dupesData = await dupesRes.json();
+          if (isMounted && Array.isArray(dupesData.data)) {
+            setDuplicateCandidates(dupesData.data);
+          }
+        }
+      } catch (err) {
+        console.warn('[GuestsDirectory live fetch error]:', err);
+      }
+    }
+
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, [enableApiFetch, isOwner]);
 
   // Filter calculations
   const filteredGuests = React.useMemo(() => {
@@ -164,7 +279,9 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
   // Counters
   const totalInvited = guests.length;
   const acceptedCount = guests.filter((g) => g.rsvpStatus === 'accepted').length;
-  const pendingCount = guests.filter((g) => g.rsvpStatus === 'pending_reply' || g.rsvpStatus === 'not_contacted').length;
+  const pendingCount = guests.filter(
+    (g) => g.rsvpStatus === 'pending_reply' || g.rsvpStatus === 'not_contacted'
+  ).length;
   const declinedCount = guests.filter((g) => g.rsvpStatus === 'declined').length;
   const confirmedSeats = guests.filter((g) => g.rsvpStatus === 'accepted' && g.needsSeat).length;
 
@@ -196,6 +313,95 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
     }
   };
 
+  // Convert GuestItemDisplay to GuestDetailData for S06 drawer
+  const buildGuestDetail = (g: GuestItemDisplay): GuestDetailData => ({
+    id: g.id,
+    displayName: g.displayName,
+    side: g.side,
+    groupName: g.groupName,
+    ageTier: g.ageTier,
+    phone: g.phone,
+    email: g.phone
+      ? `${removeVietnameseDiacritics(g.displayName).replace(/\s+/g, '').toLowerCase()}@example.com`
+      : null,
+    address: 'Hà Nội, Việt Nam',
+    privateNotes: 'Khách mời thân thiết của gia đình.',
+    subTags: [g.side === 'groom' ? 'Nhà trai' : 'Nhà gái'],
+    attendances: [
+      {
+        eventId: 'event_wedding_party',
+        eventName: 'Tiệc Thành Hôn (Tối)',
+        eventDate: 'Chủ Nhật, 15/11/2026 - 18:00',
+        rsvpStatus: g.rsvpStatus as any,
+        needsSeat: g.needsSeat,
+        needsMeal: g.needsMeal,
+        mealDietaryTier: (g.mealDietaryTier as any) || 'regular',
+        tableName: g.tableName,
+        invitationCardName: g.groupName,
+        invitationStatus: 'sent',
+      },
+      {
+        eventId: 'event_morning_ceremony',
+        eventName: 'Lễ Vu Quy (Sáng)',
+        eventDate: 'Chủ Nhật, 15/11/2026 - 09:00',
+        rsvpStatus: g.rsvpStatus === 'accepted' ? 'accepted' : 'not_contacted',
+        needsSeat: g.needsSeat,
+        needsMeal: false,
+        tableName: null,
+        invitationCardName: g.groupName,
+        invitationStatus: 'sent',
+      },
+    ],
+  });
+
+  const handleOpenGuestDetail = (id: string) => {
+    const found = guests.find((g) => g.id === id);
+    if (found) {
+      setActiveGuestId(id);
+      setActiveGuestDetail(buildGuestDetail(found));
+      setIsDetailDrawerOpen(true);
+    }
+  };
+
+  // Add Single Guest
+  const handleAddGuestSubmit = (data: AddGuestDraft) => {
+    const newGuest: GuestItemDisplay = {
+      id: `guest_${Date.now()}`,
+      displayName: data.displayName,
+      side: data.side,
+      groupName: data.isPlaceholder ? `Đi cùng ${data.placeholderFor || 'khách'}` : 'Khách riêng lẻ',
+      ageTier: data.ageTier,
+      phone: data.phone || null,
+      rsvpStatus: 'pending_reply',
+      needsSeat: data.ageTier !== 'baby',
+      needsMeal: true,
+      mealDietaryTier: 'regular',
+      tableName: null,
+      isRepresentative: false,
+    };
+    setGuests((prev) => [newGuest, ...prev]);
+
+    if (enableApiFetch) {
+      fetch('/api/v1/guests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          display_name: data.displayName,
+          side: data.side,
+          age_tier: data.ageTier,
+          phone: data.phone || undefined,
+          email: data.email || undefined,
+          address: data.address || undefined,
+          private_notes: data.privateNotes || undefined,
+          is_placeholder: data.isPlaceholder,
+          placeholder_for: data.placeholderFor || undefined,
+          sub_tags: data.subTags,
+        }),
+      }).catch((err) => console.warn('[Add Guest API Error]:', err));
+    }
+  };
+
+  // Add Family
   const handleAddFamilySubmit = (data: any) => {
     const newGuests: GuestItemDisplay[] = data.members.map((m: any) => ({
       id: `guest_${Date.now()}_${m.id}`,
@@ -211,6 +417,39 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
       isRepresentative: m.isRepresentative,
     }));
     setGuests((prev) => [...prev, ...newGuests]);
+  };
+
+  // RSVP Drawer update callback
+  const handleRsvpSave = (updatedMembers: MemberRsvpState[]) => {
+    setGuests((prev) =>
+      prev.map((g) => {
+        const updated = updatedMembers.find((m) => m.guestId === g.id);
+        if (updated) {
+          return {
+            ...g,
+            rsvpStatus: updated.rsvpStatus,
+            needsSeat: updated.needsSeat,
+            needsMeal: updated.needsMeal,
+            mealDietaryTier: updated.mealTier,
+            tableName: updated.assignedTable || null,
+          };
+        }
+        return g;
+      })
+    );
+  };
+
+  // Merge Success callback
+  const handleMergeSuccess = (result: any) => {
+    if (activeDuplicatePair) {
+      const mergedId = activeDuplicatePair.guest_b.id;
+      setGuests((prev) => prev.filter((g) => g.id !== mergedId));
+      setDuplicateCandidates((prev) =>
+        prev.filter((c) => c.guest_a.id !== mergedId && c.guest_b.id !== mergedId)
+      );
+    }
+    setIsMergeModalOpen(false);
+    setActiveDuplicatePair(null);
   };
 
   // Skeleton for loading state
@@ -269,6 +508,15 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
             h(
               Button,
               {
+                variant: 'secondary',
+                leftIcon: h(UserPlus, { className: 'w-4 h-4' }),
+                onClick: () => setIsAddGuestOpen(true),
+              },
+              '+ Thêm khách'
+            ),
+            h(
+              Button,
+              {
                 variant: 'primary',
                 leftIcon: h(Users, { className: 'w-4 h-4' }),
                 onClick: () => setIsAddFamilyOpen(true),
@@ -277,6 +525,16 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
             )
           )
       ),
+
+      // Duplicate Banner (AT09)
+      duplicateCandidates.length > 0 &&
+        h(DuplicateBanner, {
+          candidateCount: duplicateCandidates.length,
+          onOpenMergeModal: () => {
+            setActiveDuplicatePair(duplicateCandidates[0] || null);
+            setIsMergeModalOpen(true);
+          },
+        }),
 
       // Counters Bar
       h(GuestCountersBar, {
@@ -308,10 +566,7 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
           selectedIds,
           onToggleSelect: handleToggleSelect,
           onToggleSelectAll: handleToggleSelectAll,
-          onClickGuest: (id) => {
-            setActiveGuestId(id);
-            setIsRsvpDrawerOpen(true);
-          },
+          onClickGuest: handleOpenGuestDetail,
         })
       ),
 
@@ -325,19 +580,62 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
             guest,
             isSelected: selectedIds.includes(guest.id),
             onSelect: handleToggleSelect,
-            onClickCard: (id) => {
-              setActiveGuestId(id);
-              setIsRsvpDrawerOpen(true);
-            },
+            onClickCard: handleOpenGuestDetail,
           })
         )
       ),
+
+      // Add Guest Modal
+      h(AddGuestModal, {
+        isOpen: isAddGuestOpen,
+        onClose: () => setIsAddGuestOpen(false),
+        onSubmit: handleAddGuestSubmit,
+      }),
 
       // Add Family Modal (UXT02)
       h(AddFamilyModal, {
         isOpen: isAddFamilyOpen,
         onClose: () => setIsAddFamilyOpen(false),
         onSubmit: handleAddFamilySubmit,
+      }),
+
+      // Guest Detail Drawer (Screen S06)
+      h(GuestDetailDrawer, {
+        isOpen: isDetailDrawerOpen,
+        onClose: () => {
+          setIsDetailDrawerOpen(false);
+          setActiveGuestDetail(null);
+        },
+        guest: activeGuestDetail,
+        onUpdateRsvp: (g) => {
+          setActiveGuestId(g.id);
+          setIsRsvpDrawerOpen(true);
+        },
+        onTriggerMerge: (g) => {
+          const pair = duplicateCandidates.find(
+            (c) => c.guest_a.id === g.id || c.guest_b.id === g.id
+          );
+          if (pair) {
+            setActiveDuplicatePair(pair);
+          } else {
+            const other = guests.find((x) => x.id !== g.id);
+            if (other) {
+              setActiveDuplicatePair({
+                guest_a: g,
+                guest_b: {
+                  id: other.id,
+                  displayName: other.displayName,
+                  side: other.side,
+                  phone: other.phone,
+                  groupName: other.groupName,
+                  ageTier: other.ageTier,
+                },
+                match_reasons: ['Chọn thủ công để gộp'],
+              });
+            }
+          }
+          setIsMergeModalOpen(true);
+        },
       }),
 
       // RSVP Drawer (UXT03)
@@ -347,6 +645,18 @@ export const GuestsDirectory: React.FC<GuestsDirectoryProps> = ({
           setIsRsvpDrawerOpen(false);
           setActiveGuestId(null);
         },
+        onSave: handleRsvpSave,
+      }),
+
+      // Merge Guests Modal (AT09)
+      h(MergeGuestsModal, {
+        isOpen: isMergeModalOpen,
+        onClose: () => {
+          setIsMergeModalOpen(false);
+          setActiveDuplicatePair(null);
+        },
+        candidatePair: activeDuplicatePair,
+        onMergeSuccess: handleMergeSuccess,
       })
     )
   );

@@ -61,17 +61,46 @@ export const vndBigIntSchema = z
 export const nullableVndCurrencyStringSchema = vndCurrencyStringSchema.nullable().optional();
 
 /**
- * Số điện thoại Việt Nam chuẩn (10 chữ số, đầu 0 hoặc +84)
+ * Normalizes and strips non-essential formatting characters from raw phone input:
+ * removes whitespace (including NBSP \u00A0), hyphens, dots, and parentheses.
+ * Converts 11-digit numbers starting with '84' or numbers with redundant '0' after country code to canonical format.
  */
-export const vietnamesePhoneSchema = z
-  .string()
-  .trim()
-  .regex(/^(?:\+84|0)(?:3|5|7|8|9)\d{8}$/, {
-    message: 'Số điện thoại không hợp lệ (yêu cầu 10 chữ số mạng Việt Nam, ví dụ: 0912345678 hoặc +84912345678)',
-  });
+function cleanPhoneInput(val: unknown): unknown {
+  if (typeof val !== 'string') return val;
+  const trimmed = val.trim();
+  if (trimmed === '') return '';
+
+  // Strip whitespace (including NBSP \u00A0), hyphens, dots, parentheses
+  let cleaned = trimmed.replace(/[\s\u00A0.\-()]/g, '');
+
+  // Handle '+840...' or '840...' where local 0 was redundantly included after country code
+  if (cleaned.startsWith('+840') && cleaned.length === 13) {
+    cleaned = '+84' + cleaned.slice(4);
+  } else if (cleaned.startsWith('840') && cleaned.length === 12) {
+    cleaned = '+84' + cleaned.slice(3);
+  } else if (cleaned.startsWith('84') && cleaned.length === 11) {
+    cleaned = '+84' + cleaned.slice(2);
+  }
+
+  return cleaned;
+}
+
+/**
+ * Số điện thoại Việt Nam chuẩn (10 chữ số, đầu 0 hoặc +84)
+ * Hỗ trợ các định dạng có dấu cách, dấu gạch nối, dấu chấm, dấu ngoặc đơn hoặc tiền tố 84.
+ */
+export const vietnamesePhoneSchema = z.preprocess(
+  cleanPhoneInput,
+  z
+    .string()
+    .trim()
+    .regex(/^(?:\+84|0)(?:3|5|7|8|9)\d{8}$/, {
+      message: 'Số điện thoại không hợp lệ (yêu cầu 10 chữ số mạng Việt Nam, ví dụ: 0912345678 hoặc +84912345678)',
+    })
+);
 
 export const nullableVietnamesePhoneSchema = z.preprocess(
-  (val) => (typeof val === 'string' && val.trim() === '' ? null : typeof val === 'string' ? val.trim() : val),
+  (val) => (typeof val === 'string' && val.trim() === '' ? null : val),
   vietnamesePhoneSchema.nullable().optional()
 );
 
