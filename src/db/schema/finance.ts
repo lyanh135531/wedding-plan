@@ -9,6 +9,7 @@ import {
   date,
   pgEnum,
   unique,
+  uniqueIndex,
   check,
   index,
   type AnyPgColumn,
@@ -16,6 +17,7 @@ import {
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
 import { events } from "./events";
+import { vendors, vendorQuotes } from "./vendors";
 
 export const costStatusEnum = pgEnum("cost_status", [
   "draft",
@@ -91,6 +93,8 @@ export const costItems = pgTable(
     vendorName: text("vendor_name"),
     vendorPhone: text("vendor_phone"),
     vendorContact: text("vendor_contact"),
+    vendorId: uuid("vendor_id").references(() => vendors.id, { onDelete: "set null" }),
+    vendorQuoteId: uuid("vendor_quote_id").references(() => vendorQuotes.id, { onDelete: "set null" }),
     estimatedAmount: bigint("estimated_amount", { mode: "bigint" }),
     contractedAmount: bigint("contracted_amount", { mode: "bigint" }),
     finalSettlementAmount: bigint("final_settlement_amount", { mode: "bigint" }), // 0 is VALID!
@@ -113,6 +117,11 @@ export const costItems = pgTable(
     settlementCheck: check("cost_items_settlement_check", sql`final_settlement_amount IS NULL OR final_settlement_amount >= 0`),
     cancellationFeeCheck: check("cost_items_cancellation_fee_check", sql`cancellation_fee IS NULL OR cancellation_fee >= 0`),
     categoryIdx: index("cost_items_category_id_idx").on(table.categoryId),
+    vendorIdIdx: index("cost_items_vendor_id_idx").on(table.vendorId),
+    vendorQuoteIdIdx: index("cost_items_vendor_quote_id_idx").on(table.vendorQuoteId),
+    vendorQuoteIdUnique: uniqueIndex("cost_items_vendor_quote_id_unique")
+      .on(table.vendorQuoteId)
+      .where(sql`vendor_quote_id IS NOT NULL`),
   })
 );
 

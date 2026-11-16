@@ -5,6 +5,7 @@ export * from "./auth";
 export * from "./events";
 export * from "./guests";
 export * from "./finance";
+export * from "./vendors";
 export * from "./tasks";
 export * from "./files";
 export * from "./system";
@@ -22,6 +23,7 @@ import {
   payments,
   paymentAllocations,
 } from "./finance";
+import { vendors, vendorQuotes, contacts } from "./vendors";
 import { tasks, taskChecklistItems, taskDependencies, appointments } from "./tasks";
 import { attachments, attachmentVariants } from "./files";
 import { auditLogs, notifications, idempotencyRecords, importBatches, importRows } from "./system";
@@ -41,6 +43,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   contactFollowups: many(contactFollowups),
   notifications: many(notifications),
   uploads: many(attachments),
+  createdVendorQuotes: many(vendorQuotes),
 }));
 
 export const eventsRelations = relations(events, ({ many, one }) => ({
@@ -139,6 +142,14 @@ export const costItemsRelations = relations(costItems, ({ one, many }) => ({
   inChargeUser: one(users, {
     fields: [costItems.inChargeUserId],
     references: [users.id],
+  }),
+  vendor: one(vendors, {
+    fields: [costItems.vendorId],
+    references: [vendors.id],
+  }),
+  vendorQuote: one(vendorQuotes, {
+    fields: [costItems.vendorQuoteId],
+    references: [vendorQuotes.id],
   }),
   schedules: many(paymentSchedules),
   payments: many(payments),
@@ -256,3 +267,38 @@ export const importRowsRelations = relations(importRows, ({ one }) => ({
     references: [importBatches.id],
   }),
 }));
+
+export const vendorsRelations = relations(vendors, ({ many }) => ({
+  quotes: many(vendorQuotes),
+  contacts: many(contacts),
+  costItems: many(costItems),
+}));
+
+export const vendorQuotesRelations = relations(vendorQuotes, ({ one, many }) => ({
+  vendor: one(vendors, {
+    fields: [vendorQuotes.vendorId],
+    references: [vendors.id],
+  }),
+  parentQuote: one(vendorQuotes, {
+    fields: [vendorQuotes.parentQuoteId],
+    references: [vendorQuotes.id],
+    relationName: "parentQuote",
+  }),
+  childQuotes: many(vendorQuotes, { relationName: "parentQuote" }),
+  createdByUser: one(users, {
+    fields: [vendorQuotes.createdBy],
+    references: [users.id],
+  }),
+  costItem: one(costItems, {
+    fields: [vendorQuotes.id],
+    references: [costItems.vendorQuoteId],
+  }),
+}));
+
+export const contactsRelations = relations(contacts, ({ one }) => ({
+  vendor: one(vendors, {
+    fields: [contacts.vendorId],
+    references: [vendors.id],
+  }),
+}));
+

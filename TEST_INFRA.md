@@ -279,3 +279,21 @@ Playwright tests run across the following 4 configured viewports:
 | **High** | Inability to complete a primary workflow, failure to distinguish snapshot versions, unreadable financial figures on 360px viewport. | **Zero tolerated.** Gate sign-off blocked. |
 | **Medium** | Minor navigation confusion, non-blocking UI discrepancies, slow rendering on large lists. | Allowed with approved remediation plan before G6. |
 | **Low** | Minor cosmetic padding or typography adjustments not impacting usability. | Backlogged for routine polishing. |
+
+---
+
+## 9. Gate G8 Test Strategy & Acceptance Matrix (Seating, Catering & Logistics)
+
+### 9.1. Core Invariants & Acceptance Tests
+| Test ID | Gate | Description & Invariant | Verification Level | Pass Criteria |
+|---|---|---|---|---|
+| **AT06** | G8 | 4-person family on 1 invitation | Unit / Integration | Correct headcount calculation, family members grouped or warned if split |
+| **AT07** | G8 | Child/infant not needing seat (`needs_seat = false`) | Unit / Integration | Headcount and meal included; consumes 0 table seat capacity |
+| **AT09** | G8 | Table / RSVP conflict warning | UI / Integration | Flag unseated confirmed guests or overcapacity tables |
+| **AT10** | G8 | Cancellation / RSVP decline unseating | Domain / Integration | Auto-unseat guest from `seat_assignments` on decline, audit log created |
+| **AT21** | G8 | Concurrent seating race on last seat | Adversarial / Concurrency | Database row-lock in transaction (`FOR UPDATE`); strictly 1 succeeds, no overcapacity |
+| **AT22** | G8 | Reduce table/vehicle capacity below assigned | Domain / API | Rejected with 400 Bad Request (`CapacityExceededError`); requires reallocation first |
+| **AT26** | G8 | Family View (`family_view`) data redaction | Security / RLS / API | 200 OK for viewing shared tables/menus; 0 private notes; 0 phone numbers; 403 on write |
+| **AT30** | G8 | Optimistic locking on seating / logistics updates | API / Integration | Version check in update; 409 Conflict on stale version |
+| **AT52** | G8 | Immutable catering snapshot for restaurant contract | Domain / API | Locked snapshot with timestamp and change diff tracking |
+
