@@ -4,57 +4,63 @@ import * as React from 'react';
 import { PrototypeState } from '@/components/testing/PrototypeToolbar';
 import { StateWrapper } from '@/components/testing/StateWrapper';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { Users, AlertTriangle, Check, ArrowRight, ShieldAlert, Camera } from 'lucide-react';
+import { useRole } from '@/context/RoleContext';
+import {
+  Users,
+  AlertTriangle,
+  Check,
+  ArrowRight,
+  ShieldAlert,
+  Camera,
+  Plus,
+  Printer,
+  Download,
+  Filter,
+} from 'lucide-react';
+import { TableItem, GuestSeatingItem, TableShape } from './types';
+import { INITIAL_TABLES, INITIAL_SEATING_GUESTS } from './fixtures';
+import { TableCard } from './TableCard';
+import { SeatingConflictAlerts } from './SeatingConflictAlerts';
+import { SeatingExportModal } from './SeatingExportModal';
+import { AddEditTableModal } from './AddEditTableModal';
+
+export * from './types';
+export * from './fixtures';
+export * from './TableCard';
+export * from './SeatingConflictAlerts';
+export * from './SeatingExportModal';
+export * from './AddEditTableModal';
 
 const h = React.createElement;
-
-export interface TableItem {
-  id: string;
-  name: string;
-  capacity: number;
-  seatedGuestIds: string[];
-}
-
-export interface GuestSeatingItem {
-  id: string;
-  name: string;
-  groupName: string;
-  tableId: string | null;
-}
-
-export const INITIAL_TABLES: TableItem[] = [
-  { id: 'tbl_a1', name: 'Bàn A1 (Họ hàng nhà trai)', capacity: 10, seatedGuestIds: ['bac_thanh', 'bac_gai'] },
-  { id: 'tbl_a2', name: 'Bàn A2 (Bạn bè chú rể)', capacity: 10, seatedGuestIds: [] },
-  { id: 'tbl_b1', name: 'Bàn B1 (Họ hàng nhà gái)', capacity: 10, seatedGuestIds: ['co_mai'] },
-  { id: 'tbl_b2', name: 'Bàn B2 (Bạn bè cô dâu)', capacity: 10, seatedGuestIds: [] },
-];
-
-export const INITIAL_SEATING_GUESTS: GuestSeatingItem[] = [
-  { id: 'bac_thanh', name: 'Bác Thành', groupName: 'Gia đình Bác Thành', tableId: 'tbl_a1' },
-  { id: 'bac_gai', name: 'Bác Gái', groupName: 'Gia đình Bác Thành', tableId: 'tbl_a1' },
-  { id: 'anh_tuan', name: 'Anh Tuấn', groupName: 'Gia đình Bác Thành', tableId: null },
-  { id: 'be_bi', name: 'Bé Bi', groupName: 'Gia đình Bác Thành', tableId: null },
-  { id: 'co_mai', name: 'Cô Mai', groupName: 'Họ hàng nhà gái', tableId: 'tbl_b1' },
-  { id: 'chu_hung', name: 'Chú Hùng', groupName: 'Họ hàng nhà gái', tableId: null },
-];
 
 export interface SeatingManagerProps {
   initialState?: PrototypeState;
   initialConflictMessage?: string | null;
+  initialTables?: TableItem[];
+  initialGuests?: GuestSeatingItem[];
 }
 
 export const SeatingManager: React.FC<SeatingManagerProps> = ({
   initialState = 'populated',
   initialConflictMessage = null,
+  initialTables = INITIAL_TABLES,
+  initialGuests = INITIAL_SEATING_GUESTS,
 }) => {
+  // Role context with fallback for tests rendered outside RoleProvider
+  let roleContext = { isOwner: true, isFamily: false, canMutate: true };
+  try {
+    const ctx = useRole();
+    roleContext = { isOwner: ctx.isOwner, isFamily: ctx.isFamily, canMutate: ctx.canMutate };
+  } catch {
+    // Default to owner when rendered in isolation
+  }
+  const { isOwner, isFamily, canMutate } = roleContext;
   const [state, setState] = React.useState<PrototypeState>(initialState);
-  const [tables, setTables] = React.useState<TableItem[]>(INITIAL_TABLES);
-  const [guests, setGuests] = React.useState<GuestSeatingItem[]>(INITIAL_SEATING_GUESTS);
+  const [tables, setTables] = React.useState<TableItem[]>(initialTables);
+  const [guests, setGuests] = React.useState<GuestSeatingItem[]>(initialGuests);
 
   // Tap-to-seat selection (UXT12)
   const [selectedGuestId, setSelectedGuestId] = React.useState<string | null>(null);
-  const [selectedTableId, setSelectedTableId] = React.useState<string | null>(null);
 
   // 409 Race Conflict state (UXT13)
   const [conflictMessage, setConflictMessage] = React.useState<string | null>(initialConflictMessage);
@@ -63,48 +69,128 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
   const [isSnapshotFinalized, setIsSnapshotFinalized] = React.useState(true);
   const [unassignedNewGuestCount, setUnassignedNewGuestCount] = React.useState(1);
 
+  // Modals state
+  const [isExportModalOpen, setIsExportModalOpen] = React.useState(false);
+  const [isAddEditModalOpen, setIsAddEditModalOpen] = React.useState(false);
+  const [editingTable, setEditingTable] = React.useState<TableItem | null>(null);
+
+  // Filter state
+  const [shapeFilter, setShapeFilter] = React.useState<'all' | 'round' | 'rectangular'>('all');
+
   React.useEffect(() => {
     setState(initialState);
   }, [initialState]);
 
-  const handleSeatGuest = (tableId: string) => {
-    if (!selectedGuestId) return;
+  // Seating assignment logic
+  const handleSeatGuest = (tableId: string, guestIdToSeat = selectedGuestId) => {
+    if (!guestIdToSeat || !canMutate) return;
 
     // Simulate 409 Conflict if table is 'tbl_a2' when simulated
-    if (tableId === 'tbl_a2' && conflictMessage === null && selectedGuestId === 'anh_tuan') {
-      // Trigger 409 simulation per UXT13
+    if (tableId === 'tbl_a2' && conflictMessage === null && guestIdToSeat === 'anh_tuan') {
       setConflictMessage('Bàn A2 vừa hết chỗ do người dùng khác đã xếp trước. Đã cập nhật sức chứa mới.');
-      // Update capacity of tbl_a2 to full
       setTables((prev) =>
         prev.map((t) =>
           t.id === 'tbl_a2' ? { ...t, capacity: t.seatedGuestIds.length } : t
         )
       );
-      // Retain active guest selection (UXT13)
       return;
     }
 
-    // Success seat flow
     setTables((prev) =>
       prev.map((t) => {
         if (t.id === tableId) {
-          return { ...t, seatedGuestIds: [...t.seatedGuestIds, selectedGuestId] };
+          if (t.seatedGuestIds.includes(guestIdToSeat)) return t;
+          return { ...t, seatedGuestIds: [...t.seatedGuestIds, guestIdToSeat] };
         }
         return {
           ...t,
-          seatedGuestIds: t.seatedGuestIds.filter((id) => id !== selectedGuestId),
+          seatedGuestIds: t.seatedGuestIds.filter((id) => id !== guestIdToSeat),
         };
       })
     );
 
     setGuests((prev) =>
-      prev.map((g) => (g.id === selectedGuestId ? { ...g, tableId } : g))
+      prev.map((g) => (g.id === guestIdToSeat ? { ...g, tableId } : g))
     );
 
     setSelectedGuestId(null);
-    setSelectedTableId(null);
     setConflictMessage(null);
   };
+
+  const handleUnseatGuest = (tableId: string, guestId: string) => {
+    if (!canMutate) return;
+    setTables((prev) =>
+      prev.map((t) =>
+        t.id === tableId
+          ? { ...t, seatedGuestIds: t.seatedGuestIds.filter((id) => id !== guestId) }
+          : t
+      )
+    );
+    setGuests((prev) =>
+      prev.map((g) => (g.id === guestId ? { ...g, tableId: null } : g))
+    );
+  };
+
+  const handleSaveTable = (tableData: {
+    id?: string;
+    name: string;
+    tableNumber?: string;
+    shape: TableShape;
+    capacity: number;
+    notes?: string;
+  }) => {
+    if (!canMutate) return;
+    if (tableData.id) {
+      setTables((prev) =>
+        prev.map((t) =>
+          t.id === tableData.id
+            ? {
+                ...t,
+                name: tableData.name,
+                tableNumber: tableData.tableNumber,
+                shape: tableData.shape,
+                capacity: tableData.capacity,
+                notes: tableData.notes,
+              }
+            : t
+        )
+      );
+    } else {
+      const newTable: TableItem = {
+        id: `tbl_${Date.now()}`,
+        name: tableData.name,
+        tableNumber: tableData.tableNumber,
+        shape: tableData.shape,
+        capacity: tableData.capacity,
+        notes: tableData.notes,
+        seatedGuestIds: [],
+        version: 1,
+      };
+      setTables((prev) => [...prev, newTable]);
+    }
+  };
+
+  const handleDeleteTable = (tableId: string) => {
+    if (!canMutate) return;
+    // Unseat all guests on this table
+    setGuests((prev) =>
+      prev.map((g) => (g.tableId === tableId ? { ...g, tableId: null } : g))
+    );
+    setTables((prev) => prev.filter((t) => t.id !== tableId));
+  };
+
+  // Drag start for guests
+  const handleDragStart = (e: React.DragEvent, guestId: string) => {
+    if (!canMutate) return;
+    e.dataTransfer.setData('text/plain', guestId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  // Filtered tables
+  const displayedTables = tables.filter((t) => {
+    if (shapeFilter === 'all') return true;
+    return t.shape === shapeFilter;
+  });
 
   const loadingSkeleton = h(
     'div',
@@ -122,24 +208,30 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
       loadingSkeleton,
       emptyTitle: 'Chưa có bàn tiệc nào được tạo',
       emptyDescription: 'Tạo danh sách các bàn tiệc để bắt đầu phân bổ chỗ ngồi cho khách mời.',
-      emptyActionLabel: '+ Thêm bàn đầu tiên',
-      onEmptyAction: () => {
-        setTables(INITIAL_TABLES);
-        setState('populated');
-      },
+      emptyActionLabel: isOwner ? '+ Thêm bàn đầu tiên' : undefined,
+      onEmptyAction: isOwner
+        ? () => {
+            setTables(INITIAL_TABLES);
+            setState('populated');
+          }
+        : undefined,
       errorTitle: 'Không thể tải sơ đồ xếp bàn',
       errorMessage: 'Lỗi đồng bộ sơ đồ xếp chỗ từ máy chủ.',
       errorRequestId: 'REQ-20261106-SEATING-ERR',
       onRetry: () => setState('populated'),
       filteredTitle: 'Không có bàn nào thuộc khu vực lọc',
-      filteredDescription: 'Hãy thử chọn khu vực sảnh tiệc khác.',
-      onClearFilter: () => setState('populated'),
+      filteredDescription: 'Hãy thử chọn khu vực sảnh tiệc hoặc kiểu dáng bàn khác.',
+      onClearFilter: () => {
+        setShapeFilter('all');
+        setState('populated');
+      },
       permissionDeniedMessage: 'Bạn không có quyền chỉnh sửa sơ đồ xếp bàn.',
     },
     h(
       'div',
       { className: 'space-y-6 max-w-7xl mx-auto' },
-      // Header
+
+      // Header Toolbar
       h(
         'div',
         { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' },
@@ -147,11 +239,18 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
           'div',
           null,
           h('h1', { className: 'text-2xl font-bold text-text-main tracking-tight' }, 'Sơ Đồ Xếp Bàn Tiệc'),
-          h('p', { className: 'text-sm text-text-muted mt-0.5' }, 'Phân bổ bàn tiệc cho từng khách mời và gia đình')
+          h(
+            'p',
+            { className: 'text-sm text-text-muted mt-0.5' },
+            isFamily
+              ? 'Chế độ Người nhà (family_view): Chỉ xem sơ đồ và danh sách phân bổ chỗ ngồi'
+              : 'Phân bổ bàn tiệc cho từng khách mời, kiểm soát sức chứa và xuất danh sách'
+          )
         ),
         h(
           'div',
-          { className: 'flex items-center gap-2' },
+          { className: 'flex items-center flex-wrap gap-2' },
+          // Simulation trigger for 409
           h(
             'button',
             {
@@ -159,18 +258,53 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
               onClick: () => {
                 setConflictMessage('Bàn A2 vừa hết chỗ do người dùng khác đã xếp trước. Đã cập nhật sức chứa mới.');
               },
-              className: 'text-xs text-[#B45309] bg-[#FFF8E1] border border-[#F59E0B] px-2.5 py-1.5 rounded font-medium hover:bg-[#FEF3C7]',
+              className:
+                'text-xs text-[#B45309] bg-[#FFF8E1] border border-[#F59E0B] px-2.5 py-1.5 rounded font-medium hover:bg-[#FEF3C7]',
             },
             '⚡ Mô phỏng lỗi 409 Conflict'
-          )
+          ),
+
+          // Export button (Sanitized A4 Printable per AT26)
+          h(
+            Button,
+            {
+              type: 'button',
+              variant: 'secondary',
+              onClick: () => setIsExportModalOpen(true),
+              className: 'text-xs h-9 flex items-center gap-1.5',
+            },
+            h(Printer, { className: 'w-3.5 h-3.5' }),
+            'Xuất danh sách A4'
+          ),
+
+          // Add Table button (Owner only per AT03/AT26)
+          isOwner &&
+            h(
+              Button,
+              {
+                type: 'button',
+                variant: 'primary',
+                onClick: () => {
+                  setEditingTable(null);
+                  setIsAddEditModalOpen(true);
+                },
+                className: 'text-xs h-9 flex items-center gap-1.5',
+              },
+              h(Plus, { className: 'w-3.5 h-3.5' }),
+              'Thêm bàn mới'
+            )
         )
       ),
 
       // Snapshot status warning banner (UXT14)
-      isSnapshotFinalized && unassignedNewGuestCount > 0 &&
+      isSnapshotFinalized &&
+        unassignedNewGuestCount > 0 &&
         h(
           'div',
-          { className: 'p-3 bg-[#EFF6FF] border border-[#93C5FD] rounded-control flex items-center justify-between gap-3 text-xs text-[#1E40AF]' },
+          {
+            className:
+              'p-3 bg-[#EFF6FF] border border-[#93C5FD] rounded-control flex items-center justify-between gap-3 text-xs text-[#1E40AF]',
+          },
           h(
             'div',
             { className: 'flex items-center gap-2' },
@@ -183,14 +317,15 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
               ` chưa bàn giao lại cho nhà hàng.`
             )
           ),
-          h(
-            'button',
-            {
-              onClick: () => setUnassignedNewGuestCount(0),
-              className: 'font-semibold underline shrink-0 hover:text-[#1D4ED8]',
-            },
-            'Đồng bộ snapshot mới'
-          )
+          isOwner &&
+            h(
+              'button',
+              {
+                onClick: () => setUnassignedNewGuestCount(0),
+                className: 'font-semibold underline shrink-0 hover:text-[#1D4ED8]',
+              },
+              'Đồng bộ snapshot mới'
+            )
         ),
 
       // 409 Capacity Conflict Alert (UXT13)
@@ -199,7 +334,7 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
           'div',
           {
             className:
-              'p-4 bg-danger-bg border border-danger/40 rounded-card flex items-start justify-between gap-3 text-sm text-danger animate-bounce-once',
+              'p-4 bg-danger-bg border border-danger/40 rounded-card flex items-start justify-between gap-3 text-sm text-danger',
             role: 'alert',
           },
           h(
@@ -212,7 +347,11 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
               h('p', { className: 'font-bold' }, 'Xung đột sức chứa bàn (Lỗi 409 Conflict)'),
               h('p', { className: 'text-xs mt-0.5' }, conflictMessage),
               selectedGuestId &&
-                h('p', { className: 'text-xs font-semibold mt-1 text-[#991B1B]' }, `Khách đang chọn vẫn được giữ nguyên. Vui lòng chọn bàn khác còn chỗ bên dưới.`)
+                h(
+                  'p',
+                  { className: 'text-xs font-semibold mt-1 text-[#991B1B]' },
+                  `Khách đang chọn vẫn được giữ nguyên. Vui lòng chọn bàn khác còn chỗ bên dưới.`
+                )
             )
           ),
           h(
@@ -225,34 +364,68 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
           )
         ),
 
-      // Tap-to-seat workflow helper (UXT12)
+      // Seating Conflict Alerts: Unseated, Split Family (AT06/AT09), Overcapacity (AT21)
+      h(SeatingConflictAlerts, { tables, guests }),
+
+      // Tap-to-seat workflow helper (UXT12) & Shape Filter Bar
       h(
         'div',
-        { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control flex items-center justify-between text-xs text-text-main' },
+        {
+          className:
+            'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-text-main',
+        },
         h(
           'div',
           { className: 'flex items-center gap-2' },
           h('span', { className: 'font-semibold text-primary' }, 'Bước 1:'),
-          h('span', null, selectedGuestId ? `Đã chọn: ${guests.find((g) => g.id === selectedGuestId)?.name}` : 'Chạm chọn 1 khách chưa xếp bàn'),
+          h(
+            'span',
+            null,
+            selectedGuestId
+              ? `Đã chọn: ${guests.find((g) => g.id === selectedGuestId)?.name}`
+              : canMutate
+              ? 'Chạm hoặc kéo 1 khách chưa xếp bàn'
+              : 'Danh sách khách chưa xếp bàn'
+          ),
           h(ArrowRight, { className: 'w-3.5 h-3.5 text-text-muted' }),
           h('span', { className: 'font-semibold text-primary' }, 'Bước 2:'),
-          h('span', null, 'Chạm vào bàn tiệc muốn gán')
+          h('span', null, canMutate ? 'Chạm hoặc thả vào bàn tiệc muốn gán' : 'Xem sơ đồ bàn')
         ),
-        selectedGuestId &&
+
+        // Filter by shape
+        h(
+          'div',
+          { className: 'flex items-center gap-2' },
+          h(Filter, { className: 'w-3.5 h-3.5 text-text-muted' }),
           h(
-            'button',
+            'select',
             {
-              onClick: () => setSelectedGuestId(null),
-              className: 'text-xs text-text-muted hover:text-text-main underline',
+              value: shapeFilter,
+              onChange: (e: any) => setShapeFilter(e.target.value),
+              className:
+                'h-8 px-2 border border-border-control rounded text-xs bg-white text-text-main focus:outline-none focus:ring-1 focus:ring-primary',
             },
-            'Bỏ chọn'
-          )
+            h('option', { value: 'all' }, 'Tất cả kiểu bàn'),
+            h('option', { value: 'round' }, 'Chỉ bàn tròn'),
+            h('option', { value: 'rectangular' }, 'Chỉ bàn chữ nhật')
+          ),
+          selectedGuestId &&
+            h(
+              'button',
+              {
+                onClick: () => setSelectedGuestId(null),
+                className: 'text-xs text-text-muted hover:text-text-main underline ml-2',
+              },
+              'Bỏ chọn khách'
+            )
+        )
       ),
 
-      // Two columns: Left = Unseated Guests, Right = Tables
+      // Layout: Left column = unseated guests, Right column = tables grid
       h(
         'div',
         { className: 'grid grid-cols-1 lg:grid-cols-3 gap-6' },
+
         // Left Column: Unseated Guests List
         h(
           'div',
@@ -263,39 +436,76 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
             h('h2', { className: 'text-sm font-bold text-text-main' }, 'Khách chưa xếp bàn'),
             h(
               'span',
-              { className: 'text-xs font-semibold px-2 py-0.5 rounded-full bg-[#FAF9F5] text-text-muted tabular-nums' },
+              {
+                className:
+                  'text-xs font-semibold px-2 py-0.5 rounded-full bg-[#FAF9F5] text-text-muted tabular-nums',
+              },
               guests.filter((g) => !g.tableId).length
             )
           ),
 
           h(
             'div',
-            { className: 'space-y-2 max-h-[400px] overflow-y-auto pr-1' },
-            guests
-              .filter((g) => !g.tableId)
-              .map((guest) => {
-                const isSelected = selectedGuestId === guest.id;
-                return h(
-                  'button',
-                  {
-                    key: guest.id,
-                    type: 'button',
-                    onClick: () => setSelectedGuestId(guest.id),
-                    className: `w-full text-left p-3 rounded-control border transition-all text-xs flex items-center justify-between ${
-                      isSelected
-                        ? 'border-primary bg-primary/10 font-bold ring-2 ring-primary'
-                        : 'border-border-subtle bg-white hover:border-border-control'
-                    }`,
-                  },
-                  h(
-                    'div',
-                    null,
-                    h('p', { className: 'font-semibold text-text-main text-sm' }, guest.name),
-                    h('p', { className: 'text-text-muted text-[11px]' }, guest.groupName)
-                  ),
-                  isSelected && h(Check, { className: 'w-4 h-4 text-primary shrink-0' })
-                );
-              })
+            { className: 'space-y-2 max-h-[460px] overflow-y-auto pr-1' },
+            guests.filter((g) => !g.tableId).length === 0
+              ? h(
+                  'div',
+                  { className: 'py-8 text-center text-text-muted text-xs italic' },
+                  'Tất cả khách đã được xếp vào bàn tiệc.'
+                )
+              : guests
+                  .filter((g) => !g.tableId)
+                  .map((guest) => {
+                    const isSelected = selectedGuestId === guest.id;
+                    return h(
+                      'div',
+                      {
+                        key: guest.id,
+                        draggable: canMutate,
+                        onDragStart: (e: React.DragEvent) => handleDragStart(e, guest.id),
+                        onClick: () => {
+                          if (canMutate) {
+                            setSelectedGuestId(isSelected ? null : guest.id);
+                          }
+                        },
+                        className: `w-full text-left p-3 rounded-control border transition-all text-xs flex items-center justify-between ${
+                          canMutate ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
+                        } ${
+                          isSelected
+                            ? 'border-primary bg-primary/10 font-bold ring-2 ring-primary'
+                            : 'border-border-subtle bg-white hover:border-border-control'
+                        }`,
+                      },
+                      h(
+                        'div',
+                        null,
+                        h(
+                          'div',
+                          { className: 'flex items-center gap-1.5' },
+                          h('p', { className: 'font-semibold text-text-main text-sm' }, guest.name),
+                          guest.needsSeat === false &&
+                            h(
+                              'span',
+                              {
+                                className:
+                                  'text-[10px] px-1 py-0.2 bg-[#EFF6FF] text-[#1D4ED8] rounded',
+                              },
+                              'Em bé'
+                            )
+                        ),
+                        h('p', { className: 'text-text-muted text-[11px]' }, guest.groupName),
+                        // Sensitive fields only for owner per AT03/AT26
+                        isOwner &&
+                          guest.phone &&
+                          h(
+                            'p',
+                            { className: 'text-[10px] text-text-muted flex items-center gap-1 mt-0.5' },
+                            guest.phone
+                          )
+                      ),
+                      isSelected && h(Check, { className: 'w-4 h-4 text-primary shrink-0' })
+                    );
+                  })
           )
         ),
 
@@ -303,98 +513,42 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
         h(
           'div',
           { className: 'lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4' },
-          tables.map((tbl) => {
-            const isFull = tbl.seatedGuestIds.length >= tbl.capacity;
-            const remainingSeats = tbl.capacity - tbl.seatedGuestIds.length;
-
-            return h(
-              'div',
-              {
-                key: tbl.id,
-                className: `p-4 bg-surface border rounded-card shadow-sm flex flex-col justify-between transition-all ${
-                  isFull ? 'border-border-subtle opacity-75' : 'border-border-control/60 hover:border-primary'
-                }`,
+          displayedTables.map((tbl) =>
+            h(TableCard, {
+              key: tbl.id,
+              table: tbl,
+              guests,
+              selectedGuestId,
+              onSeatGuest: handleSeatGuest,
+              onUnseatGuest: handleUnseatGuest,
+              onEditTable: (tableToEdit) => {
+                setEditingTable(tableToEdit);
+                setIsAddEditModalOpen(true);
               },
-              h(
-                'div',
-                null,
-                h(
-                  'div',
-                  { className: 'flex items-center justify-between mb-2' },
-                  h('h3', { className: 'font-bold text-sm text-text-main' }, tbl.name),
-                  h(
-                    'span',
-                    {
-                      className: `text-xs px-2 py-0.5 rounded font-mono font-semibold ${
-                        isFull
-                          ? 'bg-danger-bg text-danger'
-                          : 'bg-primary/10 text-primary'
-                      }`,
-                    },
-                    `${tbl.seatedGuestIds.length} / ${tbl.capacity} chỗ`
-                  )
-                ),
-
-                // Seated guest list
-                h(
-                  'div',
-                  { className: 'space-y-1.5 my-3 min-h-[60px]' },
-                  tbl.seatedGuestIds.length === 0
-                    ? h('p', { className: 'text-xs text-text-muted italic' }, 'Bàn trống chưa có khách')
-                    : tbl.seatedGuestIds.map((guestId) => {
-                        const g = guests.find((x) => x.id === guestId);
-                        return h(
-                          'div',
-                          {
-                            key: guestId,
-                            className: 'px-2 py-1 bg-[#FAF9F5] border border-border-subtle rounded text-xs text-text-main flex items-center justify-between',
-                          },
-                          h('span', null, g?.name || guestId),
-                          h(
-                            'button',
-                            {
-                              type: 'button',
-                              onClick: () => {
-                                setTables((prev) =>
-                                  prev.map((t) =>
-                                    t.id === tbl.id
-                                      ? { ...t, seatedGuestIds: t.seatedGuestIds.filter((x) => x !== guestId) }
-                                      : t
-                                  )
-                                );
-                                setGuests((prev) =>
-                                  prev.map((x) => (x.id === guestId ? { ...x, tableId: null } : x))
-                                );
-                              },
-                              className: 'text-text-muted hover:text-danger text-[11px] ml-2',
-                              title: 'Gỡ khỏi bàn',
-                            },
-                            '✕'
-                          )
-                        );
-                      })
-                )
-              ),
-
-              // Action button
-              h(
-                Button,
-                {
-                  variant: selectedGuestId && !isFull ? 'primary' : 'secondary',
-                  disabled: !selectedGuestId || isFull,
-                  onClick: () => handleSeatGuest(tbl.id),
-                  className: 'w-full text-xs h-9',
-                },
-                isFull
-                  ? 'Bàn đã đầy'
-                  : selectedGuestId
-                  ? `Xếp vào bàn này (còn ${remainingSeats} chỗ)`
-                  : `Còn trống ${remainingSeats} chỗ`
-              )
-            );
-          })
+              onDeleteTable: handleDeleteTable,
+              onDropGuest: (tblId, guestId) => handleSeatGuest(tblId, guestId),
+            })
+          )
         )
-      )
+      ),
+
+      // Modals
+      isExportModalOpen &&
+        h(SeatingExportModal, {
+          isOpen: isExportModalOpen,
+          onClose: () => setIsExportModalOpen(false),
+          tables,
+          guests,
+        }),
+
+      isAddEditModalOpen &&
+        isOwner &&
+        h(AddEditTableModal, {
+          isOpen: isAddEditModalOpen,
+          onClose: () => setIsAddEditModalOpen(false),
+          onSave: handleSaveTable,
+          editingTable,
+        })
     )
   );
 };

@@ -9,6 +9,9 @@ export * from "./vendors";
 export * from "./tasks";
 export * from "./files";
 export * from "./system";
+export * from "./seating";
+export * from "./catering";
+export * from "./logistics";
 
 import { users, sessions, accounts, memberInvites, memberEventAccess } from "./auth";
 import { events, weddingSettings } from "./events";
@@ -27,6 +30,9 @@ import { vendors, vendorQuotes, contacts } from "./vendors";
 import { tasks, taskChecklistItems, taskDependencies, appointments } from "./tasks";
 import { attachments, attachmentVariants } from "./files";
 import { auditLogs, notifications, idempotencyRecords, importBatches, importRows } from "./system";
+import { tables, seatAssignments } from "./seating";
+import { menus, menuItems, guestMealSelections, cateringSnapshots } from "./catering";
+import { accommodations, roomAssignments, transportTrips, tripPassengers } from "./logistics";
 
 // ==========================================
 // DRIZZLE RELATIONS DEFINITIONS
@@ -53,6 +59,16 @@ export const eventsRelations = relations(events, ({ many, one }) => ({
   tasks: many(tasks),
   appointments: many(appointments),
   memberAccess: many(memberEventAccess),
+  tables: many(tables),
+  seatAssignments: many(seatAssignments),
+  menus: many(menus),
+  menuItems: many(menuItems),
+  guestMealSelections: many(guestMealSelections),
+  cateringSnapshots: many(cateringSnapshots),
+  accommodations: many(accommodations),
+  roomAssignments: many(roomAssignments),
+  transportTrips: many(transportTrips),
+  tripPassengers: many(tripPassengers),
 }));
 
 export const weddingSettingsRelations = relations(weddingSettings, ({ one }) => ({
@@ -75,6 +91,10 @@ export const guestsRelations = relations(guests, ({ one, many }) => ({
   representativeInvitations: many(invitations),
   attendances: many(attendance),
   contactFollowups: many(contactFollowups),
+  seatAssignments: many(seatAssignments),
+  mealSelections: many(guestMealSelections),
+  roomAssignments: many(roomAssignments),
+  tripPassengers: many(tripPassengers),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one, many }) => ({
@@ -301,4 +321,116 @@ export const contactsRelations = relations(contacts, ({ one }) => ({
     references: [vendors.id],
   }),
 }));
+
+export const tablesRelations = relations(tables, ({ one, many }) => ({
+  event: one(events, {
+    fields: [tables.eventId],
+    references: [events.id],
+  }),
+  seatAssignments: many(seatAssignments),
+}));
+
+export const seatAssignmentsRelations = relations(seatAssignments, ({ one }) => ({
+  event: one(events, {
+    fields: [seatAssignments.eventId],
+    references: [events.id],
+  }),
+  table: one(tables, {
+    fields: [seatAssignments.tableId],
+    references: [tables.id],
+  }),
+  guest: one(guests, {
+    fields: [seatAssignments.guestId],
+    references: [guests.id],
+  }),
+}));
+
+export const menusRelations = relations(menus, ({ one, many }) => ({
+  event: one(events, {
+    fields: [menus.eventId],
+    references: [events.id],
+  }),
+  items: many(menuItems),
+  snapshots: many(cateringSnapshots),
+}));
+
+export const menuItemsRelations = relations(menuItems, ({ one }) => ({
+  menu: one(menus, {
+    fields: [menuItems.menuId],
+    references: [menus.id],
+  }),
+  event: one(events, {
+    fields: [menuItems.eventId],
+    references: [events.id],
+  }),
+}));
+
+export const guestMealSelectionsRelations = relations(guestMealSelections, ({ one }) => ({
+  event: one(events, {
+    fields: [guestMealSelections.eventId],
+    references: [events.id],
+  }),
+  guest: one(guests, {
+    fields: [guestMealSelections.guestId],
+    references: [guests.id],
+  }),
+}));
+
+export const cateringSnapshotsRelations = relations(cateringSnapshots, ({ one }) => ({
+  event: one(events, {
+    fields: [cateringSnapshots.eventId],
+    references: [events.id],
+  }),
+  menu: one(menus, {
+    fields: [cateringSnapshots.menuId],
+    references: [menus.id],
+  }),
+}));
+
+export const accommodationsRelations = relations(accommodations, ({ one, many }) => ({
+  event: one(events, {
+    fields: [accommodations.eventId],
+    references: [events.id],
+  }),
+  roomAssignments: many(roomAssignments),
+}));
+
+export const roomAssignmentsRelations = relations(roomAssignments, ({ one }) => ({
+  accommodation: one(accommodations, {
+    fields: [roomAssignments.accommodationId],
+    references: [accommodations.id],
+  }),
+  event: one(events, {
+    fields: [roomAssignments.eventId],
+    references: [events.id],
+  }),
+  guest: one(guests, {
+    fields: [roomAssignments.guestId],
+    references: [guests.id],
+  }),
+}));
+
+export const transportTripsRelations = relations(transportTrips, ({ one, many }) => ({
+  event: one(events, {
+    fields: [transportTrips.eventId],
+    references: [events.id],
+  }),
+  passengers: many(tripPassengers),
+}));
+
+export const tripPassengersRelations = relations(tripPassengers, ({ one }) => ({
+  trip: one(transportTrips, {
+    fields: [tripPassengers.tripId],
+    references: [transportTrips.id],
+  }),
+  event: one(events, {
+    fields: [tripPassengers.eventId],
+    references: [events.id],
+  }),
+  guest: one(guests, {
+    fields: [tripPassengers.guestId],
+    references: [guests.id],
+  }),
+}));
+
 

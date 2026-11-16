@@ -45,12 +45,12 @@
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M8.0 | Gate G7 Commit Baseline | Resolve 34 vendor tests & commit Gate G7 clean | none | IN_PROGRESS |
-| M8.1 | Database Schema & RLS | Seating, catering, logistics Drizzle schemas & SQL RLS | M8.0 | PLANNED |
-| M8.2 | Repositories & Domain Services | Concurrency locking, AT07, AT10, AT21, AT22, meal aggregation | M8.1 | PLANNED |
-| M8.3 | REST API Route Handlers | `/api/v1/tables`, `/menus`, `/transport`, `/accommodations` + AT30 + 403 | M8.2 | PLANNED |
-| M8.4 | Frontend UI Modules & Pages | S18 seating, S19 menus, S20 logistics, conflict alerts | M8.3 | PLANNED |
-| M8.5 | E2E Testing & Council Review | 100% E2E tests, adversarial stress tests, council signoff | M8.4 | PLANNED |
+| M8.0 | Gate G7 Commit Baseline | Resolve 34 vendor tests & commit Gate G7 clean | none | DONE |
+| M8.1 | Database Schema & RLS | Seating, catering, logistics Drizzle schemas & SQL RLS | M8.0 | DONE |
+| M8.2 | Repositories & Domain Services | Concurrency locking, AT07, AT10, AT21, AT22, meal aggregation | M8.1 | DONE |
+| M8.3 | REST API Route Handlers | `/api/v1/tables`, `/menus`, `/transport`, `/accommodations` + AT30 + 403 | M8.2 | DONE |
+| M8.4 | Frontend UI Modules & Pages | S18 seating, S19 menus, S20 logistics, conflict alerts | M8.3 | DONE |
+| M8.5 | E2E Testing & Council Review | 100% E2E tests, adversarial stress tests, council signoff | M8.4 | DONE |
 
 ---
 
