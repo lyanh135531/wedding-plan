@@ -12,6 +12,8 @@ export * from "./system";
 export * from "./seating";
 export * from "./catering";
 export * from "./logistics";
+export * from "./preparation";
+export * from "./support";
 
 import { users, sessions, accounts, memberInvites, memberEventAccess } from "./auth";
 import { events, weddingSettings } from "./events";
@@ -33,6 +35,8 @@ import { auditLogs, notifications, idempotencyRecords, importBatches, importRows
 import { tables, seatAssignments } from "./seating";
 import { menus, menuItems, guestMealSelections, cateringSnapshots } from "./catering";
 import { accommodations, roomAssignments, transportTrips, tripPassengers } from "./logistics";
+import { preparationItems } from "./preparation";
+import { supportAssignments } from "./support";
 
 // ==========================================
 // DRIZZLE RELATIONS DEFINITIONS
@@ -69,6 +73,8 @@ export const eventsRelations = relations(events, ({ many, one }) => ({
   roomAssignments: many(roomAssignments),
   transportTrips: many(transportTrips),
   tripPassengers: many(tripPassengers),
+  preparationItems: many(preparationItems),
+  supportAssignments: many(supportAssignments),
 }));
 
 export const weddingSettingsRelations = relations(weddingSettings, ({ one }) => ({
@@ -432,5 +438,24 @@ export const tripPassengersRelations = relations(tripPassengers, ({ one }) => ({
     references: [guests.id],
   }),
 }));
+
+export const preparationItemsRelations = relations(preparationItems, ({ one }) => ({
+  event: one(events, {
+    fields: [preparationItems.eventId],
+    references: [events.id],
+  }),
+}));
+
+export const supportAssignmentsRelations = relations(supportAssignments, ({ one }) => ({
+  event: one(events, {
+    fields: [supportAssignments.eventId],
+    references: [events.id],
+  }),
+  contact: one(contacts, {
+    fields: [supportAssignments.contactId],
+    references: [contacts.id],
+  }),
+}));
+
 
 

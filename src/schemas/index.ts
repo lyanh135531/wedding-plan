@@ -8,4 +8,6 @@ export * from './vendors';
 export * from './seating';
 export * from './catering';
 export * from './logistics';
+export * from './preparation';
+export * from './support';
 
