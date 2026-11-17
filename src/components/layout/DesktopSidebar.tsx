@@ -63,8 +63,10 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroupConfig[] = [
     groupTitle: 'Ngày cưới & cài đặt',
     items: [
       { name: 'Lịch trình ngày cưới', href: '/timeline', milestone: 'R3' },
+      { name: 'Bộ bàn giao ngày cưới', href: '/handovers', milestone: 'R3' },
       { name: 'Đội hỗ trợ', href: '/support', milestone: 'R2' },
       { name: 'Đồ dùng cần chuẩn bị', href: '/preparation', milestone: 'R2' },
+      { name: 'Hậu cưới & Lưu trữ', href: '/after-wedding', milestone: 'R3' },
       { name: 'Cài đặt chung', href: '/settings', milestone: 'R1' },
       { name: 'Chia sẻ quyền', href: '/sharing', milestone: 'R1' },
       { name: 'Nhập dữ liệu', href: '/data/import', milestone: 'R1' },

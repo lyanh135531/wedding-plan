@@ -14,6 +14,9 @@ export * from "./catering";
 export * from "./logistics";
 export * from "./preparation";
 export * from "./support";
+export * from "./timeline";
+export * from "./gifts";
+export * from "./handovers";
 
 import { users, sessions, accounts, memberInvites, memberEventAccess } from "./auth";
 import { events, weddingSettings } from "./events";
@@ -37,6 +40,9 @@ import { menus, menuItems, guestMealSelections, cateringSnapshots } from "./cate
 import { accommodations, roomAssignments, transportTrips, tripPassengers } from "./logistics";
 import { preparationItems } from "./preparation";
 import { supportAssignments } from "./support";
+import { timelineItems } from "./timeline";
+import { gifts, giftContributors, giftReturns } from "./gifts";
+import { handoverPackets, postWeddingTasks } from "./handovers";
 
 // ==========================================
 // DRIZZLE RELATIONS DEFINITIONS
@@ -75,6 +81,9 @@ export const eventsRelations = relations(events, ({ many, one }) => ({
   tripPassengers: many(tripPassengers),
   preparationItems: many(preparationItems),
   supportAssignments: many(supportAssignments),
+  timelineItems: many(timelineItems),
+  gifts: many(gifts),
+  handoverPackets: many(handoverPackets),
 }));
 
 export const weddingSettingsRelations = relations(weddingSettings, ({ one }) => ({
@@ -101,6 +110,7 @@ export const guestsRelations = relations(guests, ({ one, many }) => ({
   mealSelections: many(guestMealSelections),
   roomAssignments: many(roomAssignments),
   tripPassengers: many(tripPassengers),
+  giftContributions: many(giftContributors),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one, many }) => ({
@@ -446,7 +456,7 @@ export const preparationItemsRelations = relations(preparationItems, ({ one }) =
   }),
 }));
 
-export const supportAssignmentsRelations = relations(supportAssignments, ({ one }) => ({
+export const supportAssignmentsRelations = relations(supportAssignments, ({ one, many }) => ({
   event: one(events, {
     fields: [supportAssignments.eventId],
     references: [events.id],
@@ -455,7 +465,61 @@ export const supportAssignmentsRelations = relations(supportAssignments, ({ one 
     fields: [supportAssignments.contactId],
     references: [contacts.id],
   }),
+  timelineItems: many(timelineItems),
 }));
+
+export const timelineItemsRelations = relations(timelineItems, ({ one }) => ({
+  event: one(events, {
+    fields: [timelineItems.eventId],
+    references: [events.id],
+  }),
+  supportAssignment: one(supportAssignments, {
+    fields: [timelineItems.supportAssignmentId],
+    references: [supportAssignments.id],
+  }),
+}));
+
+export const giftsRelations = relations(gifts, ({ one, many }) => ({
+  event: one(events, {
+    fields: [gifts.eventId],
+    references: [events.id],
+  }),
+  contributors: many(giftContributors),
+  returns: many(giftReturns),
+}));
+
+export const giftContributorsRelations = relations(giftContributors, ({ one }) => ({
+  gift: one(gifts, {
+    fields: [giftContributors.giftId],
+    references: [gifts.id],
+  }),
+  guest: one(guests, {
+    fields: [giftContributors.guestId],
+    references: [guests.id],
+  }),
+}));
+
+export const giftReturnsRelations = relations(giftReturns, ({ one }) => ({
+  gift: one(gifts, {
+    fields: [giftReturns.giftId],
+    references: [gifts.id],
+  }),
+}));
+
+export const handoverPacketsRelations = relations(handoverPackets, ({ one }) => ({
+  event: one(events, {
+    fields: [handoverPackets.eventId],
+    references: [events.id],
+  }),
+}));
+
+export const postWeddingTasksRelations = relations(postWeddingTasks, ({ one }) => ({
+  wedding: one(weddingSettings, {
+    fields: [postWeddingTasks.weddingId],
+    references: [weddingSettings.id],
+  }),
+}));
+
 
 
 

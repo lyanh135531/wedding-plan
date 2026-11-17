@@ -163,6 +163,10 @@ export const attendance = pgTable(
     accommodationNeeded: boolean("accommodation_needed").notNull().default(false),
     transportNeeded: boolean("transport_needed").notNull().default(false),
     isOriginOnsite: boolean("is_origin_onsite").notNull().default(false),
+    isCheckedIn: boolean("is_checked_in").notNull().default(false),
+    checkInTime: timestamp("check_in_time", { withTimezone: true, mode: "date" }),
+    checkedInByUserId: text("checked_in_by_user_id"),
+    checkInNotes: text("check_in_notes"),
     version: integer("version").notNull().default(1),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .default(sql`clock_timestamp()`)

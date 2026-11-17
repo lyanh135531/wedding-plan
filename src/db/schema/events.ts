@@ -34,6 +34,7 @@ export const events = pgTable(
     contactPhone: text("contact_phone"),
     publicNotes: text("public_notes"),
     privateNotes: text("private_notes"),
+    isCheckInEnabled: boolean("is_check_in_enabled").notNull().default(true),
     version: integer("version").notNull().default(1),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .default(sql`clock_timestamp()`)
@@ -66,6 +67,12 @@ export const weddingSettings = pgTable(
     }),
     budgetTarget: bigint("budget_target", { mode: "bigint" }),
     contingencyBudget: bigint("contingency_budget", { mode: "bigint" }),
+    isArchived: boolean("is_archived").notNull().default(false),
+    archivedAt: timestamp("archived_at", { withTimezone: true, mode: "date" }),
+    archivedByUserId: text("archived_by_user_id"),
+    archivedReason: text("archived_reason"),
+    reopenedAt: timestamp("reopened_at", { withTimezone: true, mode: "date" }),
+    reopenedByUserId: text("reopened_by_user_id"),
     version: integer("version").notNull().default(1),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .default(sql`clock_timestamp()`)

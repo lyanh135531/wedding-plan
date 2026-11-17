@@ -10,4 +10,9 @@ export * from './catering';
 export * from './logistics';
 export * from './preparation';
 export * from './support';
+export * from './timeline';
+export * from './gifts';
+export * from './handovers';
+export * from './attendance';
+export * from './archival';
 
