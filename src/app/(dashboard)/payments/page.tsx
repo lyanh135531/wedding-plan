@@ -2,13 +2,11 @@
 
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { PaymentsLedgerScreen } from '@/components/modules/finance/PaymentsLedgerScreen';
-import { usePrototype } from '@/components/testing/PrototypeToolbar';
+import { LiveFinanceWorkspace } from '@/components/modules/finance/LiveFinanceWorkspace';
 
 const h = React.createElement;
 
 export default function PaymentsPage() {
-  const { state } = usePrototype();
 
   return h(
     PageShell,
@@ -21,8 +19,6 @@ export default function PaymentsPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(PaymentsLedgerScreen, {
-      initialState: state,
-    })
+    h(LiveFinanceWorkspace, { view: 'payments' })
   );
 }

@@ -31,11 +31,12 @@ describe('Gate G10: Timeline Service & Operations (PLAN §14.1, AT34, FL15)', ()
       scheduledEndTime: '2028-11-20T09:30:00Z',
       locationName: 'Tư gia Nhà Gái',
       personInCharge: 'Trưởng đoàn',
-      inChargePhone: '0901234567',
+      inChargePhone: '090 123 4567',
     });
 
     expect(created.id).toBeDefined();
     expect(created.title).toBe('Lễ Gia Tiên Nhà Gái');
+    expect(created.inChargePhone).toBe('0901234567');
     expect(created.status).toBe('not_started');
     expect(created.version).toBe(1);
 

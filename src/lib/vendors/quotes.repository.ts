@@ -10,7 +10,7 @@ import {
 } from '@/schemas/vendors';
 import { VendorNotFoundError } from './vendors.repository';
 
-export type TxDb = NodePgDatabase<typeof schema>;
+type TxDb = NodePgDatabase<typeof schema>;
 
 // -----------------------------------------------------------------------------
 // EXCEPTIONS

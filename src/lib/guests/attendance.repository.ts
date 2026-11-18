@@ -1,3 +1,4 @@
+import { seatAssignments } from '@/db/schema/seating';
 import { eq, and, inArray, sql } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '@/db/schema';
@@ -184,6 +185,13 @@ export async function updateAttendance(
 
   if (!updated) {
     throw new Error('Dữ liệu đã bị thay đổi bởi người khác, vui lòng làm mới trang');
+  }
+
+  if (isTransitionToDeclined) {
+    await txDb.delete(seatAssignments).where(and(
+      eq(seatAssignments.guestId, guestId),
+      eq(seatAssignments.eventId, eventId)
+    ));
   }
 
   // Safe table unseating audit trail (AT10)

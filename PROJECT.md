@@ -1,80 +1,78 @@
-# Project: Wedding Management Platform — Gate G8
+> **2026-11-18 Audit Council Sign-off:** Gate G11 and Milestone R3 formally verified and signed off by independent Audit Council (Reviewers, Challengers, Forensic Auditor). All Vitest (1,301), Playwright (296), adversarial drills, and mobile suites pass with 100% clean record. See `docs/MILESTONE_R3_SIGNOFF.md`.
+
+# Project: Wedding Management Platform — Gate G11 & Milestone R3
 
 ## Architecture
 - **Layered Architecture**:
-  - **Database Layer**: Drizzle ORM (`src/db/schema/seating.ts`, `catering.ts`, `logistics.ts`, `index.ts`), PostgreSQL RLS policies (`src/db/migrations/0003_seating_catering_logistics.sql`), session context injection (`app.current_user_id`, `app.current_role`) via `withTransactionScopedContext`.
-  - **Repository Layer**: Transaction-aware data access objects (`src/lib/seating/`, `src/lib/catering/`, `src/lib/logistics/`) using `.for('update')` row locking and optimistic locking (`version: integer`).
-  - **Domain Service Layer**: Headcount arithmetic, seat capacity validation (AT21), non-seat infant logic (AT07), RSVP cancellation unseating hook (AT10), capacity reduction guard (AT22), meal counting & dietary aggregation, sanitized A4 exports (AT26).
-  - **API Route Handlers**: Next.js App Router (`/api/v1/tables`, `/api/v1/menus`, `/api/v1/transport`, `/api/v1/accommodations`) enforcing live DB session, `family_view` 403 on writes (AT03, AT26), and optimistic locking 409 responses (AT30).
-  - **Frontend UI Layer**: Desktop drag-and-drop & mobile tap-to-seat workflow (S18 `/seating`), catering management & meal locking (S19 `/menus`), accommodations & shuttle coordination (S20 `/logistics`), wrapped in `PageShell` and role-aware contexts.
+  - **Database Layer**: Drizzle ORM schemas (`src/db/schema/`), PostgreSQL RLS policies enforcing tenant/role separation (`owner` vs `family_view`), transaction-scoped context (`withTransactionScopedContext`), connection pool sanitization (`DISCARD ALL`), staged backup and verified sandbox restore scripts (`scripts/backup.ts`, `scripts/restore-drill.ts`).
+  - **Repository & Domain Service Layer**: High-integrity services for all wedding management domains:
+    - Guests, invitations, RSVPs, multi-event attendance (AT05, AT06, AT08, AT09, AT10).
+    - Budget, deposits, multi-installment payments, refunds, cash gift ledgers, multi-contributor envelopes (AT11-AT17, AT25, AT45-AT48, AT51).
+    - Tasks, DAG cycle prevention, schedule diffs, calendar feeds, timeline live markers, schedule shift previews (AT18-AT20, AT34, AT62).
+    - Vendors, quotes, contracts, seating charts, meal aggregates, transport and accommodation logistics (AT07, AT21, AT22, AT26, AT30, AT52).
+    - Handover packets (A4 day-of printouts, versioned snapshots, delta diffs).
+    - Archival freeze (read-only mode, immutable audit logging, unarchiving AT35).
+    - Offline resilience (PLAN §22.2: OfflineBanner and API/form write barrier implemented; live vendor form retention/reconnect verified, day-of handover packet reference).
+  - **API Layer**: Next.js App Router (`/api/v1/`) with session authorization, RLS context injection, 403 Forbidden for `family_view` on writes (AT03), optimistic locking (AT30), and structured error formatting.
+  - **Frontend Layer**: Responsive web application built with Tailwind CSS, supporting 4 viewports (`360px`, `390px`, `768px`, `1440px`), touch-target compliance (>=44px), mobile bottom navigation, desktop sidebar, print styles for A4 exports, and offline status indicators.
 
 ---
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 0 | Gate G7 Commit Baseline | Resolve 34 vendor tests and commit Gate G7 clean | M8.0 | R1, Survey |
-| 1 | Seating Schema Migration | `tables`, `seat_assignments` with constraints & RLS | M8.1 | R1, PLAN §12 |
-| 2 | Catering Schema Migration | `menus`, `menu_items`, `guest_meal_selections`, snapshots with RLS | M8.1 | R1, PLAN §13 |
-| 3 | Logistics Schema Migration | `accommodations`, `room_assignments`, `transport_trips`, `trip_passengers` with RLS | M8.1 | R1, PLAN §13 |
-| 4 | RLS Policies Enforcement | Restrict `family_view` to read-only sanitized event data | M8.1 | R1, AT03, AT26 |
-| 5 | Table & Seat Repository | CRUD tables, assign/unassign seats with row locking | M8.2 | R2, AT21 |
-| 6 | Seating Capacity Guard | In-transaction server capacity check preventing over-allocation | M8.2 | R2, AT21 |
-| 7 | Infant Non-Seat Policy | Children `needs_seat = false` do not consume table capacity | M8.2 | R2, AT07 |
-| 8 | RSVP Decline Auto-Unseat | Changing RSVP to declined unseats guest automatically | M8.2 | R2, AT10 |
-| 9 | Capacity Reduction Guard | Block decreasing capacity below assigned count | M8.2 | R2, AT22 |
-| 10 | Catering Domain Service | Aggregate meal counts (adult, child, veg) vs confirmed RSVP | M8.2 | R2, PLAN §13 |
-| 11 | Sanitized A4 Seating Export | Export layout without private notes or contact info | M8.2 | R2, AT26 |
-| 12 | Logistics Domain Service | Room/trip assignments, vehicle capacity reduction guard | M8.2 | R2, AT22 |
-| 13 | Table & Seat API Routes | `/api/v1/tables`, `/api/v1/tables/[id]/seats` with AT30 locking | M8.3 | R3, PLAN §12 |
-| 14 | Menu & Meal API Routes | `/api/v1/menus`, `/api/v1/menus/[id]/items`, meal selections | M8.3 | R3, PLAN §13 |
-| 15 | Transport API Routes | `/api/v1/transport`, trips, passenger assignment | M8.3 | R3, PLAN §13 |
-| 16 | Accommodation API Routes | `/api/v1/accommodations`, rooms, guest assignment | M8.3 | R3, PLAN §13 |
-| 17 | Family View Authorization | Block write access with 403 Forbidden for `family_view` | M8.3 | R3, AT03, AT26 |
-| 18 | S18 Seating Screen Desktop | Table arrangement & drag-and-drop seating chart | M8.4 | R4, UI_UX §7.6 |
-| 19 | S18 Seating Screen Mobile | Tap-to-seat alternative workflow for mobile screens | M8.4 | R4, UI_UX §7.6 |
-| 20 | S19 Menus & Meals Screen | Menu management, dietary counts, final lock with restaurant | M8.4 | R4, UI_UX §7.6 |
-| 21 | S20 Logistics Screen | Accommodation and transport assignment management | M8.4 | R4, UI_UX §7.6 |
-| 22 | Seating Conflict Warnings | Warn on split families, unassigned guests, overcapacity | M8.4 | R4, AT06, AT09 |
-| 23 | E2E Test Suite | Comprehensive tests covering AT06, AT07, AT09, AT10, AT21, AT22, AT26, AT30 | M8.5 | R5, PLAN §25 |
-| 24 | Adversarial Hardening | Concurrency race condition stress tests & edge-case probes | M8.5 | R5, PLAN §25 |
-| 25 | Independent Council Review | Reviewers, Challengers, and Forensic Auditor verification | M8.5 | R5, Acceptance |
+| 1 | Gate G10 Commit Clean Baseline | Stage 79 Gate G10 files and commit to git cleanly | M11.0 | R1, Survey |
+| 2 | Prototype Test Assertion Fix | Fix string mismatch in `uxt-criteria-matrix.spec.ts:210` | M11.1 | R2, Survey |
+| 3 | Live E2E System User Journeys | Static component coverage across G0-G10 plus live vendor/auth/offline, guest/RSVP, seating, core finance and handover journeys | M11.1 | R2, PLAN §24 |
+| 4 | 100% Automated Test Pass Rate | Ensure 0 failures across all Vitest and Playwright test suites | M11.1 | R2, Acceptance |
+| 5 | Mobile Responsive Layouts | Zero horizontal overflow and responsive reflow across 360-1440px | M11.2 | R3, UI_UX_SPEC |
+| 6 | Mobile Touch & Nav Usability | 44px touch targets, mobile bottom nav, modal auto-centering | M11.2 | R3, UI_UX_SPEC |
+| 7 | Global OfflineBanner & Input Preservation | Offline status banner, submit protection, form input retention | M11.3 | R4, PLAN §22.2 |
+| 8 | Automated Network Failure Drill | E2E/integration drill simulating disconnect, state retention & reconnect | M11.3 | R4, PLAN §26 |
+| 9 | Automated Backup Restore Drill | Comprehensive drill verifying DB dump, uploads tarball, checksums, FKs | M11.3 | R4, PLAN §26 |
+| 10 | Project README & Quickstart | Comprehensive README.md covering setup, scripts, architecture | M11.4 | R5, Rule 10 |
+| 11 | Operations Runbook (`docs/OPERATIONS.md`) | Startup, container commands, health checks, secrets, migrations | M11.4 | R5, PLAN §26.2 |
+| 12 | Disaster Recovery Manual (`docs/DISASTER_RECOVERY.md`) | Backup execution, restic offsite setup, emergency restore & wipe | M11.4 | R5, PLAN §26.2 |
+| 13 | Milestone R3 Formal Sign-off Document | Formal sign-off and audit council verdict package | M11.4 | R5, Acceptance |
+| 14 | Independent Audit Council Review | Formal verification by Reviewers, Challengers, and Forensic Auditor | M11.5 | R5, Acceptance |
 
 ---
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M8.0 | Gate G7 Commit Baseline | Resolve 34 vendor tests & commit Gate G7 clean | none | DONE |
-| M8.1 | Database Schema & RLS | Seating, catering, logistics Drizzle schemas & SQL RLS | M8.0 | DONE |
-| M8.2 | Repositories & Domain Services | Concurrency locking, AT07, AT10, AT21, AT22, meal aggregation | M8.1 | DONE |
-| M8.3 | REST API Route Handlers | `/api/v1/tables`, `/menus`, `/transport`, `/accommodations` + AT30 + 403 | M8.2 | DONE |
-| M8.4 | Frontend UI Modules & Pages | S18 seating, S19 menus, S20 logistics, conflict alerts | M8.3 | DONE |
-| M8.5 | E2E Testing & Council Review | 100% E2E tests, adversarial stress tests, council signoff | M8.4 | DONE |
+| M11.0 | Gate G10 Commit Baseline | Stage and commit 79 Gate G10 files cleanly | none | DONE |
+| M11.1 | Full E2E System Testing | 296 component checks plus 24 live cases covering auth/offline, vendors, guests/RSVP, seating, core finance and handovers | M11.0 | DONE |
+| M11.2 | Mobile Responsiveness & Usability | Viewport validation (360/390/768/1440px), touch targets, overflow checks (72/72 PASS) | M11.1 | DONE |
+| M11.3 | Network Failure & Backup Restore Drills | Real sandbox restore (54 tables, 79 FKs), credential reset, tamper rejection, live offline/reconnect form drill verified | M11.1 | DONE |
+| M11.4 | Operational Handover Documentation | README, operations runbook, DR manual, and milestone sign-off documentation | M11.1 | DONE |
+| M11.5 | Independent Audit Council Sign-off | Formal sign-off: Reviewers (APPROVE), Challengers (APPROVE), Forensic Auditor (CLEAN) | M11.2, M11.3, M11.4 | DONE |
 
 ---
 
 ## Interface Contracts
-### Seating Service ↔ Table API
-- `assignGuestToTable(eventId, tableId, guestId, options?: { version?: number }) => Promise<{ success: boolean; version: number }>`
-- `unassignGuest(eventId, guestId) => Promise<void>`
-- `updateTableCapacity(eventId, tableId, newCapacity, version) => Promise<Table>` (throws `CapacityExceededError` if assigned > newCapacity)
+### Offline Resilience ↔ PageShell
+- `useNetworkStatus() => { isOnline: boolean }`
+- `OfflineBanner: React.FC` renders sticky top notification when `!isOnline`, showing the offline warning and pointing to printed Handover Packets; the banner alone does not enforce read-only behavior.
 
-### Catering Service ↔ Menu API
-- `getMealSummary(eventId) => Promise<{ adultMeals: number; childMeals: number; vegetarianMeals: number; totalMeals: number; bufferMeals: number }>`
-- `lockMenuWithVendor(eventId, menuId, snapshotData) => Promise<CateringSnapshot>`
-
-### Logistics Service ↔ Transport API
-- `assignPassengerToTrip(eventId, tripId, guestId) => Promise<TripPassenger>` (throws `TripCapacityExceededError` if full)
-- `updateTripCapacity(eventId, tripId, newCapacity) => Promise<TransportTrip>` (throws `CapacityExceededError` if passengers > newCapacity)
+### Backup & Restore Drill ↔ Verification Harness
+- `createAtomicBackup(options) => Promise<BackupManifest>`: real bundles include database/upload evidence; DB evidence and dump share an exported snapshot.
+- `executeRestoreDrill(backupPath, { adminUrl, sandboxRoot, ownerEmails })`: fresh DB/uploads only, reconciles evidence and sanitizes credentials.
+- Implemented real sandbox restore: checksum/tamper checks, row fingerprints/counts, numeric totals, FK definitions/validation, uploads hashes and post-restore credential cleanup. Mock mode remains checksum-only.
+- Evidence: `docs/G11_VERIFICATION_2026-11-18.json` (24 live cases, 54 tables, 79 FKs, PostgreSQL 17.4). Production/Compose 16 and offsite drills remain pending.
 
 ---
 
 ## Code Layout
-- Database schemas: `src/db/schema/seating.ts`, `src/db/schema/catering.ts`, `src/db/schema/logistics.ts`
-- Migrations: `src/db/migrations/0003_seating_catering_logistics.sql`
-- Repositories: `src/lib/seating/`, `src/lib/catering/`, `src/lib/logistics/`
-- API routes: `src/app/api/v1/tables/`, `src/app/api/v1/menus/`, `src/app/api/v1/transport/`, `src/app/api/v1/accommodations/`
-- UI Components: `src/components/modules/seating/`, `src/components/modules/menus/`, `src/components/modules/logistics/`
-- Pages: `src/app/(dashboard)/seating/`, `src/app/(dashboard)/menus/`, `src/app/(dashboard)/logistics/`
-- Tests: `tests/unit/seating/`, `tests/unit/catering/`, `tests/unit/logistics/`, `tests/integration/api/`, `tests/adversarial/`
+- Backup & Restore scripts: `scripts/backup.ts`, `scripts/restore-drill.ts`
+- Offline components: `src/components/common/OfflineBanner.tsx`
+- Layout components: `src/components/layout/PageShell.tsx`, `Header.tsx`, `DesktopSidebar.tsx`, `MobileBottomNav.tsx`
+- Test suites:
+  - Unit/Integration: `tests/unit/`, `tests/integration/`
+  - Adversarial & Drills: `tests/adversarial/`
+  - Playwright E2E: `tests/e2e/`
+- Documentation:
+  - `README.md`
+  - `docs/OPERATIONS.md`
+  - `docs/DISASTER_RECOVERY.md`
+  - `docs/MILESTONE_R3_SIGNOFF.md`

@@ -9,9 +9,20 @@ import {
   pgEnum,
   unique,
   index,
+  customType,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { users } from "./auth";
+
+// Audit snapshots contain native bigint VND values; store them exactly as decimal strings.
+const auditJson = customType<{ data: unknown; driverData: unknown }>({
+  dataType: () => 'jsonb',
+  toDriver: (value) => JSON.stringify(value, (_key, item) => typeof item === 'bigint' ? item.toString() : item),
+  fromDriver: (value) => {
+    if (typeof value !== 'string') return value;
+    try { return JSON.parse(value); } catch { return value; }
+  },
+});
 
 export const idempotencyStatusEnum = pgEnum("idempotency_status", ["processing", "completed", "failed"]);
 export const importTypeEnum = pgEnum("import_type", ["guests", "cost_items"]);
@@ -28,8 +39,8 @@ export const auditLogs = pgTable(
     action: text("action").notNull(), // CREATE, UPDATE, DELETE, VOID, MERGE, RESCHEDULE
     entityType: text("entity_type").notNull(),
     entityId: uuid("entity_id").notNull(),
-    beforeState: jsonb("before_state"),
-    afterState: jsonb("after_state"),
+    beforeState: auditJson("before_state"),
+    afterState: auditJson("after_state"),
     ipAddress: text("ip_address"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .default(sql`clock_timestamp()`)

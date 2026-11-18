@@ -218,8 +218,8 @@ test.describe('UXT Criteria Scenarios Matrix (UXT01–UXT28 & Gate G1)', () => {
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
     // UXT12 Tap-to-seat workflow helper
-    await expect(page.locator('text=Chạm chọn 1 khách chưa xếp bàn')).toBeVisible();
-    await expect(page.locator('text=Chạm vào bàn tiệc muốn gán')).toBeVisible();
+    await expect(page.locator('text=Chạm hoặc kéo 1 khách chưa xếp bàn')).toBeVisible();
+    await expect(page.locator('text=Chạm hoặc thả vào bàn tiệc muốn gán')).toBeVisible();
 
     // UXT13 409 Conflict banner
     await expect(page.locator('text=Xung đột sức chứa bàn (Lỗi 409 Conflict)')).toBeVisible();

@@ -301,7 +301,7 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
               'select',
               {
                 value: categoryId,
-                onChange: (e) => setCategoryId(e.target.value),
+                onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setCategoryId(e.target.value),
                 className:
                   'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
                 required: true,
@@ -332,7 +332,7 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
                 'select',
                 {
                   value: eventId,
-                  onChange: (e) => setEventId(e.target.value),
+                  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setEventId(e.target.value),
                   className:
                     'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
                 },
@@ -358,7 +358,7 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
             ),
             React.createElement('textarea', {
               value: notes,
-              onChange: (e) => setNotes(e.target.value),
+              onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value),
               rows: 2,
               placeholder: 'Ghi chú cho khoản chi khi vào ngân sách...',
               className:

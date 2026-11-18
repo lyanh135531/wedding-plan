@@ -29,7 +29,7 @@ export async function GET(
       session.user.id,
       session.role,
       async (_client, scopedDb) => {
-        return getHandoverDeltaDiff(scopedDb, id);
+        return getHandoverDeltaDiff(scopedDb, id, session.role);
       }
     );
 

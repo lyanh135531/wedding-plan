@@ -88,16 +88,14 @@ export async function POST(req: NextRequest) {
       body.idempotency_key ||
       null;
 
-    const result = await withIdempotency({
+    const result = await withTransactionScopedContext(session.user.id, session.role, async (_client, txDb) => withIdempotency({
+      transactionDb: txDb,
       key: idempotencyKey,
       userId: session.user.id,
       operationType: 'RECORD_PAYMENT',
       payload: parsed.data,
       execute: async () => {
-        const created = await withTransactionScopedContext(
-          session.user.id,
-          session.role,
-          async (_client, txDb) => {
+        const created = await (async () => {
             // AT38: If direct third party ("Người khác góp bằng cách trả hộ")
             if (parsed.data.is_direct_third_party) {
               return createDirectThirdPartyPayment(
@@ -121,8 +119,7 @@ export async function POST(req: NextRequest) {
 
             // Normal outflow or refund (AT12, AT14)
             return createPayment(txDb, parsed.data, session.user.id);
-          }
-        );
+        })();
 
         const serialized = JSON.parse(
           JSON.stringify(created, (_key, value) =>
@@ -132,7 +129,7 @@ export async function POST(req: NextRequest) {
 
         return { status: 201, body: { data: serialized } };
       },
-    });
+    }));
 
     return NextResponse.json(result.body, { status: result.status });
   } catch (error: any) {

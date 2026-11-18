@@ -136,7 +136,7 @@ export const applyShiftTimelineSchema = z.object({
   pivotTime: dateTimeStringSchema.optional().nullable(),
   pivotItemId: uuidSchema.optional().nullable(),
   confirmed: z.literal(true, {
-    errorMap: () => ({ message: 'Xác nhận dời lịch là bắt buộc' }),
+    error: 'Xác nhận dời lịch là bắt buộc',
   }),
 });
 

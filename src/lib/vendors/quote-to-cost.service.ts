@@ -13,8 +13,8 @@ import {
   QuoteToCostPreviewResponse,
   ConvertQuoteToCostInput,
   ConvertQuoteToCostResponse,
-  CostStatus,
 } from '@/schemas/vendors';
+import type { CostStatus } from '@/schemas/finance';
 import { withIdempotency } from '@/lib/finance/idempotency.service';
 
 // -----------------------------------------------------------------------------
@@ -142,6 +142,7 @@ export async function convertQuoteToCostItem(
   const { quoteId, input, userId, idempotencyKey } = params;
 
   const result = await withIdempotency<ConvertQuoteToCostResponse>({
+    transactionDb: txDb,
     key: idempotencyKey,
     userId,
     operationType: 'convert_quote_to_cost',

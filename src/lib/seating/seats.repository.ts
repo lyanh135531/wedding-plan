@@ -89,14 +89,16 @@ export async function assignSeat(
 export async function unassignSeat(
   txDb: TxDb,
   eventId: string,
-  guestId: string
+  guestId: string,
+  expectedTableId?: string
 ): Promise<boolean> {
   const [deleted] = await txDb
     .delete(seatAssignments)
     .where(
       and(
         eq(seatAssignments.eventId, eventId),
-        eq(seatAssignments.guestId, guestId)
+        eq(seatAssignments.guestId, guestId),
+        expectedTableId ? eq(seatAssignments.tableId, expectedTableId) : undefined
       )
     )
     .returning();

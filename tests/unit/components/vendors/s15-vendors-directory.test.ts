@@ -44,6 +44,8 @@ describe('S15 Vendors Directory Components', () => {
         searchQuery: 'Riverside',
         onSearchChange: () => {},
         serviceTypeFilter: 'venue',
+        onServiceTypeChange: () => {},
+        onStatusChange: () => {},
         statusFilter: 'selected',
         onClearFilters: () => {},
         totalFilteredCount: 1,

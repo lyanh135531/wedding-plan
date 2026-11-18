@@ -126,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
       'div',
       { className: 'flex items-center gap-2 sm:gap-3 shrink-0' },
       // Toggle Role Switcher
-      h(
+      process.env.NODE_ENV !== 'production' && h(
         'button',
         {
           type: 'button',

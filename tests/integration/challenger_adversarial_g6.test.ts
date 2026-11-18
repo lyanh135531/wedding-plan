@@ -155,7 +155,7 @@ describe('Adversarial Challenger Suite: Gate G6 Import/Export, Consistency & Res
       expect(fs.existsSync(path.join(finalBackupPath, 'manifest.json'))).toBe(true);
     });
 
-    it('AT32, AT55: executes automated restore drill with checksum verification and isolated sandbox integrity', async () => {
+    it('AT32, AT55: validates checksums without claiming a database or uploads restore', async () => {
       // 1. Create pristine backup
       const manifest = await createAtomicBackup({
         backupDir: testTempDir,
@@ -168,9 +168,9 @@ describe('Adversarial Challenger Suite: Gate G6 Import/Export, Consistency & Res
       const drillResult = await executeRestoreDrill(backupFolder, { mockMode: true });
 
       expect(drillResult.isChecksumValid).toBe(true);
-      expect(drillResult.isDbRestored).toBe(true);
-      expect(drillResult.isUploadsRestored).toBe(true);
-      expect(drillResult.integrityChecksPassed).toBe(true);
+      expect(drillResult.isDbRestored).toBe(false);
+      expect(drillResult.isUploadsRestored).toBe(false);
+      expect(drillResult.integrityChecksPassed).toBe(false);
     });
 
     it('AT55: rejects restore drill if database dump or uploads archive was tampered with (checksum mismatch)', async () => {

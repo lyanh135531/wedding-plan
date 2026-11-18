@@ -52,7 +52,8 @@ export async function withTransactionScopedContext<T>(
   userId: string,
   role: UserRole,
   callback: (client: PoolClient, db: NodePgDatabase<typeof schema>) => Promise<T>,
-  clientOverride?: PoolClient
+  clientOverride?: PoolClient,
+  isolation: 'read committed' | 'repeatable read' = 'read committed'
 ): Promise<T> {
   if (!userId || typeof userId !== 'string' || userId.trim() === '') {
     throw new Error('withTransactionScopedContext requires a valid, non-empty userId.');
@@ -69,7 +70,7 @@ export async function withTransactionScopedContext<T>(
 
   try {
     // 1. Begin explicit transaction
-    await client.query('BEGIN;');
+    await client.query(isolation === 'repeatable read' ? 'BEGIN ISOLATION LEVEL REPEATABLE READ;' : 'BEGIN;');
     isTransactionActive = true;
 
     // 2. Set transaction-local session configuration variables

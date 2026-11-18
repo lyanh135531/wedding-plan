@@ -45,7 +45,7 @@ export const handoverPacketDtoSchema = z.object({
   version: z.number(),
   title: z.string(),
   scope: handoverScopeSchema,
-  snapshotData: z.record(z.any()),
+  snapshotData: z.record(z.string(), z.any()),
   handoverStatus: handoverStatusEnum,
   handedOverTo: z.string().nullable(),
   handedOverAt: z.string().nullable(),
@@ -58,6 +58,6 @@ export const handoverPacketDtoSchema = z.object({
 export type HandoverPacketDto = z.infer<typeof handoverPacketDtoSchema>;
 
 export const handoverPacketFamilyDtoSchema = handoverPacketDtoSchema.extend({
-  snapshotData: z.record(z.any()),
+  snapshotData: z.record(z.string(), z.any()),
 });
 export type HandoverPacketFamilyDto = z.infer<typeof handoverPacketFamilyDtoSchema>;

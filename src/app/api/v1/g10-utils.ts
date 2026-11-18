@@ -82,6 +82,9 @@ export async function checkArchivalFreezeGuard(db: TxDb, isUnarchiving = false):
 }
 
 export function handleG10Error(err: unknown): NextResponse {
+  if ((err as { code?: string })?.code === 'OUTDATED_HANDOVER') {
+    return NextResponse.json({ error: 'OUTDATED_HANDOVER', message: (err as Error).message }, { status: 409 });
+  }
   if (
     err instanceof TimelineOptimisticLockError ||
     err instanceof GiftOptimisticLockError ||

@@ -174,6 +174,7 @@ export function createMockG10TxDb(initialStore: MockG10Store = {}) {
         orderBy: vi.fn().mockImplementation((..._orderCols: any[]) => {
           return queryBuilder;
         }),
+        for: vi.fn().mockImplementation(() => queryBuilder),
         limit: vi.fn().mockImplementation((limitNum: number) => {
           currentRows = currentRows.slice(0, limitNum);
           return queryBuilder;
@@ -314,5 +315,5 @@ export function createMockG10TxDb(initialStore: MockG10Store = {}) {
     }),
   };
 
-  return txDb;
+  return txDb as Omit<TxDb, '_store'> & { _store: Required<MockG10Store> };
 }

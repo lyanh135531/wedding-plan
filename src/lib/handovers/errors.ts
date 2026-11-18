@@ -17,3 +17,9 @@ export class HandoverAlreadyDeliveredError extends Error {
     this.name = 'HandoverAlreadyDeliveredError';
   }
 }
+
+export class HandoverOutdatedError extends Error {
+  readonly statusCode = 409;
+  readonly code = 'OUTDATED_HANDOVER';
+  constructor() { super('Dữ liệu đã thay đổi sau bản chốt. Hãy tạo bản chốt mới trước khi bàn giao.'); }
+}

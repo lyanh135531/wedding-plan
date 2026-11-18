@@ -165,6 +165,13 @@ export async function assignGuestToTable(
     );
   }
 
+  // RSVP changes lock this same row. A decline must never race a new assignment.
+  const [participation] = await txDb.select({ rsvpStatus: attendance.rsvpStatus })
+    .from(attendance).where(and(eq(attendance.eventId, eventId), eq(attendance.guestId, guestId))).for('update');
+  if (participation?.rsvpStatus === 'declined') {
+    throw new CapacityExceededError('Khách đã xác nhận không tham dự buổi này. Hãy cập nhật RSVP trước khi xếp bàn.');
+  }
+
   const incomingNeedsSeat = await isGuestConsumingSeat(txDb, eventId, guestId);
   const occupiedSeats = await countOccupyingSeats(txDb, eventId, tableId, guestId);
 
@@ -196,12 +203,13 @@ export async function unassignGuest(
   txDb: TxDb,
   eventId: string,
   guestId: string,
-  actorId?: string
+  actorId?: string,
+  expectedTableId?: string
 ): Promise<boolean> {
   const existing = await getGuestSeatAssignment(txDb, eventId, guestId);
-  if (!existing) return false;
+  if (!existing || (expectedTableId && existing.tableId !== expectedTableId)) return false;
 
-  const result = await unassignSeat(txDb, eventId, guestId);
+  const result = await unassignSeat(txDb, eventId, guestId, expectedTableId);
   if (result && actorId) {
     await txDb.insert(auditLogs).values({
       userId: actorId,

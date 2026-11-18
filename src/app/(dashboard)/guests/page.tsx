@@ -2,13 +2,11 @@
 
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { GuestsDirectory } from '@/components/modules/guests/GuestsDirectory';
-import { usePrototype } from '@/components/testing/PrototypeToolbar';
+import { LiveGuestsDirectory } from '@/components/modules/guests/LiveGuestsDirectory';
 
 const h = React.createElement;
 
 export default function GuestsPage() {
-  const { state } = usePrototype();
 
   return h(
     PageShell,
@@ -21,8 +19,6 @@ export default function GuestsPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(GuestsDirectory, {
-      initialState: state,
-    })
+    h(LiveGuestsDirectory)
   );
 }

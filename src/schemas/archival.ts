@@ -16,7 +16,7 @@ export type PostWeddingTaskKey = z.infer<typeof postWeddingTaskKeyEnum>;
 export const archiveWeddingSchema = z.object({
   archiveReason: z.string().trim().min(1, { message: 'Lý do chuyển sang lưu trữ là bắt buộc' }).max(500),
   confirmed: z.literal(true, {
-    errorMap: () => ({ message: 'Xác nhận khóa lưu trữ là bắt buộc' }),
+    error: 'Xác nhận khóa lưu trữ là bắt buộc',
   }),
 });
 export type ArchiveWeddingInput = z.infer<typeof archiveWeddingSchema>;

@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "verifiedAt": "2026-11-17T10:00:02.405Z",
+  "postgresVersion": "pg_restore (PostgreSQL) 17.4",
+  "tablesVerified": 54,
+  "foreignKeysVerified": 79,
+  "sourceUnchanged": true,
+  "tamperRejected": true,
+  "browserJourneys": true,
+  "restore": {
+    "backupId": "backup_2026-11-17T09-59-45-865Z_9ce5e8ea-5a4a-47c5-896f-e62e43dafa1d",
+    "verificationMode": "restored-and-verified",
+    "isChecksumValid": true,
+    "isDbRestored": true,
+    "isUploadsRestored": true,
+    "integrityChecksPassed": true,
+    "credentialsSanitized": true,
+    "verifiedAt": "2026-11-17T09:59:48.081Z"
+  },
+  "scope": "Local isolated PostgreSQL cluster and production Next.js build; seeded sessions, no real Google OAuth"
+}

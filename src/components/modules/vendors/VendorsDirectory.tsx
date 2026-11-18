@@ -15,8 +15,6 @@ import { VendorListDesktop } from './VendorListDesktop';
 import { VendorCardMobile } from './VendorCardMobile';
 import { VendorQuickCompareBar } from './VendorQuickCompareBar';
 import { AddVendorModal } from './AddVendorModal';
-import { FIXTURE_VENDORS } from './fixtures';
-import { removeVietnameseDiacritics } from '@/lib/utils';
 
 export interface VendorsDirectoryProps {
   initialVendors?: (VendorDto | VendorSummaryDto)[];
@@ -28,16 +26,17 @@ export const VendorsDirectory: React.FC<VendorsDirectoryProps> = ({
   const { isOwner, isFamily } = useRole();
 
   const [vendors, setVendors] = React.useState<(VendorDto | VendorSummaryDto)[]>(
-    initialVendors || FIXTURE_VENDORS
+    initialVendors || []
   );
   const [loading, setLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [serviceTypeFilter, setServiceTypeFilter] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(25);
   const [totalCount, setTotalCount] = React.useState(
-    (initialVendors || FIXTURE_VENDORS).length
+    (initialVendors || []).length
   );
 
   // Quick Compare state (Owner only)
@@ -60,6 +59,7 @@ export const VendorsDirectory: React.FC<VendorsDirectoryProps> = ({
   const fetchVendors = React.useCallback(async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const res = await vendorsApi.list({
         search: searchQuery || undefined,
         serviceType: serviceTypeFilter || undefined,
@@ -70,29 +70,7 @@ export const VendorsDirectory: React.FC<VendorsDirectoryProps> = ({
       setVendors(res.data);
       setTotalCount(res.pagination.total);
     } catch {
-      // Offline fallback: filter local vendors in prototype
-      let filtered = [...FIXTURE_VENDORS];
-      if (searchQuery.trim()) {
-        const normQuery = removeVietnameseDiacritics(searchQuery.toLowerCase());
-        filtered = filtered.filter((v) => {
-          const normName = removeVietnameseDiacritics(v.name.toLowerCase());
-          const normContact = removeVietnameseDiacritics((v.contact_person || '').toLowerCase());
-          const phone = v.phone || '';
-          return (
-            normName.includes(normQuery) ||
-            normContact.includes(normQuery) ||
-            phone.includes(normQuery)
-          );
-        });
-      }
-      if (serviceTypeFilter) {
-        filtered = filtered.filter((v) => v.service_type === serviceTypeFilter);
-      }
-      if (statusFilter) {
-        filtered = filtered.filter((v) => v.status === statusFilter);
-      }
-      setVendors(filtered);
-      setTotalCount(filtered.length);
+      setLoadError('Không thể tải danh sách nhà cung cấp. Dữ liệu đang hiển thị có thể chưa cập nhật; hãy kiểm tra kết nối và thử lại.');
     } finally {
       setLoading(false);
     }
@@ -143,6 +121,7 @@ export const VendorsDirectory: React.FC<VendorsDirectoryProps> = ({
   return React.createElement(
     'div',
     { className: 'space-y-6 pb-20' },
+    loadError && React.createElement('p', { role: 'alert', className: 'text-danger' }, loadError),
     // Header action row
     React.createElement(
       'div',
@@ -259,7 +238,7 @@ export const VendorsDirectory: React.FC<VendorsDirectoryProps> = ({
               setCurrentPage(1);
             },
             pageSizeOptions: [25, 50, 100],
-            itemName: 'nhà cung cấp',
+            unitLabel: 'nhà cung cấp',
           })
         ),
 

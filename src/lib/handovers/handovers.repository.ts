@@ -33,6 +33,12 @@ export function mapToHandoverPacketFamilyDto(raw: any): HandoverPacketFamilyDto 
   delete sanitizedSnapshot.budgets;
   delete sanitizedSnapshot.costs;
   delete sanitizedSnapshot.gifts;
+  for (const section of ['timeline', 'support', 'checklist']) {
+    if (Array.isArray(sanitizedSnapshot[section])) {
+      // Legacy snapshots without sharing metadata are deliberately not exposed.
+      sanitizedSnapshot[section] = sanitizedSnapshot[section].filter((item: { isShared?: boolean }) => item.isShared === true);
+    }
+  }
 
   return {
     ...full,

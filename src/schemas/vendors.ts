@@ -376,7 +376,7 @@ export const convertQuoteToCostRequestSchema = z.object({
   status: costStatusEnum.default('contracted'),
   notes: notesSchema,
 });
-export type ConvertQuoteToCostInput = z.infer<typeof convertQuoteToCostRequestSchema>;
+export type ConvertQuoteToCostInput = z.input<typeof convertQuoteToCostRequestSchema>;
 
 export const convertQuoteToCostResponseSchema = z.object({
   is_already_converted: z.boolean(),

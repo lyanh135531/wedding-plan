@@ -15,7 +15,6 @@ import { VendorInfoCards } from './VendorInfoCards';
 import { QuotesManager } from './QuotesManager';
 import { EditVendorModal } from './EditVendorModal';
 import { AddQuoteModal } from './AddQuoteModal';
-import { FIXTURE_VENDORS, FIXTURE_QUOTES } from './fixtures';
 
 export interface VendorDetailScreenProps {
   vendorId: string;
@@ -32,13 +31,10 @@ export const VendorDetailScreen: React.FC<VendorDetailScreenProps> = ({
   const { isOwner, isFamily } = useRole();
 
   const [vendor, setVendor] = React.useState<VendorDto | null>(
-    initialVendor ||
-      FIXTURE_VENDORS.find((v) => v.id === vendorId) ||
-      FIXTURE_VENDORS[0]
+    initialVendor || null
   );
   const [quotes, setQuotes] = React.useState<QuoteDto[]>(
-    initialQuotes ||
-      FIXTURE_QUOTES.filter((q) => q.vendor_id === vendorId)
+    initialQuotes || []
   );
 
   const [loading, setLoading] = React.useState(!initialVendor);
@@ -79,19 +75,11 @@ export const VendorDetailScreen: React.FC<VendorDetailScreenProps> = ({
           const quotesRes = await vendorsApi.listQuotes(vendorId, true);
           setQuotes(quotesRes.data);
         } catch {
-          // If quotes endpoint fails or offline, filter local fixtures
-          setQuotes(FIXTURE_QUOTES.filter((q) => q.vendor_id === vendorId));
+          setErrorMsg('Không thể tải báo giá. Hãy kiểm tra kết nối và thử lại.');
         }
       }
     } catch {
-      // Offline / fallback to fixture
-      const found = FIXTURE_VENDORS.find((v) => v.id === vendorId);
-      if (found) {
-        setVendor(found);
-        setQuotes(FIXTURE_QUOTES.filter((q) => q.vendor_id === vendorId));
-      } else {
-        setErrorMsg('Không tìm thấy thông tin nhà cung cấp này trong hệ thống.');
-      }
+      setErrorMsg('Không thể tải thông tin nhà cung cấp. Hãy kiểm tra kết nối và thử lại.');
     } finally {
       setLoading(false);
     }

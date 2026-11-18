@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from 'next/link.js';
+import { usePathname } from 'next/navigation.js';
 import { LayoutDashboard, Users, Wallet, CheckSquare, Menu as MenuIcon } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
 import { useNavVisibility } from '@/hooks/useNavVisibility';

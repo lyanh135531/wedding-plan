@@ -1,4 +1,4 @@
-import { db } from '@/db/client';
+import { db as defaultDb } from '@/db/client';
 import { idempotencyRecords } from '@/db/schema/system';
 import { users } from '@/db/schema/auth';
 import { eq, and, sql } from 'drizzle-orm';
@@ -52,6 +52,8 @@ function serializeCanonical(val: unknown): string {
 }
 
 export interface IdempotencyExecutionOptions<T> {
+  /** Must be the same scoped transaction used by execute for atomic financial writes. */
+  transactionDb?: Pick<typeof defaultDb, 'select' | 'insert' | 'update' | 'execute'>;
   key?: string | null;
   userId: string;
   operationType: string;
@@ -72,6 +74,7 @@ export async function withIdempotency<T>(
   options: IdempotencyExecutionOptions<T>
 ): Promise<{ status: number; body: T; fromCache: boolean }> {
   const { key, userId, operationType, payload, ttlHours = 24, execute } = options;
+  const db = options.transactionDb || defaultDb;
 
   // If no idempotency key provided, execute directly without caching
   if (!key || key.trim() === '') {
@@ -81,6 +84,10 @@ export async function withIdempotency<T>(
 
   const cleanKey = key.trim();
   const requestHash = hashPayload(payload);
+  if (options.transactionDb) {
+    // Serialize identical requests until both the mutation and cached result commit.
+    await db.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([userId, operationType, cleanKey])}, 0))`);
+  }
 
   // 1. Check user authorization status in live database (AT54: Replay after permission revoked)
   const [userRecord] = await db

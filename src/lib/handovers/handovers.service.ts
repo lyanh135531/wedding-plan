@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+import { events } from '@/db/schema/events';
 import { timelineItems } from '@/db/schema/timeline';
 import { tables, seatAssignments } from '@/db/schema/seating';
 import { menus, menuItems } from '@/db/schema/catering';
@@ -7,6 +8,7 @@ import { preparationItems } from '@/db/schema/preparation';
 import { attendance } from '@/db/schema/guests';
 import {
   CreateHandoverPacketInput,
+  createHandoverPacketSchema,
   DeliverHandoverPacketInput,
   HandoverPacketDto,
   HandoverPacketFamilyDto,
@@ -20,7 +22,7 @@ import {
   mapToHandoverPacketDto,
   mapToHandoverPacketFamilyDto,
 } from './handovers.repository';
-import { HandoverPacketNotFoundError } from './errors';
+import { HandoverPacketNotFoundError, HandoverOutdatedError } from './errors';
 
 export async function assembleLiveEventData(
   db: TxDb,
@@ -48,6 +50,7 @@ export async function assembleLiveEventData(
       locationName: i.locationName,
       personInCharge: i.personInCharge,
       status: i.status,
+      isShared: i.isShared === true,
     }));
   }
 
@@ -64,6 +67,7 @@ export async function assembleLiveEventData(
     result.seating = {
       tablesCount: tableList.length,
       assignedSeatsCount: seatList.length,
+      assignments: seatList.map((seat: any) => ({ guestId: seat.guestId, tableId: seat.tableId, seatNumber: seat.seatNumber })),
       tables: tableList.map((t: any) => ({
         id: t.id,
         name: t.name,
@@ -103,6 +107,7 @@ export async function assembleLiveEventData(
       phone: s.phone,
       roles: s.roles,
       arrivalTime: s.arrivalTime,
+      isShared: s.isShared === true,
     }));
   }
 
@@ -118,6 +123,7 @@ export async function assembleLiveEventData(
       type: p.type,
       status: p.status,
       isRental: p.isRental,
+      isShared: p.isShared === true,
     }));
   }
 
@@ -132,16 +138,20 @@ export async function createHandoverSnapshot(
   input: CreateHandoverPacketInput,
   userId?: string | null
 ): Promise<HandoverPacketDto> {
+  // Serialize snapshot versions for this event inside the request transaction.
+  const [event] = await db.select().from(events).where(eq(events.id, input.eventId)).for('update');
+  if (!event) throw new Error('Buổi lễ không tồn tại.');
   const existing = await listHandoverPacketsByEvent(db, input.eventId);
   const nextVersion = existing.length > 0 ? Math.max(...existing.map((e) => e.version)) + 1 : 1;
 
-  const liveSnapshot = await assembleLiveEventData(db, input.eventId, input.scope);
+  const scope = createHandoverPacketSchema.shape.scope.parse(input.scope);
+  const liveSnapshot = await assembleLiveEventData(db, input.eventId, scope);
 
   return createHandoverPacketRecord(db, {
     eventId: input.eventId,
     version: nextVersion,
     title: input.title,
-    scope: input.scope,
+    scope,
     snapshotData: liveSnapshot,
     isSharedWithFamily: input.isSharedWithFamily ?? false,
     createdByUserId: userId ?? null,
@@ -154,7 +164,8 @@ export async function createHandoverSnapshot(
  */
 export async function getHandoverDeltaDiff(
   db: TxDb,
-  snapshotId: string
+  snapshotId: string,
+  role?: string
 ): Promise<{
   hasChanges: boolean;
   modifiedSections: string[];
@@ -167,7 +178,7 @@ export async function getHandoverDeltaDiff(
   }
 
   const liveData = await assembleLiveEventData(db, snapshot.eventId, snapshot.scope);
-  const frozen = snapshot.snapshotData;
+  const frozen = role === 'family_view' ? mapToHandoverPacketFamilyDto(snapshot).snapshotData : snapshot.snapshotData;
 
   const modifiedSections: string[] = [];
   const details: Record<string, any> = {};
@@ -215,6 +226,24 @@ export async function getHandoverDeltaDiff(
     }
   }
 
+  // Counts alone miss moved seats, renamed tables and changed times/people.
+  const canonical = (value: unknown): string => {
+    const normalize = (item: any): any => {
+      if (item instanceof Date) return item.toISOString();
+      if (Array.isArray(item)) return item.map(normalize).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+      if (item && typeof item === 'object') return Object.fromEntries(Object.keys(item).sort().map((key) => [key, normalize(item[key])]));
+      return item;
+    };
+    return JSON.stringify(normalize(value));
+  };
+  const sections = { timeline: 'includeTimeline', seating: 'includeSeating', catering: 'includeCatering', support: 'includeSupport', checklist: 'includeChecklist' } as const;
+  for (const [section, flag] of Object.entries(sections)) {
+    if (snapshot.scope[flag] && !modifiedSections.includes(section) && canonical(frozen[section]) !== canonical(liveData[section])) {
+      modifiedSections.push(section);
+      details[section] = { message: 'Nội dung đã thay đổi sau bản chốt' };
+    }
+  }
+
   const hasChanges = modifiedSections.length > 0;
   const diffSummary = hasChanges
     ? `Đã có thay đổi sau bản chốt v${snapshot.version} (${modifiedSections.join(', ')}). Chưa bàn giao lại cho nhà hàng/đối tác.`
@@ -233,6 +262,8 @@ export async function deliverHandover(
   snapshotId: string,
   input: DeliverHandoverPacketInput
 ): Promise<HandoverPacketDto> {
+  const diff = await getHandoverDeltaDiff(db, snapshotId);
+  if (diff.hasChanges) throw new HandoverOutdatedError();
   return updateHandoverDelivery(db, snapshotId, input.handedOverTo, input.handedOverChannel);
 }
 

@@ -2,13 +2,11 @@
 
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { BudgetScreen } from '@/components/modules/finance/BudgetScreen';
-import { usePrototype } from '@/components/testing/PrototypeToolbar';
+import { LiveFinanceWorkspace } from '@/components/modules/finance/LiveFinanceWorkspace';
 
 const h = React.createElement;
 
 export default function BudgetPage() {
-  const { state } = usePrototype();
 
   return h(
     PageShell,
@@ -21,8 +19,6 @@ export default function BudgetPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(BudgetScreen, {
-      initialState: state,
-    })
+    h(LiveFinanceWorkspace, { view: 'budget' })
   );
 }

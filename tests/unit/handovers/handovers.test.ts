@@ -43,6 +43,17 @@ describe('Gate G10: Handover Packets & Snapshot Diffing (PLAN §14.4, FL13, AT26
     });
   }
 
+  it('uses operational scope defaults when the caller omits scope', async () => {
+    const snapshot = await createHandoverSnapshot(setupDb(), {
+      eventId,
+      title: 'Default scope',
+    });
+    expect(snapshot.scope.includeFinancials).toBe(false);
+    expect(snapshot.scope.includeTimeline).toBe(true);
+    expect(snapshot.snapshotData.timeline).toHaveLength(1);
+    expect(snapshot.snapshotData.seating.assignedSeatsCount).toBe(1);
+  });
+
   it('creates an immutable snapshot capturing live event operational state', async () => {
     const db = setupDb();
     const snapshot = await createHandoverSnapshot(db, {

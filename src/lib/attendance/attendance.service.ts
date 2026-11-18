@@ -1,3 +1,4 @@
+import { nullableVietnamesePhoneSchema } from '@/schemas/common';
 import { TxDb } from './types';
 import {
   CheckInGuestInput,
@@ -110,7 +111,7 @@ export async function createWalkInGuest(
   return createWalkInGuestRecord(db, input.eventId, {
     groupId: input.groupId,
     fullName: input.fullName,
-    phone: input.phone,
+    phone: nullableVietnamesePhoneSchema.parse(input.phone),
     relationship: input.relationship,
     tableId: input.tableId,
     needsSeat: input.needsSeat,

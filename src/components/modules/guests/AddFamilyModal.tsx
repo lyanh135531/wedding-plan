@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,22 +19,27 @@ export interface FamilyMemberDraft {
 
 export interface AddFamilyModalProps {
   isOpen: boolean;
+  initialGroupName?: string;
+  initialMembers?: FamilyMemberDraft[];
   onClose: () => void;
   onSubmit: (familyData: {
     groupName: string;
     side: 'groom' | 'bride' | 'mutual';
     members: FamilyMemberDraft[];
-  }) => void;
+  }) => void | Promise<void>;
 }
 
 export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  initialGroupName = 'Gia đình Bác Thành',
+  initialMembers,
 }) => {
-  const [groupName, setGroupName] = React.useState('Gia đình Bác Thành');
+  const { saving, saveError, runSave } = useSaveAction();
+  const [groupName, setGroupName] = React.useState(initialGroupName);
   const [side, setSide] = React.useState<'groom' | 'bride' | 'mutual'>('groom');
-  const [members, setMembers] = React.useState<FamilyMemberDraft[]>([
+  const [members, setMembers] = React.useState<FamilyMemberDraft[]>(initialMembers || [
     { id: '1', name: 'Bác Thành', ageTier: 'adult', phone: '0901234567', isRepresentative: true },
     { id: '2', name: 'Bác Gái', ageTier: 'adult', isRepresentative: false },
     { id: '3', name: 'Anh Tuấn', ageTier: 'adult', isRepresentative: false },
@@ -76,12 +82,14 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim() || members.length === 0) return;
-    onSubmit({
+    void runSave(async () => {
+    await onSubmit({
       groupName,
       side,
       members,
     });
     onClose();
+    });
   };
 
   return h(
@@ -97,8 +105,9 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
       'div',
       {
         className:
-          'bg-surface w-full max-w-xl rounded-card border border-border-control shadow-2xl p-6 text-text-main my-8',
+          'bg-surface w-full max-w-xl max-h-[90dvh] overflow-y-auto rounded-card border border-border-control shadow-2xl p-6 text-text-main my-8',
       },
+      saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
       // Header
       h(
         'div',
@@ -278,6 +287,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
             Button,
             {
               type: 'submit',
+            disabled: saving,
               variant: 'primary',
             },
             `Lưu gia đình (${members.length} khách)`

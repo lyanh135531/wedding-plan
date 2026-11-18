@@ -48,11 +48,13 @@ export const TableCard: React.FC<TableCardProps> = ({
   const seatConsumingCount = seatedGuests.filter((g) => g.needsSeat !== false).length;
   const infantCount = seatedGuests.filter((g) => g.needsSeat === false).length;
   const isFull = seatConsumingCount >= table.capacity;
+  const selectionNeedsSeat = guests.find((guest) => guest.id === selectedGuestId)?.needsSeat !== false;
+  const cannotSeatSelection = isFull && selectionNeedsSeat;
   const remainingSeats = Math.max(0, table.capacity - seatConsumingCount);
 
   // Drag and drop handlers
   const handleDragOver = (e: React.DragEvent) => {
-    if (!canMutate || isFull) return;
+    if (!canMutate) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     if (!isDragOver) setIsDragOver(true);
@@ -249,17 +251,17 @@ export const TableCard: React.FC<TableCardProps> = ({
           'button',
           {
             type: 'button',
-            disabled: !selectedGuestId || isFull,
+            disabled: !selectedGuestId || cannotSeatSelection,
             onClick: () => onSeatGuest(table.id),
             className: `w-full text-xs h-9 rounded-control font-medium transition-all ${
-              isFull
+              cannotSeatSelection
                 ? 'bg-border-subtle/50 text-text-muted cursor-not-allowed'
                 : selectedGuestId
                 ? 'bg-primary text-white hover:bg-primary/90 shadow-sm'
                 : 'bg-[#FAF9F5] border border-border-subtle text-text-muted hover:border-primary'
             }`,
           },
-          isFull
+          cannotSeatSelection
             ? 'Bàn đã đầy'
             : selectedGuestId
             ? `Xếp vào bàn này (còn ${remainingSeats} chỗ)`

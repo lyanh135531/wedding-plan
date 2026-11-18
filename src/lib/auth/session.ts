@@ -1,4 +1,4 @@
-import { db, pool } from "@/db/client";
+import { db, pool, withTransactionScopedContext } from "@/db/client";
 import { users, sessions, memberEventAccess } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 
@@ -118,10 +118,14 @@ export async function getCurrentSession(req?: Request | Headers): Promise<UserSe
     // 6. Query member_event_access to populate allowedEventIds for family users
     let allowedEventIds: string[] = [];
     if (record.userRole === "family_view") {
-      const accessRows = await db
-        .select({ eventId: memberEventAccess.eventId })
-        .from(memberEventAccess)
-        .where(eq(memberEventAccess.userId, record.userId));
+      const accessRows = await withTransactionScopedContext(
+        record.userId,
+        'family_view',
+        async (_client, scopedDb) => scopedDb
+          .select({ eventId: memberEventAccess.eventId })
+          .from(memberEventAccess)
+          .where(eq(memberEventAccess.userId, record.userId))
+      );
 
       allowedEventIds = accessRows.map((r) => r.eventId);
     }

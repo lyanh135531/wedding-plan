@@ -3,7 +3,7 @@ import * as React from 'react';
 import '@/styles/globals.css';
 import { RoleProvider } from '@/context/RoleContext';
 import { EventScopeProvider } from '@/context/EventScopeContext';
-import { PrototypeProvider } from '@/components/testing/PrototypeToolbar';
+import { NetworkWriteGuard } from '@/components/common/NetworkWriteGuard';
 
 const h = React.createElement;
 
@@ -23,17 +23,14 @@ export default function RootLayout({
     h(
       'body',
       { className: 'min-h-screen bg-bg-page text-text-main font-sans antialiased' },
+      h(NetworkWriteGuard),
       h(
         RoleProvider,
         null,
         h(
           EventScopeProvider,
           null,
-          h(
-            PrototypeProvider,
-            null,
-            children
-          )
+          children
         )
       )
     )

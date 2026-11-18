@@ -246,7 +246,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
             'select',
             {
               value: serviceType,
-              onChange: (e) => setServiceType(e.target.value as VendorServiceType),
+              onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setServiceType(e.target.value as VendorServiceType),
               className:
                 'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
               required: true,
@@ -277,7 +277,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
             'select',
             {
               value: status,
-              onChange: (e) => setStatus(e.target.value as VendorStatus),
+              onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value as VendorStatus),
               className:
                 'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
             },
@@ -410,7 +410,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
               ),
               React.createElement('textarea', {
                 value: rainPlan,
-                onChange: (e) => setRainPlan(e.target.value),
+                onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setRainPlan(e.target.value),
                 rows: 2,
                 className:
                   'w-full p-2 bg-surface border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
@@ -426,7 +426,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
               ),
               React.createElement('textarea', {
                 value: decorAudioRules,
-                onChange: (e) => setDecorAudioRules(e.target.value),
+                onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDecorAudioRules(e.target.value),
                 rows: 2,
                 className:
                   'w-full p-2 bg-surface border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
@@ -446,7 +446,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
         ),
         React.createElement('textarea', {
           value: notes,
-          onChange: (e) => setNotes(e.target.value),
+          onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value),
           rows: 3,
           className:
             'w-full p-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-base focus:outline-2 focus:outline-focus',

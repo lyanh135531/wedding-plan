@@ -1,6 +1,8 @@
 'use client';
 
 import * as React from 'react';
+import { api } from '@/lib/api/request';
+import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { useRole } from '@/context/RoleContext';
 import {
@@ -61,6 +63,7 @@ export interface HandoverPacketData {
 }
 
 export interface HandoverSnapshotItem {
+  snapshotData?: HandoverPacketData;
   id: string;
   version: number;
   title: string;
@@ -78,6 +81,10 @@ export interface HandoversDashboardProps {
 
 export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId }) => {
   const { isOwner } = useRole();
+  const { saving, saveError, runSave } = useSaveAction();
+  const generation = React.useRef(0);
+  const [refresh, setRefresh] = React.useState(0);
+  const [shared, setShared] = React.useState(false);
   const [liveData, setLiveData] = React.useState<HandoverPacketData | null>(null);
   const [snapshots, setSnapshots] = React.useState<HandoverSnapshotItem[]>([]);
   const [selectedSnapshotId, setSelectedSnapshotId] = React.useState<string | null>(null);
@@ -92,105 +99,73 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
   const [deliverChannel, setDeliverChannel] = React.useState('Trực tiếp tại sảnh tiệc');
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
-  // Fetch live pack data and snapshots
   const fetchData = React.useCallback(async () => {
-    if (!eventId) return;
+    const request = ++generation.current;
     setLoading(true);
+    setErrorMsg(null);
     try {
-      const [liveRes, snapRes] = await Promise.all([
-        fetch(`/api/v1/handovers/packet?eventId=${eventId}`),
-        fetch(`/api/v1/handovers/snapshots?eventId=${eventId}`),
+      if (!eventId) { setLiveData(null); setSnapshots([]); return; }
+      const [live, snapshots] = await Promise.all([
+        api<{ data: HandoverPacketData }>(`/api/v1/handovers/packet?eventId=${eventId}`),
+        api<{ data: HandoverSnapshotItem[] }>(`/api/v1/handovers/snapshots?eventId=${eventId}`),
       ]);
-
-      if (liveRes.ok) {
-        const json = await liveRes.json();
-        setLiveData(json.data);
-      }
-      if (snapRes.ok) {
-        const json = await snapRes.json();
-        setSnapshots(json.data || []);
-        if (json.data?.length > 0 && !selectedSnapshotId) {
-          setSelectedSnapshotId(json.data[0].id);
-        }
-      }
-    } catch (err) {
-      console.error('Lỗi tải bộ bàn giao:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId, selectedSnapshotId]);
+      if (request !== generation.current) return;
+      setLiveData(live.data); setSnapshots(snapshots.data);
+      setSelectedSnapshotId((current) => snapshots.data.some((snapshot) => snapshot.id === current) ? current : snapshots.data[0]?.id || null);
+      setRefresh((value) => value + 1);
+    } catch (error) { if (request === generation.current) setErrorMsg((error as Error).message); }
+    finally { if (request === generation.current) setLoading(false); }
+  }, [eventId]);
 
   React.useEffect(() => {
-    fetchData();
+    setSelectedSnapshotId(null); setDiffInfo(null); setLiveData(null); setSnapshots([]);
+    void fetchData();
+    return () => { generation.current++; };
   }, [fetchData]);
 
   // Fetch delta diff when snapshot changes (FL13)
   React.useEffect(() => {
+    let cancelled = false;
+    setDiffInfo(null);
     if (selectedSnapshotId) {
       fetch(`/api/v1/handovers/snapshots/${selectedSnapshotId}/diff`)
         .then((res) => (res.ok ? res.json() : null))
         .then((json) => {
-          if (json?.data) {
+          if (!cancelled && json?.data) {
             setDiffInfo(json.data);
           }
         })
         .catch(() => {});
     }
-  }, [selectedSnapshotId]);
+    return () => { cancelled = true; };
+  }, [selectedSnapshotId, refresh]);
 
-  // Create snapshot
-  const handleCreateSnapshot = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/v1/handovers/packet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventId,
-          title: snapshotTitle.trim() || `Bản chốt vận hành ${new Date().toLocaleDateString('vi-VN')}`,
-        }),
+  const handleCreateSnapshot = (event: React.FormEvent) => {
+    event.preventDefault();
+    void runSave(async () => {
+      const response = await api<{ data: HandoverSnapshotItem }>('/api/v1/handovers/packet', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId, title: snapshotTitle.trim() || `Bản chốt vận hành ${new Date().toLocaleDateString('vi-VN')}`, isSharedWithFamily: shared }),
       });
-
-      if (res.ok) {
-        setIsSnapshotModalOpen(false);
-        setSnapshotTitle('');
-        fetchData();
-      } else {
-        const errJson = await res.json();
-        setErrorMsg(errJson.message || 'Lỗi tạo bản chốt');
-      }
-    } catch {
-      setErrorMsg('Lỗi kết nối máy chủ');
-    }
+      setSelectedSnapshotId(response.data.id);
+      setIsSnapshotModalOpen(false); setSnapshotTitle('');
+      await fetchData();
+    });
   };
-
-  // Deliver handover
-  const handleDeliver = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDeliver = (event: React.FormEvent) => {
+    event.preventDefault();
     if (!selectedSnapshotId) return;
-
-    try {
-      const res = await fetch(`/api/v1/handovers/snapshots/${selectedSnapshotId}/deliver`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          handedOverTo: recipientName.trim(),
-          handedOverChannel: deliverChannel.trim(),
-        }),
+    void runSave(async () => {
+      await api(`/api/v1/handovers/snapshots/${selectedSnapshotId}/deliver`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ handedOverTo: recipientName.trim(), handedOverChannel: deliverChannel.trim() }),
       });
-
-      if (res.ok) {
-        setIsDeliverModalOpen(false);
-        setRecipientName('');
-        fetchData();
-      } else {
-        const errJson = await res.json();
-        setErrorMsg(errJson.message || 'Lỗi ghi nhận bàn giao');
-      }
-    } catch {
-      setErrorMsg('Lỗi kết nối máy chủ');
-    }
+      setIsDeliverModalOpen(false); setRecipientName('');
+      await fetchData();
+    });
   };
+  const selectedSnapshot = snapshots.find((snapshot) => snapshot.id === selectedSnapshotId);
+  const displayData = selectedSnapshot ? selectedSnapshot.snapshotData : liveData;
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
@@ -200,11 +175,11 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
 
   return h(
     'div',
-    { className: 'space-y-6 max-w-7xl mx-auto p-4 sm:p-6 print:p-0 print:m-0' },
+    { className: 'space-y-6 w-full min-w-0 max-w-7xl mx-auto p-4 sm:p-6 print:p-0 print:m-0' },
     // Header (hidden on print)
     h(
       'div',
-      { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border-subtle pb-4 print:hidden' },
+      { className: 'flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 border-b border-border-subtle pb-4 print:hidden' },
       h(
         'div',
         null,
@@ -213,7 +188,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
       ),
       h(
         'div',
-        { className: 'flex items-center gap-3' },
+        { className: 'flex flex-wrap items-center gap-3' },
         h(
           Button,
           {
@@ -223,6 +198,10 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
           },
           'In bộ tài liệu A4'
         ),
+        isOwner && selectedSnapshotId && h(Button, {
+          variant: 'secondary', disabled: saving || !diffInfo || diffInfo.hasChanges,
+          onClick: () => setIsDeliverModalOpen(true),
+        }, 'Ghi nhận bàn giao'),
         isOwner &&
           h(
             Button,
@@ -236,11 +215,14 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
       )
     ),
 
+    loading && h('p', { role: 'status' }, 'Đang tải bộ bàn giao…'),
+    saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
+    selectedSnapshot && h('p', { className: 'font-semibold' }, `Đang xem bản chốt v${selectedSnapshot.version}: ${selectedSnapshot.title}`),
     // Error alert
     errorMsg &&
       h(
         'div',
-        { className: 'p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-control flex items-center justify-between print:hidden' },
+        { role: 'alert', className: 'p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-control flex items-center justify-between print:hidden' },
         h('span', null, errorMsg),
         h('button', { type: 'button', onClick: () => setErrorMsg(null), className: 'font-bold' }, '✕')
       ),
@@ -250,11 +232,11 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
       diffInfo.hasChanges &&
       h(
         'div',
-        { className: 'p-4 bg-amber-50 border-2 border-amber-300 rounded-card flex items-start gap-3 shadow-sm print:hidden' },
+        { className: 'p-4 bg-amber-50 border-2 border-amber-300 rounded-card flex flex-col md:flex-row items-start gap-3 shadow-sm print:hidden' },
         h(AlertTriangle, { className: 'w-5 h-5 text-amber-600 shrink-0 mt-0.5' }),
         h(
           'div',
-          { className: 'flex-1' },
+          { className: 'flex-1 min-w-0' },
           h('p', { className: 'font-bold text-sm text-amber-900' }, 'Phát hiện thay đổi sau bản chốt bàn giao!'),
           h('p', { className: 'text-xs text-amber-800 mt-0.5' }, diffInfo.diffSummary),
           h(
@@ -270,9 +252,9 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
               variant: 'secondary',
               size: 'sm',
               leftIcon: h(Send, { className: 'w-3.5 h-3.5' }),
-              onClick: () => setIsDeliverModalOpen(true),
+              onClick: () => setIsSnapshotModalOpen(true),
             },
-            'Bàn giao lại'
+            'Tạo bản chốt cập nhật'
           )
       ),
 
@@ -280,7 +262,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
     snapshots.length > 0 &&
       h(
         'div',
-        { className: 'flex items-center gap-2 overflow-x-auto pb-1 text-xs print:hidden' },
+        { className: 'flex min-w-0 items-center gap-2 overflow-x-auto pb-1 text-xs print:hidden' },
         h('span', { className: 'font-semibold text-text-muted shrink-0' }, 'Lịch sử bản chốt:'),
         snapshots.map((s) =>
           h(
@@ -289,7 +271,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
               key: s.id,
               type: 'button',
               onClick: () => setSelectedSnapshotId(s.id),
-              className: `px-3 py-1.5 rounded-full border font-medium ${
+              className: `shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full border font-medium ${
                 selectedSnapshotId === s.id
                   ? 'bg-primary text-white border-primary'
                   : 'bg-white text-text-main border-border-control'
@@ -307,7 +289,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
       // Document header with event info & export timestamp
       h(
         'div',
-        { className: 'border-b-2 border-primary pb-4 flex justify-between items-start' },
+        { className: 'border-b-2 border-primary pb-4 flex flex-col md:flex-row print:flex-row justify-between items-start gap-3' },
         h(
           'div',
           null,
@@ -323,7 +305,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
       ),
 
       // Section 1: Timeline
-      liveData?.timeline &&
+      displayData?.timeline &&
         h(
           'div',
           { className: 'space-y-3' },
@@ -336,7 +318,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
           h(
             'div',
             { className: 'divide-y divide-border-subtle text-xs' },
-            liveData.timeline.map((t) =>
+            displayData.timeline.map((t) =>
               h(
                 'div',
                 { key: t.id, className: 'py-2 flex items-start justify-between gap-4' },
@@ -373,19 +355,19 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
             'div',
             { className: 'p-3 bg-gray-50 border border-border-subtle rounded' },
             h('p', { className: 'font-semibold text-text-muted' }, 'Tổng số bàn tiệc đã xếp'),
-            h('p', { className: 'text-xl font-bold text-text-main mt-1' }, `${liveData?.seating?.tablesCount || 0} bàn`)
+            h('p', { className: 'text-xl font-bold text-text-main mt-1' }, `${displayData?.seating?.tablesCount || 0} bàn`)
           ),
           h(
             'div',
             { className: 'p-3 bg-gray-50 border border-border-subtle rounded' },
             h('p', { className: 'font-semibold text-text-muted' }, 'Suất ăn phục vụ xác nhận'),
-            h('p', { className: 'text-xl font-bold text-primary mt-1' }, `${liveData?.catering?.totalMealsNeeded || 0} phần ăn`)
+            h('p', { className: 'text-xl font-bold text-primary mt-1' }, `${displayData?.catering?.totalMealsNeeded || 0} phần ăn`)
           )
         )
       ),
 
       // Section 3: Key Support Personnel Directory
-      liveData?.support &&
+      displayData?.support &&
         h(
           'div',
           { className: 'space-y-3' },
@@ -398,7 +380,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
           h(
             'div',
             { className: 'grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs' },
-            liveData.support.map((s) =>
+            displayData.support.map((s) =>
               h(
                 'div',
                 { key: s.id, className: 'p-2.5 bg-gray-50 border border-border-subtle rounded flex justify-between items-center' },
@@ -445,16 +427,18 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
             className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4',
           },
           h('h3', { className: 'text-base font-bold text-text-main' }, 'Chốt Bản Bàn Giao Mới (Snapshot)'),
+          saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
           h(
             'div',
             { className: 'space-y-3 text-xs' },
             h(
               'div',
               null,
-              h('label', { className: 'font-semibold text-text-main' }, 'Tên bản chốt *'),
+              h('label', { htmlFor: 'handover-title-input', className: 'font-semibold text-text-main' }, 'Tên bản chốt *'),
               h('input', {
                 type: 'text',
                 required: true,
+                id: 'handover-title-input',
                 value: snapshotTitle,
                 onChange: (e) => setSnapshotTitle(e.target.value),
                 placeholder: 'Ví dụ: Bản chốt giao nhà hàng White Palace v1',
@@ -464,9 +448,10 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
           ),
           h(
             'div',
-            { className: 'flex justify-end gap-2 pt-3 border-t border-border-subtle' },
+            { className: 'flex flex-wrap justify-end gap-2 pt-3 border-t border-border-subtle' },
             h(Button, { variant: 'secondary', type: 'button', onClick: () => setIsSnapshotModalOpen(false) }, 'Hủy'),
-            h(Button, { variant: 'primary', type: 'submit' }, 'Tạo bản chốt')
+            h('label', { className: 'flex items-center gap-2' }, h('input', { type: 'checkbox', checked: shared, onChange: (e: React.ChangeEvent<HTMLInputElement>) => setShared(e.target.checked) }), 'Chia sẻ bản chốt với người nhà'),
+            h(Button, { variant: 'primary', type: 'submit', disabled: saving }, 'Tạo bản chốt')
           )
         )
       ),
@@ -483,16 +468,18 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
             className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4',
           },
           h('h3', { className: 'text-base font-bold text-text-main' }, 'Ghi Nhận Đã Bàn Giao'),
+          saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
           h(
             'div',
             { className: 'space-y-3 text-xs' },
             h(
               'div',
               null,
-              h('label', { className: 'font-semibold text-text-main' }, 'Người / Đơn vị nhận bàn giao *'),
+              h('label', { htmlFor: 'handover-recipient-input', className: 'font-semibold text-text-main' }, 'Người / Đơn vị nhận bàn giao *'),
               h('input', {
                 type: 'text',
                 required: true,
+                id: 'handover-recipient-input',
                 value: recipientName,
                 onChange: (e) => setRecipientName(e.target.value),
                 placeholder: 'Ví dụ: Quản lý sảnh tiệc - Anh Hoàng',
@@ -513,9 +500,9 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
           ),
           h(
             'div',
-            { className: 'flex justify-end gap-2 pt-3 border-t border-border-subtle' },
+            { className: 'flex flex-wrap justify-end gap-2 pt-3 border-t border-border-subtle' },
             h(Button, { variant: 'secondary', type: 'button', onClick: () => setIsDeliverModalOpen(false) }, 'Đóng'),
-            h(Button, { variant: 'primary', type: 'submit' }, 'Xác nhận đã bàn giao')
+            h(Button, { variant: 'primary', type: 'submit', disabled: saving }, 'Xác nhận đã bàn giao')
           )
         )
       )

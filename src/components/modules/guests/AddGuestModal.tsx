@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -24,7 +25,7 @@ export interface AddGuestDraft {
 export interface AddGuestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (guestData: AddGuestDraft) => void;
+  onSubmit: (guestData: AddGuestDraft) => void | Promise<void>;
 }
 
 export const AddGuestModal: React.FC<AddGuestModalProps> = ({
@@ -32,6 +33,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const { saving, saveError, runSave } = useSaveAction();
   const [displayName, setDisplayName] = React.useState('');
   const [side, setSide] = React.useState<'groom' | 'bride' | 'mutual' | 'unassigned'>('groom');
   const [ageTier, setAgeTier] = React.useState<'adult' | 'child' | 'baby'>('adult');
@@ -58,7 +60,8 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
       .map((t) => t.trim())
       .filter(Boolean);
 
-    onSubmit({
+    void runSave(async () => {
+    await onSubmit({
       displayName: displayName.trim(),
       side,
       ageTier,
@@ -72,6 +75,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
     });
 
     onClose();
+    });
   };
 
   return h(
@@ -85,8 +89,9 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
     h(
       'div',
       {
-        className: 'bg-surface-card rounded-card border border-border-subtle shadow-modal w-full max-w-lg p-6 space-y-5 animate-in fade-in zoom-in-95',
+        className: 'bg-surface rounded-card border border-border-subtle shadow-modal w-full max-w-lg max-h-[90dvh] overflow-y-auto p-6 space-y-5 animate-in fade-in zoom-in-95',
       },
+      saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
       // Header
       h(
         'div',
@@ -251,7 +256,8 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
           ),
           h(
             Button,
-            { type: 'submit', variant: 'primary' },
+            { type: 'submit',
+            disabled: saving, variant: 'primary' },
             'Thêm khách mời'
           )
         )

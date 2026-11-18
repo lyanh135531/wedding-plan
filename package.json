@@ -15,7 +15,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:all": "vitest run && playwright test"
+    "test:all": "vitest run && playwright test",
+    "test:live": "tsx scripts/verify-g11.ts",
+    "test:restore": "tsx scripts/verify-g11.ts --dr-only"
   },
   "keywords": [],
   "author": "",

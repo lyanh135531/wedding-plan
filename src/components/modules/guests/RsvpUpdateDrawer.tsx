@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -11,10 +12,10 @@ const h = React.createElement;
 export interface MemberRsvpState {
   guestId: string;
   name: string;
-  rsvpStatus: 'accepted' | 'declined' | 'pending_reply';
+  rsvpStatus: 'accepted' | 'declined' | 'pending_reply' | 'tentative' | 'not_contacted';
   needsSeat: boolean;
   needsMeal: boolean;
-  mealTier: 'regular' | 'vegetarian' | 'child_portion';
+  mealTier: 'regular' | 'vegetarian' | 'child_portion' | 'special';
   assignedTable?: string | null;
 }
 
@@ -24,22 +25,25 @@ export interface RsvpUpdateDrawerProps {
   householdName?: string;
   initialEventTitle?: string;
   initialMembers?: MemberRsvpState[];
-  onSave?: (updatedMembers: MemberRsvpState[]) => void;
+  onSave?: (updatedMembers: MemberRsvpState[]) => void | Promise<void>;
 }
+
+const DEFAULT_MEMBERS: MemberRsvpState[] = [
+    { guestId: 'bac_thanh', name: 'Bác Thành', rsvpStatus: 'accepted', needsSeat: true, needsMeal: true, mealTier: 'regular', assignedTable: 'Bàn A1' },
+    { guestId: 'bac_gai', name: 'Bác Gái', rsvpStatus: 'accepted', needsSeat: true, needsMeal: true, mealTier: 'regular', assignedTable: 'Bàn A1' },
+    { guestId: 'anh_tuan', name: 'Anh Tuấn', rsvpStatus: 'pending_reply', needsSeat: true, needsMeal: true, mealTier: 'vegetarian', assignedTable: null },
+    { guestId: 'be_bi', name: 'Bé Bi', rsvpStatus: 'pending_reply', needsSeat: false, needsMeal: true, mealTier: 'child_portion', assignedTable: null },
+  ];
 
 export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
   isOpen,
   onClose,
   householdName = 'Gia đình Bác Thành',
   initialEventTitle = 'Lễ Vu Quy',
-  initialMembers = [
-    { guestId: 'bac_thanh', name: 'Bác Thành', rsvpStatus: 'accepted', needsSeat: true, needsMeal: true, mealTier: 'regular', assignedTable: 'Bàn A1' },
-    { guestId: 'bac_gai', name: 'Bác Gái', rsvpStatus: 'accepted', needsSeat: true, needsMeal: true, mealTier: 'regular', assignedTable: 'Bàn A1' },
-    { guestId: 'anh_tuan', name: 'Anh Tuấn', rsvpStatus: 'pending_reply', needsSeat: true, needsMeal: true, mealTier: 'vegetarian', assignedTable: null },
-    { guestId: 'be_bi', name: 'Bé Bi', rsvpStatus: 'pending_reply', needsSeat: false, needsMeal: true, mealTier: 'child_portion', assignedTable: null },
-  ],
+  initialMembers = DEFAULT_MEMBERS,
   onSave,
 }) => {
+  const { saving, saveError, runSave } = useSaveAction();
   const [members, setMembers] = React.useState<MemberRsvpState[]>(initialMembers);
   const [pendingUnseat, setPendingUnseat] = React.useState<{ guestId: string; tableName: string } | null>(null);
 
@@ -79,15 +83,14 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
     setPendingUnseat(null);
   };
 
-  const handleMealTierChange = (guestId: string, tier: 'regular' | 'vegetarian' | 'child_portion') => {
+  const handleMealTierChange = (guestId: string, tier: 'regular' | 'vegetarian' | 'child_portion' | 'special') => {
     setMembers((prev) =>
       prev.map((m) => (m.guestId === guestId ? { ...m, mealTier: tier } : m))
     );
   };
 
   const handleSave = () => {
-    onSave?.(members);
-    onClose();
+    void runSave(async () => { await onSave?.(members); onClose(); });
   };
 
   return h(
@@ -105,6 +108,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
         className:
           'w-full max-w-lg bg-surface h-full shadow-2xl flex flex-col justify-between overflow-y-auto p-6 border-l border-border-control',
       },
+      saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
       // Header
       h(
         'div',
@@ -234,7 +238,8 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
                     },
                     h('option', { value: 'regular' }, 'Khẩu phần chuẩn'),
                     h('option', { value: 'vegetarian' }, 'Ăn chay'),
-                    h('option', { value: 'child_portion' }, 'Khẩu phần trẻ em')
+                    h('option', { value: 'child_portion' }, 'Khẩu phần trẻ em'),
+                    h('option', { value: 'special' }, 'Khẩu phần đặc biệt')
                   )
                 )
             )
@@ -259,6 +264,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
           {
             variant: 'primary',
             onClick: handleSave,
+            disabled: saving,
           },
           'Lưu phản hồi tham dự'
         )

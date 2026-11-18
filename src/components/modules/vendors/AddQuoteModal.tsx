@@ -211,7 +211,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
           ),
           React.createElement('textarea', {
             value: includesText,
-            onChange: (e) => setIncludesText(e.target.value),
+            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setIncludesText(e.target.value),
             rows: 3,
             placeholder: 'Thực đơn 6 món\nNước ngọt suốt tiệc\nMàn hình LED...',
             className:
@@ -228,7 +228,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
           ),
           React.createElement('textarea', {
             value: excludesText,
-            onChange: (e) => setExcludesText(e.target.value),
+            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setExcludesText(e.target.value),
             rows: 3,
             placeholder: 'Phí rượu mang ngoài\nVũ đoàn khai mạc...',
             className:
@@ -251,7 +251,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
           ),
           React.createElement('textarea', {
             value: depositConditions,
-            onChange: (e) => setDepositConditions(e.target.value),
+            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDepositConditions(e.target.value),
             rows: 2,
             placeholder: 'Cọc đợt 1 30%, đợt 2 50%...',
             className:
@@ -268,7 +268,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
           ),
           React.createElement('textarea', {
             value: terms,
-            onChange: (e) => setTerms(e.target.value),
+            onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setTerms(e.target.value),
             rows: 2,
             placeholder: 'Thời hạn hủy không phạt cọc trước 30 ngày...',
             className:

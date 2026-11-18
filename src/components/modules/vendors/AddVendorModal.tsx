@@ -187,7 +187,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
             'select',
             {
               value: serviceType,
-              onChange: (e) => setServiceType(e.target.value as VendorServiceType),
+              onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setServiceType(e.target.value as VendorServiceType),
               className:
                 'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
               required: true,
@@ -218,7 +218,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
             'select',
             {
               value: status,
-              onChange: (e) => setStatus(e.target.value as VendorStatus),
+              onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value as VendorStatus),
               className:
                 'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
             },
@@ -364,7 +364,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
               ),
               React.createElement('textarea', {
                 value: rainPlan,
-                onChange: (e) => setRainPlan(e.target.value),
+                onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setRainPlan(e.target.value),
                 rows: 2,
                 placeholder: 'Có sảnh kín hoặc rạp bạt che sẵn...',
                 className:
@@ -381,7 +381,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
               ),
               React.createElement('textarea', {
                 value: decorAudioRules,
-                onChange: (e) => setDecorAudioRules(e.target.value),
+                onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDecorAudioRules(e.target.value),
                 rows: 2,
                 placeholder: 'Giới hạn âm lượng sau 21h, bãi xe ô tô...',
                 className:
@@ -402,7 +402,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
         ),
         React.createElement('textarea', {
           value: notes,
-          onChange: (e) => setNotes(e.target.value),
+          onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value),
           rows: 3,
           placeholder: 'Ghi chú về đàm phán giá, ưu đãi bí mật...',
           className:

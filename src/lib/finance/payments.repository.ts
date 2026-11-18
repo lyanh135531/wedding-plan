@@ -191,7 +191,7 @@ export async function createPayment(
       .select()
       .from(payments)
       .where(eq(payments.id, input.parent_payment_id))
-      .limit(1);
+      .limit(1).for('update');
 
     if (!parentPayment || parentPayment.costItemId !== input.cost_item_id) {
       throw new ParentPaymentNotFoundError('Không tìm thấy giao dịch chi gốc của khoản chi này');
@@ -418,7 +418,7 @@ export async function voidPayment(
     .select()
     .from(payments)
     .where(eq(payments.id, input.payment_id))
-    .limit(1);
+    .limit(1).for('update');
 
   if (!existing) {
     throw new PaymentNotFoundError();

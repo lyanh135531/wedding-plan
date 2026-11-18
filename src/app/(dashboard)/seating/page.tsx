@@ -2,13 +2,11 @@
 
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { SeatingManager } from '@/components/modules/seating/SeatingManager';
-import { usePrototype } from '@/components/testing/PrototypeToolbar';
+import { LiveSeatingWorkspace } from '@/components/modules/seating/LiveSeatingWorkspace';
 
 const h = React.createElement;
 
 export default function SeatingPage() {
-  const { state } = usePrototype();
 
   return h(
     PageShell,
@@ -21,8 +19,6 @@ export default function SeatingPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(SeatingManager, {
-      initialState: state,
-    })
+    h(LiveSeatingWorkspace)
   );
 }

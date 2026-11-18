@@ -50,7 +50,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
           throw new TableNotFoundError();
         }
 
-        const unseated = await unassignGuest(scopedDb, table.eventId, guestId, session!.user.id);
+        const unseated = await unassignGuest(scopedDb, table.eventId, guestId, session!.user.id, id);
         if (!unseated) {
           throw new SeatAssignmentNotFoundError('Khách mời chưa được xếp vào bàn này.');
         }

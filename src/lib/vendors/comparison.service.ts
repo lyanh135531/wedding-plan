@@ -162,8 +162,8 @@ export async function comparePackages(
       fees_inclusive: quote.fees_inclusive,
       includes: quote.includes,
       excludes: quote.excludes,
-      deposit_conditions: quote.deposit_conditions,
-      terms: quote.terms,
+      deposit_conditions: quote.deposit_conditions ?? null,
+      terms: quote.terms ?? null,
     };
   });
 

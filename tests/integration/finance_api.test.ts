@@ -1,3 +1,5 @@
+import * as costsRepository from '@/lib/finance/costs.repository';
+import * as paymentsRepository from '@/lib/finance/payments.repository';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import * as sessionModule from '@/lib/auth/session';
@@ -124,8 +126,8 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
   describe('3. Cost Items API (AT11, AT16, AT47, AT48)', () => {
     it('creates a cost item and returns 201 with serialized BigInt', async () => {
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(ownerSession as any);
-      vi.spyOn(dbClient, 'withTransactionScopedContext').mockImplementation(
-        async (_userId, _role, _callback) => {
+      vi.spyOn(costsRepository, 'createCostItem').mockImplementation(
+        async () => {
           return {
             id: 'c0000000-0000-4000-8000-000000000001',
             name: 'Thuê sảnh tiệc & Thực đơn',
@@ -139,6 +141,8 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
           };
         }
       );
+
+      vi.spyOn(dbClient, 'withTransactionScopedContext').mockImplementation(async (_userId, _role, callback) => callback({} as any, {} as any));
 
       const req = new NextRequest('http://localhost:3000/api/v1/finance/costs', {
         method: 'POST',
@@ -199,8 +203,8 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
   describe('4. Payments API (AT12, AT14, AT38, AT46)', () => {
     it('creates an outflow payment and validates allocation sum', async () => {
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(ownerSession as any);
-      vi.spyOn(dbClient, 'withTransactionScopedContext').mockImplementation(
-        async (_userId, _role, _callback) => {
+      vi.spyOn(paymentsRepository, 'createPayment').mockImplementation(
+        async () => {
           return {
             id: 'p0000000-0000-4000-8000-000000000001',
             costItemId: 'c0000000-0000-4000-8000-000000000001',
@@ -219,6 +223,8 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
           };
         }
       );
+
+      vi.spyOn(dbClient, 'withTransactionScopedContext').mockImplementation(async (_userId, _role, callback) => callback({} as any, {} as any));
 
       const req = new NextRequest('http://localhost:3000/api/v1/finance/payments', {
         method: 'POST',
@@ -245,8 +251,8 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
 
     it('AT38: creates direct third-party payment ("Người khác góp bằng cách trả hộ")', async () => {
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(ownerSession as any);
-      vi.spyOn(dbClient, 'withTransactionScopedContext').mockImplementation(
-        async (_userId, _role, _callback) => {
+      vi.spyOn(paymentsRepository, 'createDirectThirdPartyPayment').mockImplementation(
+        async () => {
           return {
             payment: {
               id: 'p-direct-1',
@@ -265,6 +271,8 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
           };
         }
       );
+
+      vi.spyOn(dbClient, 'withTransactionScopedContext').mockImplementation(async (_userId, _role, callback) => callback({} as any, {} as any));
 
       const req = new NextRequest('http://localhost:3000/api/v1/finance/payments', {
         method: 'POST',

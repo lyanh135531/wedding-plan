@@ -275,7 +275,6 @@ export function createMockG8TxDb(initialStore: MockG8Store = {}) {
 
       return deleteBuilder;
     }),
-    _store: store,
   };
 
   return txDb as TxDb & { _store: Required<MockG8Store> };

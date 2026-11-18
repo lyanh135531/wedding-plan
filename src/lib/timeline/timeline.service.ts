@@ -1,3 +1,4 @@
+import { nullableVietnamesePhoneSchema } from '@/schemas/common';
 import { TxDb } from './types';
 import {
   CreateTimelineItemInput,
@@ -89,9 +90,9 @@ export async function createTimelineItem(
     scheduledEndTime: end,
     locationName: input.locationName,
     personInCharge: input.personInCharge,
-    inChargePhone: input.inChargePhone,
+    inChargePhone: nullableVietnamesePhoneSchema.parse(input.inChargePhone),
     backupPerson: input.backupPerson,
-    backupPhone: input.backupPhone,
+    backupPhone: nullableVietnamesePhoneSchema.parse(input.backupPhone),
     supportAssignmentId: input.supportAssignmentId,
     assignedItemIds: input.assignedItemIds,
     assignedTaskIds: input.assignedTaskIds,
@@ -130,9 +131,9 @@ export async function updateTimelineItem(
       actualEndTime: input.actualEndTime !== undefined ? (input.actualEndTime ? new Date(input.actualEndTime) : null) : undefined,
       locationName: input.locationName,
       personInCharge: input.personInCharge,
-      inChargePhone: input.inChargePhone,
+      inChargePhone: nullableVietnamesePhoneSchema.parse(input.inChargePhone),
       backupPerson: input.backupPerson,
-      backupPhone: input.backupPhone,
+      backupPhone: nullableVietnamesePhoneSchema.parse(input.backupPhone),
       supportAssignmentId: input.supportAssignmentId,
       assignedItemIds: input.assignedItemIds,
       assignedTaskIds: input.assignedTaskIds,

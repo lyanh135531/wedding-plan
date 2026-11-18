@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState, ReactNode } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from 'next/link.js';
+import { usePathname } from 'next/navigation.js';
 import { X } from 'lucide-react';
 import { DesktopSidebar } from './DesktopSidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { Header } from './Header';
 import { DirtyFormGuardModal } from './DirtyFormGuardModal';
 import { PermissionDeniedView } from './PermissionDeniedView';
+import { OfflineBanner } from '@/components/common/OfflineBanner';
 import { useRole } from '@/context/RoleContext';
 import { useEventScope } from '@/context/EventScopeContext';
 
@@ -153,6 +154,9 @@ export const PageShell: React.FC<PageShellProps> = ({
         className:
           'pt-16 pb-20 lg:pb-8 lg:pl-[240px] min-h-screen flex flex-col',
       },
+      // Banner cảnh báo mất kết nối mạng (PLAN §22.2, UI/UX §2.3)
+      h(OfflineBanner, null),
+
       h(
         'div',
         {

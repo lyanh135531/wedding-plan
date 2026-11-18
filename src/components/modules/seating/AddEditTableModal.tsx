@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useSaveAction } from '@/components/common/useSaveAction';
 import { TableItem, TableShape } from './types';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ const h = React.createElement;
 
 export interface AddEditTableModalProps {
   isOpen: boolean;
+  occupiedSeatCount?: number;
   onClose: () => void;
   onSave: (tableData: {
     id?: string;
@@ -18,7 +20,7 @@ export interface AddEditTableModalProps {
     shape: TableShape;
     capacity: number;
     notes?: string;
-  }) => void;
+  }) => void | Promise<void>;
   editingTable?: TableItem | null;
 }
 
@@ -27,7 +29,10 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
   onClose,
   onSave,
   editingTable,
+  occupiedSeatCount,
 }) => {
+  const formId = React.useId();
+  const { saving, saveError, runSave } = useSaveAction();
   const [name, setName] = React.useState('');
   const [tableNumber, setTableNumber] = React.useState('');
   const [shape, setShape] = React.useState<TableShape>('round');
@@ -58,20 +63,21 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
       setError('Tên bàn không được để trống');
       return;
     }
-    if (capacity <= 0) {
+    if (!Number.isInteger(capacity) || capacity <= 0) {
       setError('Sức chứa bàn phải là số nguyên dương lớn hơn 0');
       return;
     }
 
     // AT22 Guard: Cannot reduce capacity below currently seated count
-    if (editingTable && capacity < editingTable.seatedGuestIds.length) {
+    if (editingTable && capacity < (occupiedSeatCount ?? editingTable.seatedGuestIds.length)) {
       setError(
-        `Không thể giảm sức chứa xuống dưới ${editingTable.seatedGuestIds.length} ghế (hiện có ${editingTable.seatedGuestIds.length} khách đã xếp vào bàn này per AT22). Vui lòng điều chuyển khách trước.`
+        `Không thể giảm sức chứa xuống dưới ${occupiedSeatCount ?? editingTable.seatedGuestIds.length} ghế (hiện có ${editingTable.seatedGuestIds.length} khách đã xếp vào bàn này per AT22). Vui lòng điều chuyển khách trước.`
       );
       return;
     }
 
-    onSave({
+    void runSave(async () => {
+    await onSave({
       id: editingTable?.id,
       name: name.trim(),
       tableNumber: tableNumber.trim() || undefined,
@@ -80,6 +86,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
       notes: notes.trim() || undefined,
     });
     onClose();
+    });
   };
 
   if (!isOpen) return null;
@@ -94,6 +101,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
     h(
       'form',
       { onSubmit: handleSubmit, className: 'space-y-4' },
+      saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
       error &&
         h(
           'div',
@@ -110,8 +118,9 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
       h(
         'div',
         { className: 'space-y-1' },
-        h('label', { className: 'block text-xs font-semibold text-text-main' }, 'Tên bàn tiệc *'),
+        h('label', { htmlFor: `${formId}-name`, className: 'block text-xs font-semibold text-text-main' }, 'Tên bàn tiệc *'),
         h('input', {
+          id: `${formId}-name`,
           className:
             'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
           value: name,
@@ -218,6 +227,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
           Button,
           {
             type: 'submit',
+            disabled: saving,
             variant: 'primary',
             className: 'text-xs',
           },

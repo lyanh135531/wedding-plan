@@ -128,10 +128,11 @@ describe('Gate G10: Attendance Check-in Service & Operations (PLAN §14.3)', () 
     const walkIn1 = await createWalkInGuest(db, {
       eventId,
       fullName: 'Phạm Minh Cường',
-      phone: '0988888888',
+      phone: '0988 888 888',
       tableId: table1Id,
     });
 
+    expect(walkIn1.phone).toBe('0988888888');
     expect(walkIn1.isOriginOnsite).toBe(true);
     expect(walkIn1.isCheckedIn).toBe(true);
     expect(walkIn1.tableName).toBe('Bàn VIP 1');

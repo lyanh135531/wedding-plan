@@ -403,6 +403,7 @@ describe('EMPIRICAL ADVERSARIAL CHALLENGER 2: Headcount Math, Baby Policy & Safe
 
       // Mock TxDb
       const mockTxDb: any = {
+        delete: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockResolvedValue([existingAttendance]),
@@ -492,6 +493,7 @@ describe('EMPIRICAL ADVERSARIAL CHALLENGER 2: Headcount Math, Baby Policy & Safe
 
       const insertedAuditLogs: any[] = [];
       const mockTxDb: any = {
+        delete: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockResolvedValue([existingAttendance]),
@@ -551,6 +553,7 @@ describe('EMPIRICAL ADVERSARIAL CHALLENGER 2: Headcount Math, Baby Policy & Safe
       };
 
       const mockTxDb: any = {
+        delete: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockResolvedValue([existingAttendance]),
