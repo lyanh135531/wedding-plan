@@ -1,29 +1,4 @@
 'use client';
-
-import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { DataImportWizard } from '@/components/modules/data-import/DataImportWizard';
-import { FeaturePreview } from '@/components/common/FeaturePreview';
-import { usePrototype } from '@/components/testing/PrototypeToolbar';
-
-const h = React.createElement;
-
-export default function DataImportPage() {
-  const { state } = usePrototype();
-
-  return h(
-    PageShell,
-    {
-      title: 'Nhập Dữ Liệu Khách Mời',
-      breadcrumbs: [
-        { label: 'Trang chủ', href: '/overview' },
-        { label: 'Nhập dữ liệu', href: '/data/import' },
-      ],
-      showScopeSelector: false,
-      maxWidth: 'standard',
-    },
-    h(FeaturePreview, null, h(DataImportWizard, {
-      initialState: state,
-    }))
-  );
-}
+import { LiveDataImport } from '@/components/modules/data-import/LiveDataImport';
+export default function Page(){return <PageShell title="Nhập dữ liệu" showScopeSelector={false}><LiveDataImport/></PageShell>;}

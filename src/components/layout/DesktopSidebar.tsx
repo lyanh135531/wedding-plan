@@ -5,6 +5,7 @@ import Link from 'next/link.js';
 import { usePathname } from 'next/navigation.js';
 import { useRole } from '@/context/RoleContext';
 import { BrandMark } from '@/components/common/BrandMark';
+import { LogoutButton } from '@/components/common/LogoutButton';
 import { Home, CheckSquare, Calendar, Briefcase, FileText, Lightbulb, Users, Mail, LayoutGrid, Utensils, Truck, Wallet, Receipt, Landmark, Gift, Clock, ClipboardList, HeartHandshake, Package, Settings, Upload, Download, History, Lock, type LucideIcon } from 'lucide-react';
 
 const NAV_ICONS: Record<string, LucideIcon> = {
@@ -72,9 +73,11 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroupConfig[] = [
     groupTitle: 'Ngày cưới & cài đặt',
     items: [
       { name: 'Lịch trình ngày cưới', href: '/timeline' },
+      { name: 'Điểm danh khách', href: '/attendance' },
       { name: 'Bộ bàn giao ngày cưới', href: '/handovers' },
       { name: 'Đội hỗ trợ', href: '/support' },
       { name: 'Đồ dùng cần chuẩn bị', href: '/preparation' },
+      { name: 'Hậu cưới & Lưu trữ', href: '/after-wedding' },
       { name: 'Cài đặt chung', href: '/settings' },
       { name: 'Nhập dữ liệu', href: '/data/import' },
       { name: 'Xuất dữ liệu & Bản in', href: '/data/export' },
@@ -201,7 +204,8 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
       'div',
       { className: 'p-5 border-t border-white/10 text-[10px] text-[#B8C4B8] shrink-0 space-y-2' },
       h('div', { className: 'flex items-center gap-2' }, h(Lock, { className: 'w-3 h-3', 'aria-hidden': true }), 'Không gian riêng của gia đình'),
-      h('div', { className: 'text-[#8DA397] tracking-wide' }, 'Giờ Việt Nam · VND')
+      h('div', { className: 'text-[#8DA397] tracking-wide' }, 'Giờ Việt Nam · VND'),
+      h(LogoutButton)
     )
   );
 };

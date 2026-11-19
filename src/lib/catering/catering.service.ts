@@ -1,4 +1,5 @@
 import { eq, and, inArray, sql } from 'drizzle-orm';
+import { events } from '@/db/schema/events';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '@/db/schema';
 import {
@@ -247,6 +248,8 @@ export async function createAndLockCateringSnapshot(
   bufferPercentage = 0,
   notes?: string
 ): Promise<CateringSnapshotDto> {
+  await txDb.select({ id: events.id }).from(events).where(eq(events.id, eventId)).for('update');
+  let menuSnapshot: Record<string, unknown> | null = null;
   if (menuId) {
     const [menu] = await txDb
       .select()
@@ -255,6 +258,9 @@ export async function createAndLockCateringSnapshot(
     if (!menu) {
       throw new MenuNotFoundError();
     }
+    if (menu.eventId !== eventId) throw new MenuNotFoundError();
+    const courses = await txDb.select().from(menuItems).where(eq(menuItems.menuId, menuId));
+    menuSnapshot = { name: menu.name, mealType: menu.mealType, description: menu.description, courses };
   }
 
   // Get next snapshot version
@@ -275,6 +281,7 @@ export async function createAndLockCateringSnapshot(
     .values({
       eventId,
       menuId: menuId ?? null,
+      menuSnapshot,
       snapshotVersion: nextVersion,
       adultMeals: summary.adultMeals,
       childMeals: summary.childMeals,

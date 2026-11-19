@@ -115,7 +115,7 @@ export async function updatePreparationItem(
     {
       title: input.title,
       category: input.category,
-      status: input.status || 'not_prepared',
+      status: input.status ?? existing.status,
       priority: input.priority,
       metadata: updatedMetadata as Record<string, unknown>,
       isRental: input.isRental,

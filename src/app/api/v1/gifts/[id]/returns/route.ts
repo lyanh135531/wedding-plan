@@ -1,3 +1,4 @@
+import { withIdempotency } from '@/lib/finance/idempotency.service';
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
@@ -50,7 +51,7 @@ export async function POST(
       session!.role,
       async (_client, scopedDb) => {
         await checkArchivalFreezeGuard(scopedDb);
-        return recordGiftReturn(scopedDb, id, parseResult.data, session!.user.id);
+        return (await withIdempotency({ transactionDb: scopedDb, userId: session!.user.id, key: req.headers.get('idempotency-key'), operationType: 'RETURN_GIFT', payload: { id, ...parseResult.data }, execute: async () => ({ status: 200, body: { data: await recordGiftReturn(scopedDb, id, parseResult.data, session!.user.id) } }) })).body.data;
       }
     );
 

@@ -25,8 +25,8 @@ describe('Gate G10: Attendance Check-in Service & Operations (PLAN §14.3)', () 
     return createMockG10TxDb({
       events: [{ id: eventId, isCheckInEnabled: true }],
       guests: [
-        { id: guest1Id, fullName: 'Nguyễn Văn An', phone: '0901234567', isOriginOnsite: false },
-        { id: guestDeclinedId, fullName: 'Trần Thị Bình', phone: '0912345678', isOriginOnsite: false },
+        { id: guest1Id, displayName: 'Nguyễn Văn An', phone: '0901234567', isOriginOnsite: false },
+        { id: guestDeclinedId, displayName: 'Trần Thị Bình', phone: '0912345678', isOriginOnsite: false },
       ],
       attendance: [
         {

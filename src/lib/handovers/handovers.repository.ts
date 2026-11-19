@@ -33,6 +33,7 @@ export function mapToHandoverPacketFamilyDto(raw: any): HandoverPacketFamilyDto 
   delete sanitizedSnapshot.budgets;
   delete sanitizedSnapshot.costs;
   delete sanitizedSnapshot.gifts;
+  delete sanitizedSnapshot.readiness;
   for (const section of ['timeline', 'support', 'checklist']) {
     if (Array.isArray(sanitizedSnapshot[section])) {
       // Legacy snapshots without sharing metadata are deliberately not exposed.

@@ -17,6 +17,8 @@ export interface MockG9Store {
   vendorQuotes?: Array<any>;
   costItems?: Array<any>;
   events?: Array<any>;
+  handoverPackets?: Array<any>;
+  attendance?: Array<any>;
 }
 
 function extractFilters(sqlObj: any, target: Record<string, any> = {}): Record<string, any> {
@@ -62,6 +64,8 @@ export function createMockG9TxDb(initialStore: MockG9Store = {}) {
     vendorQuotes: [...(initialStore.vendorQuotes || [])],
     costItems: [...(initialStore.costItems || [])],
     events: [...(initialStore.events || [])],
+    handoverPackets: [...(initialStore.handoverPackets || [])],
+    attendance: [...(initialStore.attendance || [])],
   };
 
   function getTableName(table: any): string {
@@ -74,6 +78,8 @@ export function createMockG9TxDb(initialStore: MockG9Store = {}) {
 
   function getStoreArray(tableName: string): any[] {
     switch (tableName) {
+      case 'attendance':
+        return store.attendance;
       case 'preparation_items':
         return store.preparationItems;
       case 'support_assignments':
@@ -98,6 +104,7 @@ export function createMockG9TxDb(initialStore: MockG9Store = {}) {
         return store.vendorQuotes;
       case 'cost_items':
         return store.costItems;
+      case 'handover_packets': return store.handoverPackets;
       case 'events':
         return store.events;
       default:
@@ -153,6 +160,8 @@ export function createMockG9TxDb(initialStore: MockG9Store = {}) {
         },
       };
 
+      queryBuilder.for = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.limit = vi.fn().mockReturnValue(queryBuilder);
       return queryBuilder;
     }),
 

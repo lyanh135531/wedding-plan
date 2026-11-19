@@ -47,10 +47,25 @@ try {
   await client.end();
   client = new Client({ connectionString: sourceUrl.toString() });
   await client.connect();
-  for (const file of fs.readdirSync('src/db/migrations').filter((name) => name.endsWith('.sql')).sort()) {
-    console.log(`[G11] Applying ${file}`);
-    await client.query(fs.readFileSync(path.join('src/db/migrations', file), 'utf8'));
+  const require = createRequire(import.meta.url);
+  const migrationEnv = { ...process.env, MIGRATION_DATABASE_URL: sourceUrl.toString(), APP_DB_USER: 'g11_app', APP_DB_PASSWORD: crypto.randomBytes(32).toString('hex') };
+  for (let attempt = 0; attempt < 2; attempt++) {
+    execFileSync(process.execPath, [require.resolve('tsx/cli'), 'scripts/migrate.ts'], { env: migrationEnv, stdio: 'inherit', windowsHide: true, timeout: 120_000 });
   }
+  assert.equal((await client.query('SELECT count(*)::int n FROM app_schema_migrations')).rows[0].n, fs.readdirSync('src/db/migrations').filter(name => name.endsWith('.sql')).length);
+  console.log('[G11] Production migration runner and repeat migration PASS');
+  await client.query('CREATE DATABASE wedding_g11_upgrade');
+  const upgradeUrl = new URL(sourceUrl); upgradeUrl.pathname = '/wedding_g11_upgrade';
+  const upgrade = new Client({ connectionString: upgradeUrl.toString() }); await upgrade.connect();
+  try {
+    for (const file of fs.readdirSync('src/db/migrations').filter(name => name.endsWith('.sql') && name < '0006').sort()) await upgrade.query(fs.readFileSync(path.join('src/db/migrations', file), 'utf8'));
+    const upgradeEnv = { ...migrationEnv, MIGRATION_DATABASE_URL: upgradeUrl.toString() };
+    assert.throws(() => execFileSync(process.execPath, [require.resolve('tsx/cli'), 'scripts/migrate.ts'], { env: upgradeEnv, stdio: 'ignore', windowsHide: true, timeout: 120_000 }));
+    execFileSync(process.execPath, [require.resolve('tsx/cli'), 'scripts/migrate.ts', '--baseline'], { env: upgradeEnv, stdio: 'inherit', windowsHide: true, timeout: 120_000 });
+    assert.equal((await upgrade.query("SELECT data_type FROM information_schema.columns WHERE table_name='catering_snapshots' AND column_name='locked_by'")).rows[0].data_type, 'text');
+    assert.equal((await upgrade.query('SELECT count(*)::int n FROM app_schema_migrations')).rows[0].n, 7);
+    console.log('[G11] Existing-schema refusal and explicit verified-baseline upgrade PASS');
+  } finally { await upgrade.end(); }
   await client.query(`INSERT INTO users(id,name,email,role) VALUES
     ('g11-owner-1','Groom',$1,'owner'), ('g11-owner-2','Bride',$2,'owner'),
     ('g11-family','Family','family@g11.invalid','family_view')`, ownerEmails);
@@ -96,10 +111,6 @@ try {
   console.log('[G11] Real restore, reconciliation, credential sanitization and tamper rejection PASS');
 
   if (!process.argv.includes('--dr-only')) {
-    await client.query('CREATE ROLE g11_app LOGIN NOSUPERUSER NOBYPASSRLS');
-    await client.query('GRANT USAGE ON SCHEMA public TO g11_app');
-    await client.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO g11_app');
-    await client.query('GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO g11_app');
     const appUrl = new URL(sourceUrl);
     appUrl.username = 'g11_app';
     const restricted = new Client({ connectionString: appUrl.toString() });
@@ -108,6 +119,7 @@ try {
       const privileges = await restricted.query('SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user');
       assert.equal(privileges.rows[0].rolsuper, false);
       assert.equal(privileges.rows[0].rolbypassrls, false);
+      await assert.rejects(restricted.query('SELECT * FROM app_schema_migrations'), { code: '42501' });
       await restricted.query('BEGIN');
       await restricted.query("SELECT set_config('app.current_role','family_view',true),set_config('app.current_user_id','g11-family',true)");
       assert.equal((await restricted.query('SELECT count(*)::int AS count FROM gifts')).rows[0].count, 0);
@@ -119,11 +131,11 @@ try {
       await restricted.query('COMMIT');
       console.log('[G11] PostgreSQL RLS with NOSUPERUSER/NOBYPASSRLS account PASS');
     } finally { await restricted.end(); }
+    execFileSync(process.execPath, [require.resolve('tsx/cli'), 'scripts/verify-auth-adapter.ts'], { env: { ...process.env, DATABASE_URL: appUrl.toString(), G11_DB_URL: sourceUrl.toString(), BETTER_AUTH_SECRET: crypto.randomBytes(32).toString('hex'), GOOGLE_CLIENT_ID: 'isolated-g11', GOOGLE_CLIENT_SECRET: 'isolated-g11' }, stdio: 'inherit', windowsHide: true, timeout: 120000 });
     const appPort = await freePort();
     const baseURL = `http://127.0.0.1:${appPort}`;
-    const require = createRequire(import.meta.url);
     const nextCli = require.resolve('next/dist/bin/next');
-    const env: NodeJS.ProcessEnv = { ...process.env, DATABASE_URL: appUrl.toString(), BETTER_AUTH_SECRET: crypto.randomBytes(32).toString('hex'), BETTER_AUTH_URL: baseURL, APP_URL: baseURL, UPLOAD_DIR: uploads, NODE_ENV: 'production' };
+    const env: NodeJS.ProcessEnv = { ...process.env, DATABASE_URL: appUrl.toString(), BETTER_AUTH_SECRET: crypto.randomBytes(32).toString('hex'), BETTER_AUTH_URL: baseURL, APP_URL: baseURL, GOOGLE_CLIENT_ID: 'isolated-g11', GOOGLE_CLIENT_SECRET: 'isolated-g11', UPLOAD_DIR: uploads, NODE_ENV: 'production' };
     const serverLog = fs.openSync(path.join(sandbox, 'next.log'), 'a');
     server = spawn(process.execPath, [nextCli, 'start', '-H', '127.0.0.1', '-p', String(appPort)], { env, stdio: ['ignore', serverLog, serverLog], windowsHide: true });
     fs.closeSync(serverLog);

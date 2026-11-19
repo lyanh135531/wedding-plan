@@ -26,6 +26,7 @@ export const gifts = pgTable(
       .references(() => events.id, { onDelete: "cascade" }),
     giftType: giftTypeEnum("gift_type").notNull().default("cash"),
     amount: bigint("amount", { mode: "bigint" }),
+    receivedAt: timestamp("received_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(),
     description: text("description"),
     receivedByUserId: text("received_by_user_id"),
     receivedByProxy: text("received_by_proxy"),

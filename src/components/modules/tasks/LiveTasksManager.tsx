@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
+import { TaskActions } from './TaskActions';
 import { CheckSquare } from 'lucide-react';
 
 const h = React.createElement;
@@ -82,6 +83,7 @@ export function LiveTasksManager() {
     ),
     loading ? h('p', { role: 'status' }, 'Đang tải công việc...') : visible.length ? h('ul', { className: 'space-y-3' }, visible.map((task) => h('li', { key: task.id, 'data-testid': `task-${task.id}`, className: 'bg-surface border rounded-card p-4 space-y-2' },
       h('h3', { className: 'font-semibold break-words' }, task.title),
+      isOwner && h(TaskActions, { id: task.id, choices: tasks, reload: () => setRevision(v=>v+1) }),
       h('p', { className: 'text-sm text-text-muted' }, task.is_waiting_official_date ? 'Hạn sẽ được tính khi chốt ngày buổi lễ' : task.computed_due_date ? `Hạn: ${new Date(task.computed_due_date).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}` : 'Chưa có hạn'),
       isOwner ? h('select', { className: selectClass, 'aria-label': `Trạng thái ${task.title}`, value: task.status, disabled: saving, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => {
         void mutate(() => api(`/api/v1/tasks/${task.id}/status`, { method: 'PATCH', body: jsonBody({ status: event.target.value, version: task.version }) }));

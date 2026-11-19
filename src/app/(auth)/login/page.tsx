@@ -6,9 +6,10 @@ import { BrandMark } from '@/components/common/BrandMark';
 
 const h = React.createElement;
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; returnTo?: string }> }) {
   const params = await searchParams;
-  if (!params.error && await getCurrentSession()) redirect('/setup');
+  const returnTo = params.returnTo && /^\/[a-z]/.test(params.returnTo) && !/[\\\r\n]/.test(params.returnTo) && !params.returnTo.startsWith('/login') ? params.returnTo : '/setup';
+  if (!params.error && await getCurrentSession()) redirect(returnTo);
   const initialError = params.error
     ? params.error === 'access_denied'
       ? 'Quyền đăng nhập Google chưa được chấp nhận. Vui lòng thử lại.'
@@ -37,6 +38,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       ),
       h('div', { className: 'auth-content' }, h(GoogleLoginCard, {
       initialError,
+      callbackURL: returnTo,
       }))
     )
   );

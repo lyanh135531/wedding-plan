@@ -89,7 +89,7 @@ describe('Gate G10 API Integration Routes Suite', () => {
         },
       ],
       guests: [
-        { id: guest1Id, fullName: 'Đặng Tuấn Anh', phone: '0909090909' },
+        { id: guest1Id, displayName: 'Đặng Tuấn Anh', phone: '0909090909' },
       ],
       attendance: [
         {

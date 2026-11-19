@@ -1,3 +1,4 @@
+export * from './media';
 import { relations } from "drizzle-orm";
 
 // Export all tables and enums from modular schemas

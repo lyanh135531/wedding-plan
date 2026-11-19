@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 const updateStatusBodySchema = z.object({
   status: taskStatusEnum,
   version: versionSchema,
+  override_reason: z.string().trim().min(1).max(1000).optional(),
 });
 
 export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -47,6 +48,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
           parsed.data.status,
           parsed.data.version,
           session.user.id
+          , parsed.data.override_reason
         );
       }
     );

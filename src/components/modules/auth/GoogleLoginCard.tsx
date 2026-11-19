@@ -15,6 +15,7 @@ export interface GoogleLoginCardProps {
   onLogin?: () => void;
   isLoading?: boolean;
   initialError?: string | null;
+  callbackURL?: string;
 }
 
 export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
@@ -23,6 +24,7 @@ export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
   onLogin,
   isLoading = false,
   initialError = null,
+  callbackURL = '/setup',
 }) => {
   const [showUninvited, setShowUninvited] = React.useState(isUninvited);
   const [signingIn, setSigningIn] = React.useState(false);
@@ -41,7 +43,7 @@ export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
       if (onLogin) { await onLogin(); }
       else {
         const result = await authClient.signIn.social({
-          provider: 'google', callbackURL: '/setup', errorCallbackURL: '/login',
+          provider: 'google', callbackURL, errorCallbackURL: `/login?returnTo=${encodeURIComponent(callbackURL)}`,
         });
         if (result.error) throw new Error(result.error.message || 'Không thể đăng nhập bằng Google.');
       }

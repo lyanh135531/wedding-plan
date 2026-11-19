@@ -44,6 +44,7 @@ export async function createGift(
       eventId: input.eventId,
       giftType: input.giftType ?? 'cash',
       amount: amountBigInt,
+      receivedAt: input.receivedAt ? new Date(input.receivedAt) : undefined,
       description: input.description ?? null,
       receivedByUserId: userId ?? input.receivedByUserId ?? null,
       receivedByProxy: input.receivedByProxy ?? null,

@@ -4,12 +4,23 @@ import { withTransactionScopedContext } from '@/db/client';
 import {
   createPaymentSchedule,
   updatePaymentSchedule,
+  listSchedulesByCostItem,
 } from '@/lib/finance/schedules.repository';
 import { createPaymentScheduleSchema } from '@/schemas/finance';
 import { z } from 'zod';
 import { versionSchema } from '@/schemas/common';
 
 export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
+  const { authenticatedRoute } = await import('@/lib/api/route');
+  const { uuidSchema } = await import('@/schemas/common');
+  return authenticatedRoute(req, async db => {
+    const id = uuidSchema.parse(req.nextUrl.searchParams.get('costItemId'));
+    const data = await listSchedulesByCostItem(db, id);
+    return JSON.parse(JSON.stringify(data, (_,v) => typeof v === 'bigint' ? v.toString() : v));
+  }, { owner: true });
+}
 
 export async function POST(req: NextRequest) {
   const session = await getCurrentSession(req);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { runIdempotentCreate } from '@/lib/api/mutation';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
 import { previewDelayShift, applyDelayShift } from '@/lib/timeline';
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
         session!.role,
         async (_client, scopedDb) => {
           await checkArchivalFreezeGuard(scopedDb);
-          await applyDelayShift(scopedDb, parseResult.data);
+          await runIdempotentCreate(req, scopedDb, session!.user.id, bodyJson, async () => { await applyDelayShift(scopedDb, parseResult.data); return { applied: true }; });
         }
       );
 

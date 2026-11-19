@@ -1,8 +1,10 @@
 # Wedding Management Platform
 
+Kế hoạch hoàn thiện toàn bộ menu và điều kiện phát hành: [Production completion plan](docs/PRODUCTION_COMPLETION_PLAN.md). Các menu đã được chuyển sang dữ liệu thật và bổ sung thao tác nghiệp vụ. Xem [biên bản hoàn thiện](docs/COMPLETION_REPORT_2026-11-19.md) để phân biệt phạm vi đã kiểm chứng và các cổng triển khai còn lại.
+
 Ứng dụng quản lý đám cưới tự host, dùng Next.js 15.5.29, React 18, TypeScript, Drizzle và PostgreSQL. Phạm vi gồm khách mời, thiệp/RSVP, ngân sách, nhà cung cấp, công việc, xếp bàn, chuẩn bị và vận hành ngày cưới.
 
-**Trạng thái: các luồng chính đã được kiểm thử; chưa nghiệm thu toàn bộ tính năng production.** Xem [rà soát độ ổn định ngày 19/11/2026](docs/STABILITY_AUDIT_2026-11-19.md) để biết các lỗi đã sửa và những màn hình còn là bản xem trước. Các tuyên bố nghiệm thu trong tài liệu cũ không thay thế bằng chứng của đợt rà soát này.
+**Trạng thái: bản ứng viên phát hành đã nối các menu với PostgreSQL; chưa triển khai và nghiệm thu trên domain production.** Không còn `FeaturePreview` hoặc fixture fallback trong các luồng dashboard. Các biên bản G11/R3 và rà soát ban đầu là bằng chứng lịch sử; trạng thái hiện tại nằm trong biên bản hoàn thiện.
 
 ## Chạy cục bộ
 
@@ -10,7 +12,7 @@
 2. Chạy `pnpm install --frozen-lockfile`.
 3. Sao chép `.env.example` thành `.env.local`, điền cấu hình thật và dùng `NODE_ENV=development`. URL PostgreSQL trong mẫu dùng hostname Docker `db`; khi chạy ứng dụng trên host phải đổi sang địa chỉ database truy cập được từ host.
 4. Cấu hình URL ứng dụng/Better Auth, Google OAuth, hai email chủ sở hữu và thư mục uploads. Không commit tệp chứa secrets.
-5. Chuẩn bị PostgreSQL và áp dụng schema/migrations theo [hướng dẫn vận hành](docs/OPERATIONS.md). Cấu hình schema bằng Drizzle không thay thế việc áp dụng SQL RLS.
+5. Chuẩn bị PostgreSQL và áp dụng schema/migrations theo [hướng dẫn vận hành](docs/OPERATIONS.md). Dùng `pnpm db:migrate` với `MIGRATION_DATABASE_URL` và tài khoản bootstrap riêng; lệnh này áp dụng cả RLS, kiểm checksum và tạo quyền app. Không dùng `drizzle-kit push` thay cho quy trình này.
 6. Chạy `pnpm dev` và mở `http://localhost:3000`.
 
 Next.js đọc `.env.local`; các script `tsx` riêng cần biến môi trường được nạp vào process trước khi chạy. Owner seeding nhận email qua đối số hoặc `SEED_OWNER_EMAIL_1` / `SEED_OWNER_EMAIL_2`:
@@ -45,12 +47,13 @@ Quy tắc chọn file để commit, các file sinh tự động và checklist tr
 
 Dashboard yêu cầu session phía server và lấy role/phạm vi sự kiện từ database. Layout ứng dụng không gắn thanh prototype; nút đổi role thử nghiệm không được xuất trong production. Danh sách/hồ sơ nhà cung cấp không tự thay dữ liệu API lỗi bằng fixtures.
 
-Các trang khách mời/RSVP, ngân sách, thanh toán và xếp bàn đã nối API thật. Bàn giao hiển thị đúng nội dung bản chốt được chọn, kiểm tra thay đổi nội dung và từ chối ghi nhận bàn giao bản đã lỗi thời. Luồng tài chính giữ số tiền nguyên chính xác, dùng cùng transaction cho idempotency và khoản ghi; các yêu cầu hoàn tiền đồng thời khóa khoản gốc. Phạm vi này chưa bao gồm mọi tính năng của các màn hình prototype cũ.
+Các trang khách mời/RSVP, ngân sách, thanh toán và xếp bàn đã nối API thật. Bàn giao hiển thị đúng nội dung bản chốt được chọn, kiểm tra thay đổi nội dung và từ chối ghi nhận bàn giao bản đã lỗi thời. Luồng tài chính giữ số tiền nguyên chính xác, dùng cùng transaction cho idempotency và khoản ghi; các yêu cầu hoàn tiền đồng thời khóa khoản gốc. Các trang chuẩn bị/ý tưởng/thực đơn/xe/phòng/lịch trình/hậu cưới/nhập dữ liệu đã thay màn hình prototype bằng workspace sử dụng API thật.
 
 `NetworkWriteGuard` chặn các API fetch ghi cùng origin và submit form khi `navigator.onLine=false`; không tạo hàng đợi ghi offline. Drill live đã kiểm tra một form nhà cung cấp qua mất/kết nối lại trên bốn viewport. Đây chưa phải kiểm định tương tác cho tất cả form nghiệp vụ.
 
 ## Vận hành và khôi phục
 
+- [Chạy trên máy này tại localhost:3000](docs/LOCAL_USAGE.md): `pnpm local:start`, `pnpm local:status`, `pnpm local:backup`, `pnpm local:stop`.
 - [Vận hành](docs/OPERATIONS.md)
 - [Backup và khôi phục](docs/DISASTER_RECOVERY.md)
 
@@ -65,6 +68,6 @@ pnpm test:live
 pnpm test:restore
 ```
 
-Harness tự tạo cluster tạm trên cổng loopback riêng, áp dụng sáu migrations và dùng tài khoản app `NOSUPERUSER NOBYPASSRLS`. Nó không dùng `DATABASE_URL` hiện có của máy. Kết thúc sẽ dừng cluster và app, giữ artifacts tạm để điều tra. Browser dùng session được seed vào database sandbox, không thay thế kiểm thử Google OAuth thật.
+Harness tự tạo cluster tạm trên cổng loopback riêng, áp dụng bảy migrations bằng lệnh migration production, kiểm chạy lại và nâng cấp schema cũ và dùng tài khoản app `NOSUPERUSER NOBYPASSRLS`. Nó không dùng `DATABASE_URL` hiện có của máy. Kết thúc sẽ dừng cluster và app, giữ artifacts tạm để điều tra. Browser dùng session được seed vào database sandbox, không thay thế kiểm thử Google OAuth thật.
 
 Bằng chứng: `test-results/g11/verification.json`, báo cáo `playwright-report/live/index.html` và `playwright-report/components/index.html`. Bản tóm tắt đã loại đường dẫn máy cá nhân: [G11 verification](docs/G11_VERIFICATION_2026-11-18.json).

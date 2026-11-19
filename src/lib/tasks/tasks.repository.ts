@@ -34,6 +34,15 @@ export class TaskVersionConflictError extends Error {
   }
 }
 
+export class TaskPrerequisiteError extends Error {
+  readonly statusCode = 409;
+  constructor() { super('Còn công việc tiên quyết chưa hoàn thành. Hoàn thành chúng trước hoặc nhập lý do hoàn thành vượt phụ thuộc.'); }
+}
+async function assertPrerequisites(db: TxOrDb, id: string, reason?: string) {
+  const prerequisites = await db.select({ status: tasks.status }).from(taskDependencies).innerJoin(tasks, eq(taskDependencies.prerequisiteTaskId, tasks.id)).where(eq(taskDependencies.dependentTaskId,id));
+  if (prerequisites.some((t: {status: string}) => t.status !== 'completed') && !reason?.trim()) throw new TaskPrerequisiteError();
+}
+
 export interface ListTasksParams {
   status?: TaskStatus;
   priority?: TaskPriority;
@@ -272,6 +281,7 @@ export async function updateTask(
   if (existing.version !== input.version) {
     throw new TaskVersionConflictError();
   }
+  if (input.status === 'completed' && existing.status !== 'completed') await assertPrerequisites(txDb, id);
 
   // Reopening check
   let reopenedAt = existing.reopenedAt;
@@ -324,7 +334,8 @@ export async function updateTaskStatus(
   id: string,
   status: TaskStatus,
   version: number,
-  userId: string
+  userId: string,
+  overrideReason?: string
 ) {
   const [existing] = await txDb
     .select()
@@ -339,6 +350,7 @@ export async function updateTaskStatus(
   if (existing.version !== version) {
     throw new TaskVersionConflictError();
   }
+  if (status === 'completed' && existing.status !== 'completed') await assertPrerequisites(txDb, id, overrideReason);
 
   let reopenedAt = existing.reopenedAt;
   if (existing.status === 'completed' && status !== 'completed') {
@@ -362,7 +374,7 @@ export async function updateTaskStatus(
     entityType: 'tasks',
     entityId: id,
     beforeState: existing,
-    afterState: updated,
+    afterState: { ...updated, overrideReason: overrideReason || null },
   });
 
   return updated;

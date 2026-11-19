@@ -52,7 +52,7 @@ export async function getPostWeddingChecklist(db: TxDb): Promise<PostWeddingChec
 
   // 4. Receive photo & video albums
   const pendingMedia = await getPendingMediaItems(db);
-  const mediaCompleted = pendingMedia.length === 0;
+  const mediaCompleted = Boolean(taskMap.get('receive_media')?.isCompleted);
 
   // 5. Complete thank-you notes
   const unthankedGifts = await getUnthankedGifts(db);
@@ -103,9 +103,9 @@ export async function getPostWeddingChecklist(db: TxDb): Promise<PostWeddingChec
       isCompleted: mediaCompleted,
       summary: mediaCompleted
         ? 'Đã nhận đủ hình ảnh và video từ ekip chụp phóng sự.'
-        : `Còn ${pendingMedia.length} đầu việc hình ảnh/video đang chờ xử lý hậu kỳ.`,
-      pendingCount: pendingMedia.length,
-      totalCount: pendingMedia.length,
+        : 'Chưa xác nhận đã nhận đủ album ảnh và video. Lưu liên kết và đối chiếu trước khi đánh dấu hoàn tất.',
+      pendingCount: mediaCompleted ? 0 : Math.max(1,pendingMedia.length),
+      totalCount: Math.max(1,pendingMedia.length),
     },
     {
       key: 'complete_thank_you',

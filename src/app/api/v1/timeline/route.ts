@@ -1,3 +1,4 @@
+import { runIdempotentCreate } from '@/lib/api/mutation';
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
       session!.role,
       async (_client, scopedDb) => {
         await checkArchivalFreezeGuard(scopedDb);
-        return createTimelineItem(scopedDb, parseResult.data);
+        return runIdempotentCreate(req, scopedDb, session!.user.id, bodyJson, async () => createTimelineItem(scopedDb, parseResult.data));
       }
     );
 

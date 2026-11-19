@@ -2,7 +2,7 @@
 # ==========================================
 # Stage 1: Base image with pnpm & libc6-compat
 # ==========================================
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat wget
 ENV PNPM_HOME="/pnpm"
@@ -29,10 +29,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 RUN pnpm build
 
+# Tooling image for one-shot migrations; never exposed as the web service.
+FROM builder AS tools
+RUN apk add --no-cache postgresql-client tar
+
 # ==========================================
 # Stage 4: Production minimal runner
 # ==========================================
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

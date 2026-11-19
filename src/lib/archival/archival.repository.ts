@@ -2,7 +2,8 @@ import { eq } from 'drizzle-orm';
 import { weddingSettings } from '@/db/schema/events';
 import { auditLogs } from '@/db/schema/system';
 import { postWeddingTasks } from '@/db/schema/handovers';
-import { costItems } from '@/db/schema/finance';
+import { costItems, payments } from '@/db/schema/finance';
+import { calculateCostItemMetrics } from '@/lib/finance/calculator';
 import { preparationItems } from '@/db/schema/preparation';
 import { gifts } from '@/db/schema/gifts';
 import { TxDb } from './types';
@@ -68,18 +69,22 @@ export async function recordAuditLog(
 
 export async function getOutstandingCostItems(db: TxDb, eventId?: string): Promise<any[]> {
   const allCosts = await db.select().from(costItems);
+  const transactions = await db.select().from(payments);
   return allCosts.filter((c: any) => {
-    if (c.status === 'cancelled') return false;
-    const finalAmount = BigInt(c.finalAmount ?? c.contractedAmount ?? c.estimatedAmount ?? 0);
-    const paidAmount = BigInt(c.paidAmount ?? 0);
-    return finalAmount > paidAmount;
+    if (eventId && c.eventId !== eventId) return false;
+    const metrics = calculateCostItemMetrics({ estimatedAmount: c.estimatedAmount == null ? null : BigInt(c.estimatedAmount), contractedAmount: c.contractedAmount == null ? null : BigInt(c.contractedAmount), finalSettlementAmount: c.finalSettlementAmount == null ? null : BigInt(c.finalSettlementAmount) }, transactions.filter((p:any)=>p.costItemId===c.id));
+    return metrics.isPriceMissing || (metrics.projectedRemaining !== null && metrics.projectedRemaining > 0n);
   });
 }
 
 export async function getPendingDepositRefunds(db: TxDb, eventId?: string): Promise<any[]> {
   const allCosts = await db.select().from(costItems);
+  const transactions = await db.select().from(payments);
   return allCosts.filter((c: any) => {
-    return c.status === 'cancelling' || (c.notes && c.notes.toLowerCase().includes('đặt cọc'));
+    if (eventId && c.eventId !== eventId) return false;
+    const net = transactions.filter((p:any)=>p.costItemId===c.id&&!p.isVoided).reduce((sum:bigint,p:any)=>sum+(p.paymentType==='refund'?-1n:1n)*BigInt(p.amount),0n);
+    const settled = c.finalSettlementAmount ?? c.contractedAmount;
+    return c.status === 'cancelling' || (settled != null && net > BigInt(settled));
   });
 }
 

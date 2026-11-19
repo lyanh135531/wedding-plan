@@ -8,6 +8,8 @@ import {
   categoryBudgets,
 } from '@/db/schema/finance';
 import { auditLogs } from '@/db/schema/system';
+import { gifts, giftReturns } from '@/db/schema/gifts';
+import { weddingSettings } from '@/db/schema/events';
 import {
   UpdateFundSettingsInput,
   CreateFundingEntryInput,
@@ -185,7 +187,7 @@ export async function voidFundingEntry(
   voidReason: string,
   userId: string
 ) {
-  const [existing] = await txDb
+  let [existing] = await txDb
     .select()
     .from(fundingEntries)
     .where(eq(fundingEntries.id, id))
@@ -199,6 +201,15 @@ export async function voidFundingEntry(
     return existing;
   }
 
+  if (existing.linkedPaymentId) {
+    const { voidPayment } = await import('./payments.repository');
+    const [linked] = await txDb.select().from(payments).where(eq(payments.id, existing.linkedPaymentId));
+    if (!linked) throw new FundingEntryNotFoundError('Không tìm thấy giao dịch trả hộ liên kết.');
+    await voidPayment(txDb, { payment_id: linked.id, voided_reason: voidReason, version: linked.version }, userId);
+    return (await txDb.select().from(fundingEntries).where(eq(fundingEntries.id,id)))[0];
+  }
+  [existing] = await txDb.select().from(fundingEntries).where(eq(fundingEntries.id,id)).for('update');
+  if (existing.isVoided) return existing;
   const [voided] = await txDb
     .update(fundingEntries)
     .set({
@@ -209,18 +220,6 @@ export async function voidFundingEntry(
     })
     .where(eq(fundingEntries.id, id))
     .returning();
-
-  // If this entry was linked to a direct payment, void the payment as well
-  if (existing.linkedPaymentId) {
-    await txDb
-      .update(payments)
-      .set({
-        isVoided: true,
-        voidedReason: `Hủy cùng khoản góp trả hộ: ${voidReason}`,
-        updatedAt: new Date(),
-      })
-      .where(eq(payments.id, existing.linkedPaymentId));
-  }
 
   await txDb.insert(auditLogs).values({
     userId,
@@ -288,7 +287,8 @@ export async function getFinanceOverview(txDb: TxOrDb) {
   });
 
   // Calculate overall budget summary (AT15, AT17, AT53)
-  const budgetSummary = calculateOverallBudgetSummary(targetBudget > 0n ? targetBudget : null, itemsWithMetrics);
+  const [wedding] = await txDb.select().from(weddingSettings).limit(1);
+  const budgetSummary = calculateOverallBudgetSummary(wedding?.budgetTarget ?? (targetBudget > 0n ? targetBudget : null), itemsWithMetrics);
 
   // 4. Fetch fund settings & funding entries for cash fund ledger (AT37, AT38, AT45)
   const [settings] = await txDb
@@ -300,7 +300,14 @@ export async function getFinanceOverview(txDb: TxOrDb) {
     .select()
     .from(fundingEntries);
 
-  const cashLedger = calculateCashLedger(settings || null, allPayments, allFundingEntries);
+  const baseLedger = calculateCashLedger(settings || null, allPayments, allFundingEntries);
+  const giftRows = await txDb.select().from(gifts);
+  const returns = await txDb.select().from(giftReturns);
+  const activeGifts = new Set(giftRows.filter((g: typeof gifts.$inferSelect) => !g.isVoided && g.giftType === 'cash').map((g: typeof gifts.$inferSelect) => g.id));
+  const openingEpoch = settings?.openingAsOf ? new Date(settings.openingAsOf).getTime() : 0;
+  const postOpeningGiftReceipts = giftRows.filter((g: typeof gifts.$inferSelect) => activeGifts.has(g.id) && new Date(g.receivedAt || g.createdAt).getTime() >= openingEpoch).reduce((sum: bigint,g: typeof gifts.$inferSelect) => sum + BigInt(g.amount || 0), 0n);
+  const postOpeningGiftReturns = returns.filter((r: typeof giftReturns.$inferSelect) => activeGifts.has(r.giftId) && new Date(r.returnedAt).getTime() >= openingEpoch).reduce((sum: bigint,r: typeof giftReturns.$inferSelect) => sum + BigInt(r.amount),0n);
+  const cashLedger = { ...baseLedger, postOpeningGiftReceipts, postOpeningGiftReturns, availableCash: baseLedger.availableCash === null ? null : baseLedger.availableCash + postOpeningGiftReceipts - postOpeningGiftReturns };
 
   return {
     categories,

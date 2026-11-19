@@ -13,6 +13,7 @@ import {
   costItems,
   preparationItems,
   supportAssignments,
+  attendance,
 } from '@/db/schema';
 import { TxDb, R2GateCheck, R2SignoffReport, R2SignoffSnapshot } from './types';
 
@@ -55,13 +56,20 @@ export async function evaluateR2Readiness(
       break;
     }
   }
+  const expectedSeats = await db.select().from(attendance).where(and(eq(attendance.eventId, eventId), eq(attendance.rsvpStatus, 'accepted'), eq(attendance.needsSeat, true)));
+  const seatedGuests = new Set(eventSeats.map(s => s.guestId));
+  const missingSeats = expectedSeats.filter(a => !seatedGuests.has(a.guestId));
+  if (missingSeats.length) {
+    seatingPassed = false;
+    seatingMessage += ` Còn ${missingSeats.length} khách đã nhận lời cần chỗ ngồi chưa được xếp bàn.`;
+  }
 
   checks.push({
     id: 'gate-1-seating-balance',
     name: 'Cân bằng chỗ ngồi & sơ đồ bàn',
     status: seatingPassed ? 'passed' : 'failed',
     message: seatingMessage,
-    details: { totalTableCapacity, totalAssignedSeats, tablesCount: eventTables.length },
+    details: { totalTableCapacity, totalAssignedSeats, tablesCount: eventTables.length, missingSeats: missingSeats.length },
   });
 
   // Gate 2: Menu Lock (PLAN §24.1, UI_UX_SPEC §7.9)
@@ -75,14 +83,15 @@ export async function evaluateR2Readiness(
     .from(cateringSnapshots)
     .where(eq(cateringSnapshots.eventId, eventId));
 
-  const menuPassed = eventMenus.length > 0 || snapshots.length > 0;
+  const lockedSnapshots = snapshots.filter(s => s.isLocked);
+  const menuPassed = lockedSnapshots.length > 0;
   checks.push({
     id: 'gate-2-menu-lock',
     name: 'Khóa thực đơn & suất ăn tiệc',
     status: menuPassed ? 'passed' : 'failed',
     message: menuPassed
       ? `Đã xác nhận thực đơn (${eventMenus.length} thực đơn hoạt động, ${snapshots.length} bản chụp chốt).`
-      : 'Chưa có thực đơn tiệc hoạt động hoặc bản chốt thực đơn cho sự kiện.',
+      : 'Chưa có bản chốt thực đơn và số suất với nhà hàng cho sự kiện.',
     details: { activeMenusCount: eventMenus.length, snapshotsCount: snapshots.length },
   });
 
@@ -118,9 +127,10 @@ export async function evaluateR2Readiness(
         .select()
         .from(roomAssignments)
         .where(eq(roomAssignments.accommodationId, room.id));
-      if (roomGuests.length > room.totalRooms) {
+      const assignedRooms = new Set(roomGuests.map(g => g.roomNumber).filter(Boolean)).size;
+      if (assignedRooms > room.totalRooms) {
         logisticsPassed = false;
-        logisticsMessage = `Phòng "${room.name}" xếp vượt số lượng phòng: ${roomGuests.length}/${room.totalRooms} phòng.`;
+        logisticsMessage = `Phòng "${room.name}" xếp vượt số lượng phòng: ${assignedRooms}/${room.totalRooms} phòng.`;
         break;
       }
     }
@@ -268,15 +278,15 @@ export async function evaluateR2Readiness(
     checksum,
     signedBy: userId,
     signedAt: evaluatedAt,
-    isImmutable: true,
+    isImmutable: false,
   };
 
   checks.push({
     id: 'gate-8-immutable-snapshot',
     name: 'Ảnh chụp nghiệm thu bất biến (Immutable Snapshot)',
-    status: 'passed',
-    message: `Đã tạo chữ ký số kiểm toán SHA-256: ${checksum.slice(0, 16)}...`,
-    details: { snapshotId: snapshot.snapshotId, checksum, isImmutable: true },
+    status: 'warning',
+    message: 'Đã đánh giá dữ liệu hiện tại. Chưa lưu bản chốt nghiệm thu.',
+    details: { checksum, isImmutable: false },
   });
 
   return {
@@ -284,7 +294,7 @@ export async function evaluateR2Readiness(
     evaluatedAt,
     overallStatus,
     totalGates: checks.length,
-    passedGates: passedCount + 1, // including Gate 8
+    passedGates: passedCount,
     failedGates: failedCount,
     checks,
     snapshot,

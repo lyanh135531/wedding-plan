@@ -13,7 +13,6 @@ import {
 } from '@/schemas/vendors';
 import { vendorsApi } from '@/lib/vendors/api-client';
 import { formatVND } from '@/lib/utils';
-import { FIXTURE_QUOTE_TO_COST_PREVIEW } from './fixtures';
 
 export interface QuoteToCostPreviewModalProps {
   isOpen: boolean;
@@ -64,17 +63,8 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
         }
       } catch (err: any) {
         if (!isMounted) return;
-        // Fallback to fixture in offline/test environment
-        const fallback = {
-          ...FIXTURE_QUOTE_TO_COST_PREVIEW,
-          quote_id: quoteId,
-          vendor_id: vendorId,
-        };
-        setPreviewData(fallback);
-        setCostName(fallback.suggested_cost_item_name);
-        if (fallback.available_categories.length > 0) {
-          setCategoryId(fallback.available_categories[0].id);
-        }
+        setPreviewData(null);
+        setErrorMsg(err.message || 'Không thể tải báo giá. Đóng và mở lại để thử lại.');
       } finally {
         if (isMounted) setLoadingPreview(false);
       }

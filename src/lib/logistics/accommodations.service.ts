@@ -15,6 +15,8 @@ import {
   AccommodationNotFoundError,
   RoomAssignmentNotFoundError,
   OptimisticLockError,
+  CapacityExceededError,
+  InvalidCapacityReductionError,
 } from './errors';
 
 import { TxDb } from './types';
@@ -131,6 +133,12 @@ export async function updateAccommodation(
     updatedAt: new Date(),
   };
 
+  if (input.totalRooms !== undefined) {
+    const assigned = await txDb.select().from(roomAssignments).where(eq(roomAssignments.accommodationId, id));
+    const used = new Set(assigned.map(r => r.roomNumber)).size;
+    if (input.totalRooms < used) throw new InvalidCapacityReductionError('Không thể giảm số phòng dưới số phòng đã phân.', used, input.totalRooms);
+  }
+
   if (input.name !== undefined) updateData.name = input.name;
   if (input.locationAddress !== undefined) updateData.locationAddress = input.locationAddress;
   if (input.checkInTime !== undefined) updateData.checkInTime = input.checkInTime ? new Date(input.checkInTime) : null;
@@ -167,11 +175,21 @@ export async function assignRoom(
   const [accommodation] = await txDb
     .select()
     .from(accommodations)
-    .where(eq(accommodations.id, input.accommodationId));
+    .where(eq(accommodations.id, input.accommodationId)).for('update');
 
   if (!accommodation) {
     throw new AccommodationNotFoundError();
   }
+  if (accommodation.eventId !== input.eventId) throw new AccommodationNotFoundError();
+  const current = await txDb.select().from(roomAssignments).where(eq(roomAssignments.accommodationId, input.accommodationId));
+  const same = current.find(r => r.guestId === input.guestId);
+  if (same) {
+    if (same.roomNumber === input.roomNumber) return mapToRoomAssignmentDto(same);
+    throw new CapacityExceededError('Khách đã được phân phòng tại đây. Gỡ phân phòng cũ trước khi đổi.');
+  }
+  const rooms = new Set(current.map(r => r.roomNumber));
+  if (!rooms.has(input.roomNumber) && rooms.size >= accommodation.totalRooms) throw new CapacityExceededError('Nơi lưu trú đã hết phòng.');
+  if (input.checkInDate && input.checkOutDate && input.checkOutDate < input.checkInDate) throw new CapacityExceededError('Ngày trả phòng phải sau ngày nhận phòng.');
 
   const [created] = await txDb
     .insert(roomAssignments)

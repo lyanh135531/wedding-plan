@@ -3,11 +3,12 @@ import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
 import { bulkMarkInvitationsSent } from '@/lib/guests';
 import { z } from 'zod';
+import { runIdempotentCreate } from '@/lib/api/mutation';
 
 export const dynamic = 'force-dynamic';
 
 const bulkMarkSentSchema = z.object({
-  invitationIds: z.array(z.string().uuid()).min(1, 'Danh sách thiệp không được để trống'),
+  invitationIds: z.array(z.string().uuid()).min(1, 'Danh sách thiệp không được để trống').max(2000),
   sentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Định dạng ngày phải là YYYY-MM-DD').optional(),
 });
 
@@ -38,12 +39,12 @@ export async function POST(req: NextRequest) {
       session.user.id,
       session.role,
       async (_client, txDb) => {
-        return bulkMarkInvitationsSent(
+        return runIdempotentCreate(req, txDb, session.user.id, body, async () => bulkMarkInvitationsSent(
           txDb,
           parsed.data.invitationIds,
           effectiveSentDate,
           session.user.id
-        );
+        ));
       }
     );
 
@@ -54,6 +55,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('[POST /api/v1/invitations/bulk-sent error]:', error);
-    return NextResponse.json({ error: error?.message || 'INTERNAL_ERROR' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'INTERNAL_ERROR' }, { status: error?.statusCode || 500 });
   }
 }

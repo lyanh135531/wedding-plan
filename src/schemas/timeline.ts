@@ -135,6 +135,7 @@ export const applyShiftTimelineSchema = z.object({
   delayMinutes: z.number().int().min(-720).max(720),
   pivotTime: dateTimeStringSchema.optional().nullable(),
   pivotItemId: uuidSchema.optional().nullable(),
+  expectedVersions: z.array(z.object({ id: uuidSchema, version: z.number().int().positive() })).max(2000).optional(),
   confirmed: z.literal(true, {
     error: 'Xác nhận dời lịch là bắt buộc',
   }),

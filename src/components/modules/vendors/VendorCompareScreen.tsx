@@ -20,7 +20,6 @@ import { CompareSimulationBar } from './CompareSimulationBar';
 import { CompareMatrixDesktop } from './CompareMatrixDesktop';
 import { CompareMatrixMobile } from './CompareMatrixMobile';
 import { QuoteToCostPreviewModal } from './QuoteToCostPreviewModal';
-import { FIXTURE_COMPARE_RESPONSE } from './fixtures';
 
 export interface VendorCompareScreenProps {
   initialResponse?: ComparePackagesResponse;
@@ -35,15 +34,6 @@ export const VendorCompareScreen: React.FC<VendorCompareScreenProps> = ({
 
   // AT03, AT41: Comparison matrix contains secret negotiated prices and contracts.
   // Family View is strictly forbidden from viewing.
-  if (isFamily) {
-    return React.createElement(PermissionDeniedView, {
-      title: 'Bạn không có quyền truy cập',
-      message:
-        'Trang so sánh báo giá và hợp đồng nhà cung cấp chứa thông tin tài chính mật, chỉ dành riêng cho hai chủ sở hữu.',
-      returnUrl: '/vendors',
-      returnLabel: 'Quay lại danh sách nhà cung cấp',
-    });
-  }
 
   // Extract quote IDs from query parameters (?quotes=id1,id2 or ?vendors=v1,v2)
   const quotesParam = searchParams.get('quotes') || '';
@@ -57,15 +47,6 @@ export const VendorCompareScreen: React.FC<VendorCompareScreenProps> = ({
         .filter(Boolean)
         .slice(0, 4);
     }
-    // If vendorsParam passed, fallback to default fixture quotes
-    if (vendorsParam) {
-      const vIds = vendorsParam
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .slice(0, 4);
-      return vIds.map((_, i) => FIXTURE_COMPARE_RESPONSE.packages[i % FIXTURE_COMPARE_RESPONSE.packages.length].quote_id);
-    }
     return [];
   }, [quotesParam, vendorsParam]);
 
@@ -76,7 +57,7 @@ export const VendorCompareScreen: React.FC<VendorCompareScreenProps> = ({
 
   // Response state
   const [compareData, setCompareData] = React.useState<ComparePackagesResponse | null>(
-    initialResponse || (parsedQuoteIds.length >= 2 ? FIXTURE_COMPARE_RESPONSE : null)
+    initialResponse || null
   );
   const [loading, setLoading] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
@@ -99,14 +80,25 @@ export const VendorCompareScreen: React.FC<VendorCompareScreenProps> = ({
 
   // Fetch comparison matrix from API
   const fetchComparison = React.useCallback(async () => {
-    if (parsedQuoteIds.length < 2) return;
+    if (isFamily) return;
+    if (parsedQuoteIds.length < 2 && !vendorsParam) return;
 
     try {
       setLoading(true);
       setErrorMsg(null);
 
+      let quoteIds = parsedQuoteIds;
+      if (!quoteIds.length && vendorsParam) {
+        const vendors = vendorsParam.split(',').map(s => s.trim()).filter(Boolean).slice(0, 4);
+        const lists = await Promise.all(vendors.map(id => vendorsApi.listQuotes(id, false)));
+        quoteIds = lists.map((list, index) => {
+          if (!list.data.length) throw new Error(`Nhà cung cấp thứ ${index + 1} chưa có báo giá. Thêm báo giá trước khi so sánh.`);
+          return list.data[0].id;
+        });
+      }
+      if (quoteIds.length < 2) throw new Error('Cần chọn ít nhất hai báo giá.');
       const req: ComparePackagesRequest = {
-        quote_ids: parsedQuoteIds,
+        quote_ids: quoteIds,
         table_count: tableCount,
         guest_count: guestCount > 0 ? guestCount : undefined,
         include_vat_and_service_fee: includeVatAndFee,
@@ -114,21 +106,13 @@ export const VendorCompareScreen: React.FC<VendorCompareScreenProps> = ({
 
       const res = await vendorsApi.compare(req);
       setCompareData(res);
-    } catch {
-      // In offline / test environment: simulate with fixture
-      const simulated = {
-        simulation_params: {
-          table_count: tableCount,
-          guest_count: guestCount,
-          include_vat_and_service_fee: includeVatAndFee,
-        },
-        packages: FIXTURE_COMPARE_RESPONSE.packages.slice(0, Math.max(2, parsedQuoteIds.length)),
-      };
-      setCompareData(simulated);
+    } catch (failure) {
+      setCompareData(null);
+      setErrorMsg((failure as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [parsedQuoteIds, tableCount, guestCount, includeVatAndFee]);
+  }, [parsedQuoteIds, vendorsParam, tableCount, guestCount, includeVatAndFee, isFamily]);
 
   // Debounce API calls when slider / inputs change
   React.useEffect(() => {
@@ -146,7 +130,17 @@ export const VendorCompareScreen: React.FC<VendorCompareScreenProps> = ({
     setSelectedPackageForCost(null);
   };
 
-  const hasInsufficientQuotes = parsedQuoteIds.length < 2;
+  if (isFamily) {
+    return React.createElement(PermissionDeniedView, {
+      title: 'Bạn không có quyền truy cập',
+      message:
+        'Trang so sánh báo giá và hợp đồng nhà cung cấp chứa thông tin tài chính mật, chỉ dành riêng cho hai chủ sở hữu.',
+      returnUrl: '/vendors',
+      returnLabel: 'Quay lại danh sách nhà cung cấp',
+    });
+  }
+
+  const hasInsufficientQuotes = parsedQuoteIds.length < 2 && !vendorsParam;
 
   return React.createElement(
     PageShell,

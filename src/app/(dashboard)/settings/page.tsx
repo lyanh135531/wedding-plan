@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { api, jsonBody } from '@/lib/api/request';
 import Link from 'next/link';
+import { SettingsAdvancedWorkspace } from '@/components/modules/SettingsAdvancedWorkspace';
 
 const h = React.createElement;
 
@@ -56,6 +57,7 @@ export default function SettingsPage() {
       showScopeSelector: false,
       maxWidth: 'standard',
     },
+    h(SettingsAdvancedWorkspace),
     h(
       'div',
       { className: 'space-y-6 max-w-xl mx-auto bg-surface p-6 rounded-card border border-border-subtle shadow-sm' },

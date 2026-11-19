@@ -66,7 +66,7 @@ export async function updatePhotoShot(
   if (input.notes !== undefined) updatedMetadata.notes = input.notes;
   if (input.isExecuted !== undefined) updatedMetadata.isExecuted = input.isExecuted;
 
-  const newStatus = input.isExecuted ? 'completed' : existing.status;
+  const newStatus = input.isExecuted === undefined ? existing.status : input.isExecuted ? 'completed' : 'pending';
 
   return updatePreparationItemRecord(
     db,

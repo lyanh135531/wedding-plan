@@ -160,6 +160,6 @@ describe('Gate G10 Database Schema & Migration Verifications', () => {
     const journalContent = JSON.parse(fs.readFileSync(journalPath, 'utf8'));
     const entry0005 = journalContent.entries.find((e: any) => e.tag === '0005_gate_g10_schedule_gifts_handovers');
     expect(entry0005).toBeDefined();
-    expect(entry0005.idx).toBe(4);
+    expect(entry0005.idx).toBe(5);
   });
 });

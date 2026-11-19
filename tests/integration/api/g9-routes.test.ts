@@ -315,13 +315,14 @@ describe('Gate G9 API Route Handlers Integration Tests (M9.1, AT03, AT26)', () =
   });
 
   describe('6. Milestone R2 Sign-off API (/api/v1/r2-signoff)', () => {
-    it('evaluates readiness and creates immutable snapshot', async () => {
+    it('evaluates without persisting and rejects sign-off when readiness gates fail', async () => {
       const getReq = new NextRequest(`http://localhost:3000/api/v1/r2-signoff?eventId=${eventId}`);
       const getRes = await r2SignoffRoute.GET(getReq);
       expect(getRes.status).toBe(200);
       const getJson = await getRes.json();
       expect(getJson.data.totalGates).toBe(8);
       expect(getJson.data.snapshot.checksum).toBeDefined();
+      expect(getJson.data.snapshot.isImmutable).toBe(false);
 
       const postReq = new NextRequest('http://localhost:3000/api/v1/r2-signoff', {
         method: 'POST',
@@ -329,9 +330,9 @@ describe('Gate G9 API Route Handlers Integration Tests (M9.1, AT03, AT26)', () =
         body: JSON.stringify({ eventId }),
       });
       const postRes = await r2SignoffRoute.POST(postReq);
-      expect(postRes.status).toBe(200);
+      expect(postRes.status).toBe(409);
       const postJson = await postRes.json();
-      expect(postJson.data.snapshot.isImmutable).toBe(true);
+      expect(postJson.message).toContain('chưa đạt');
     });
   });
 });

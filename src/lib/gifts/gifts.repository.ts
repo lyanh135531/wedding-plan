@@ -20,6 +20,7 @@ export function mapToGiftDto(rawGift: any, contributors: any[] = [], returns: an
     id: rawGift.id,
     eventId: rawGift.eventId,
     giftType: rawGift.giftType,
+    receivedAt: new Date(rawGift.receivedAt || rawGift.createdAt).toISOString(),
     amount: rawGift.amount !== null && rawGift.amount !== undefined ? rawGift.amount.toString() : null,
     description: rawGift.description ?? null,
     receivedByUserId: rawGift.receivedByUserId ?? null,
@@ -68,6 +69,7 @@ export async function createGiftRecord(
     eventId: string;
     giftType: 'cash' | 'physical';
     amount?: bigint | null;
+    receivedAt?: Date;
     description?: string | null;
     receivedByUserId?: string | null;
     receivedByProxy?: string | null;
@@ -89,6 +91,7 @@ export async function createGiftRecord(
       eventId: giftValues.eventId,
       giftType: giftValues.giftType,
       amount: giftValues.amount ?? null,
+      receivedAt: giftValues.receivedAt,
       description: giftValues.description ?? null,
       receivedByUserId: giftValues.receivedByUserId ?? null,
       receivedByProxy: giftValues.receivedByProxy ?? null,
@@ -123,7 +126,7 @@ export async function getGiftById(db: TxDb, id: string): Promise<any | null> {
     .select()
     .from(gifts)
     .where(eq(gifts.id, id))
-    .limit(1);
+    .limit(1).for('update');
 
   return gift || null;
 }

@@ -17,7 +17,13 @@
     "test:e2e:ui": "playwright test --ui",
     "test:all": "vitest run && playwright test",
     "test:live": "tsx scripts/verify-g11.ts",
-    "test:restore": "tsx scripts/verify-g11.ts --dr-only"
+    "test:restore": "tsx scripts/verify-g11.ts --dr-only",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "test:containers": "tsx scripts/verify-containers.ts",
+    "local:start": "tsx scripts/local-runtime.ts start",
+    "local:stop": "tsx scripts/local-runtime.ts stop",
+    "local:status": "tsx scripts/local-runtime.ts status",
+    "local:backup": "tsx scripts/local-runtime.ts backup"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +40,7 @@
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.6",
+    "@types/papaparse": "^5.5.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
@@ -52,8 +59,10 @@
     "better-auth": "^1.7.18",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.4",
+    "exceljs": "^4.4.0",
     "lucide-react": "^0.453.0",
     "next": "15.5.29",
+    "papaparse": "^5.7.1",
     "pg": "^8.23.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",

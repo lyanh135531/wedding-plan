@@ -136,7 +136,8 @@ export async function assembleLiveEventData(
 export async function createHandoverSnapshot(
   db: TxDb,
   input: CreateHandoverPacketInput,
-  userId?: string | null
+  userId?: string | null,
+  readinessEvidence?: Record<string, unknown>
 ): Promise<HandoverPacketDto> {
   // Serialize snapshot versions for this event inside the request transaction.
   const [event] = await db.select().from(events).where(eq(events.id, input.eventId)).for('update');
@@ -146,6 +147,7 @@ export async function createHandoverSnapshot(
 
   const scope = createHandoverPacketSchema.shape.scope.parse(input.scope);
   const liveSnapshot = await assembleLiveEventData(db, input.eventId, scope);
+  if (readinessEvidence) liveSnapshot.readiness = readinessEvidence;
 
   return createHandoverPacketRecord(db, {
     eventId: input.eventId,

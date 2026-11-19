@@ -7,6 +7,21 @@ import { eq, asc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
+export async function PATCH(req: NextRequest) {
+  const { authenticatedRoute, RouteError } = await import('@/lib/api/route');
+  const { z } = await import('zod');
+  const { auditLogs } = await import('@/db/schema/system');
+  return authenticatedRoute(req, async (db, session) => {
+    const body = createBudgetCategorySchema.extend({ id: z.string().uuid(), expectedUpdatedAt: z.string().datetime({offset:true}) }).parse(await req.json());
+    const [current] = await db.select().from(budgetCategories).where(eq(budgetCategories.id, body.id)).for('update');
+    if (!current || current.updatedAt.toISOString() !== body.expectedUpdatedAt) throw new RouteError(409, 'Danh mục đã thay đổi. Hãy tải lại trước khi lưu.');
+    await db.update(budgetCategories).set({ name: body.name, defaultOrder: body.default_order, updatedAt: new Date() }).where(eq(budgetCategories.id, body.id));
+    await db.insert(categoryBudgets).values({ categoryId: body.id, allocatedAmount: BigInt(body.allocated_budget), notes: body.notes }).onConflictDoUpdate({ target: categoryBudgets.categoryId, set: { allocatedAmount: BigInt(body.allocated_budget), notes: body.notes, updatedAt: new Date() } });
+    await db.insert(auditLogs).values({ userId: session.user.id, action: 'UPDATE_CATEGORY_BUDGET', entityType: 'budget_categories', entityId: body.id, afterState: { name: body.name, allocatedAmount: body.allocated_budget } });
+    return { id: body.id };
+  });
+}
+
 export async function GET(req: NextRequest) {
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {

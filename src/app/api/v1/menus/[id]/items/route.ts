@@ -1,3 +1,4 @@
+import { runIdempotentCreate } from '@/lib/api/mutation';
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
           eventId = menu.eventId;
         }
 
-        return addMenuItem(scopedDb, {
+        return runIdempotentCreate(req, scopedDb, session!.user.id, bodyJson, async () => addMenuItem(scopedDb, {
           menuId: id,
           eventId,
           courseOrder: parseResult.data.courseOrder,
@@ -134,7 +135,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
           dietaryFlags: parseResult.data.dietaryFlags,
           allergens: parseResult.data.allergens,
           notes: parseResult.data.notes,
-        });
+        }));
       }
     );
 

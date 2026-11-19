@@ -125,6 +125,7 @@ export const cateringSnapshots = pgTable(
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
     menuId: uuid("menu_id").references(() => menus.id, { onDelete: "set null" }),
+    menuSnapshot: jsonb("menu_snapshot"),
     snapshotVersion: integer("snapshot_version").notNull().default(1),
     adultMeals: integer("adult_meals").notNull().default(0),
     childMeals: integer("child_meals").notNull().default(0),
@@ -135,7 +136,7 @@ export const cateringSnapshots = pgTable(
     notes: text("notes"),
     isLocked: boolean("is_locked").notNull().default(false),
     lockedAt: timestamp("locked_at", { withTimezone: true, mode: "date" }),
-    lockedBy: uuid("locked_by"),
+    lockedBy: text("locked_by"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .default(sql`clock_timestamp()`)
       .notNull(),

@@ -1,12 +1,14 @@
 # Backup và khôi phục dữ liệu
 
-**Restore thực đã được kiểm chứng trong sandbox PostgreSQL 17.4.** Chưa nghiệm thu DR trên hạ tầng production, chưa đo RPO/RTO và chưa thử lấy bản backup từ kho offsite.
+**Restore thực đã được kiểm chứng trong sandbox PostgreSQL 17.** Chưa nghiệm thu DR trên hạ tầng production, chưa đo RPO/RTO và chưa thử lấy bản backup từ kho offsite. Bằng chứng mới nhất: [biên bản hoàn thiện](COMPLETION_REPORT_2026-11-19.md).
 
 ## Backup thật
 
 `scripts/backup.ts` tạo `database.dump`, `uploads.tar.gz` và `manifest.json` trong staging riêng, tính SHA-256 rồi đổi tên thư mục để công bố bundle. Không xóa staging của job khác.
 
 Yêu cầu: `DATABASE_URL` của database nguồn với quyền đọc toàn bộ dữ liệu/bypass RLS cho `pg_dump`; `UPLOAD_DIR` tồn tại; `pg_dump` tương thích phiên bản PostgreSQL và `tar` trên PATH. Mật khẩu kết nối được truyền qua môi trường libpq thay vì đối số process.
+
+Tài khoản `wedding_app` mới cố ý không bypass RLS và không phù hợp để chạy backup toàn bộ. Cấp URL bootstrap hoặc tài khoản backup riêng cho process backup; không thay `DATABASE_URL` của web app sang tài khoản đặc quyền. Giữ credentials backup ở môi trường job, tách khỏi container runner.
 
 ```sh
 pnpm exec tsx scripts/backup.ts

@@ -131,7 +131,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
         'div',
         {
           className:
-            'px-6 py-5 border-b border-border-subtle flex items-start justify-between gap-4',
+            'shrink-0 px-6 py-5 border-b border-border-subtle flex items-start justify-between gap-4',
         },
         h(
           'div',
@@ -154,7 +154,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
           )
       ),
       // Content
-      h('div', { className: 'p-6 overflow-y-auto' }, children)
+      h('div', { className: 'min-h-0 p-6 overflow-y-auto overscroll-contain' }, children)
     )
   );
 };

@@ -1,0 +1,18 @@
+'use client';
+import React, { useEffect, useState } from 'react';
+import { api, jsonBody } from '@/lib/api/request';
+import { ResourceWorkspace, RecordEditor } from '@/components/common/ResourceWorkspace';
+import { Button } from '@/components/ui/button';
+import { useRole } from '@/context/RoleContext';
+import type { PostWeddingChecklistDto } from '@/schemas/archival';
+const links: Record<string, string> = { settle_supplier_balances: '/budget', collect_deposit_refunds: '/payments', return_rentals: '/preparation', receive_media: '/documents', complete_thank_you: '/gifts', reconcile_gifts: '/gifts', export_cold_archive: '/data/export' };
+export function LiveArchivalWorkspace() {
+  const { isOwner } = useRole(); const [data, setData] = useState<PostWeddingChecklistDto | null>(null); const [error, setError] = useState(''); const [revision, setRevision] = useState(0); const [action, setAction] = useState<'freeze' | 'unarchive' | null>(null);
+  useEffect(() => { const controller = new AbortController(); setError(''); api<{ data: PostWeddingChecklistDto }>('/api/v1/archival/checklist', { signal: controller.signal }).then(r => setData(r.data)).catch(f => { if (!controller.signal.aborted) setError(f.message); }); return () => controller.abort(); }, [revision]);
+  if (!isOwner) return <p>Chỉ chủ sở hữu được quản lý hồ sơ hậu cưới.</p>;
+  return <div className="space-y-5"><h1 className="text-2xl font-serif">Hậu cưới & Lưu trữ</h1>{error && <p role="alert" className="text-danger">{error} <Button onClick={() => setRevision(v => v + 1)}>Tải lại</Button></p>}
+    {!data && !error && <p role="status">Đang tải checklist…</p>}{data && <><div className="surface-card p-5 space-y-3"><h2 className="font-semibold">{data.isArchived ? 'Đã lưu trữ — chỉ đọc' : 'Đang mở để chỉnh sửa'}</h2>{data.archivedReason && <p>{data.archivedReason}</p>}<Button variant="secondary" onClick={() => setAction(data.isArchived ? 'unarchive' : 'freeze')}>{data.isArchived ? 'Mở lại để chỉnh sửa' : 'Khóa lưu trữ'}</Button></div><ul className="space-y-3">{data.items.map(item => <li key={item.key} className="surface-card p-5"><h3 className="font-semibold">{item.isCompleted ? '✓' : '○'} {item.title}</h3><p>{item.summary}</p><a className="underline text-primary" href={links[item.key]}>Mở để đối chiếu</a>{item.key === 'receive_media' && !data.isArchived && <Button variant="secondary" onClick={async()=>{try{await api('/api/v1/archival/checklist',{method:'POST',body:jsonBody({key:'receive_media',isCompleted:!item.isCompleted})});setRevision(v=>v+1);}catch(f){setError((f as Error).message);}}}>{item.isCompleted?'Mở lại đối chiếu album':'Xác nhận đã nhận đủ album & video'}</Button>}</li>)}</ul></>}
+    <ResourceWorkspace title="Album & Video" endpoint="/api/v1/archival/media" canCreate={!data?.isArchived} canEdit={!data?.isArchived} canDelete={!data?.isArchived} fields={[{ key: 'title', label: 'Tên album / video', required: true }, { key: 'url', label: 'Liên kết', type: 'url', required: true }, { key: 'mediaType', label: 'Loại', type: 'select', default: 'photo_album', options: [{ value: 'photo_album', label: 'Album ảnh' }, { value: 'video_highlight', label: 'Video highlight' }, { value: 'raw_footage', label: 'Video gốc' }, { value: 'other', label: 'Khác' }] }, { key: 'notes', label: 'Ghi chú', type: 'textarea' }]} />
+    {action && <RecordEditor title={action === 'freeze' ? 'Xác nhận khóa lưu trữ' : 'Mở lại đám cưới'} fields={[{ key: action === 'freeze' ? 'archiveReason' : 'unarchiveReason', label: 'Lý do', required: true, type: 'textarea' }]} close={() => setAction(null)} save={async body => { await api(`/api/v1/archival/${action}`, { method: 'POST', body: jsonBody({ ...body, confirmed: true }) }); setRevision(v => v + 1); }} />}
+  </div>;
+}

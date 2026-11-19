@@ -6,6 +6,7 @@ import { weddingDateKey } from '@/lib/dates';
 import { TextInput } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
+import { AppointmentsWorkspace } from './AppointmentsWorkspace';
 import { CalendarDays } from 'lucide-react';
 
 const h = React.createElement;
@@ -41,11 +42,12 @@ export function LiveCalendarView() {
       h(TextInput, { label: 'Từ ngày', type: 'date', value: start, onChange: (event: React.ChangeEvent<HTMLInputElement>) => setStart(event.target.value) }),
       h(TextInput, { label: 'Đến ngày', type: 'date', value: end, onChange: (event: React.ChangeEvent<HTMLInputElement>) => setEnd(event.target.value) }),
     ),
+    h(AppointmentsWorkspace, { onChanged: () => setRevision(value=>value+1) }),
     h('a', { href: '/api/v1/export/calendar.ics', className: 'inline-flex min-h-[44px] items-center text-primary underline' }, 'Tải lịch .ics'),
     error && h(Alert, { variant: 'danger', action: { label: 'Thử lại', onClick: () => setRevision((value) => value + 1) } }, error),
     !error && (loading ? h('p', { role: 'status' }, 'Đang tải lịch...') : items.length ?
       h('ul', { className: 'space-y-3' }, items.map((item) => h('li', { key: item.id, className: 'bg-surface border rounded-card p-4 space-y-1' },
-        h('h2', { className: 'font-semibold break-words' }, item.title),
+        h('h2', { className: 'font-semibold break-words' }, h('a', { className: 'underline', href: item.itemType === 'task' ? '/tasks' : item.itemType === 'payment_schedule' ? '/payments' : '/calendar' }, item.title)),
         h('p', { className: 'text-sm text-text-muted' }, new Date(item.dateTime).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })),
         item.location && h('p', { className: 'text-sm' }, item.location),
       ))) : h(EmptyState, { title: 'Chưa có lịch trong khoảng ngày này', description: 'Các cuộc hẹn, buổi lễ và hạn công việc sẽ được tập hợp tại đây. Bạn có thể chọn một khoảng thời gian khác để xem.', icon: h(CalendarDays, { className: 'w-7 h-7 text-accent', strokeWidth: 1.4 }) })),

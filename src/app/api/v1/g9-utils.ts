@@ -112,6 +112,8 @@ export function handleG9Error(err: unknown): NextResponse {
     );
   }
 
+  const statusCode = (err as { statusCode?: number })?.statusCode;
+  if (statusCode && statusCode >= 400 && statusCode < 500) return NextResponse.json({ error: 'REQUEST_REJECTED', message: (err as Error).message }, { status: statusCode });
   const message = err instanceof Error ? err.message : 'Lỗi hệ thống không xác định.';
   return NextResponse.json(
     {

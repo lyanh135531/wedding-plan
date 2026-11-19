@@ -275,7 +275,7 @@ describe("Vendors & Quotes Schema Definition (Milestone M8.1)", () => {
         (e: { tag: string }) => e.tag === "0002_vendors_and_quotes"
       );
       expect(entry).toBeDefined();
-      expect(entry.idx).toBe(1);
+      expect(entry.idx).toBe(2);
     });
   });
 });

@@ -21,6 +21,7 @@ import {
   TimelineItemNotFoundError,
   InvalidTimelineShiftError,
   TimelineTimeOrderError,
+  OptimisticLockError,
 } from './errors';
 
 export interface PersonnelConflict {
@@ -287,6 +288,13 @@ export async function applyDelayShift(
     pivotTime: input.pivotTime,
     pivotItemId: input.pivotItemId,
   });
+
+  if (input.expectedVersions) {
+    const expected = new Map(input.expectedVersions.map(item => [item.id, item.version]));
+    if (expected.size !== preview.affectedItems.length || preview.affectedItems.some(item => expected.get(item.id) !== item.version)) {
+      throw new OptimisticLockError('Lịch trình đã thay đổi sau khi xem trước. Hãy xem trước lại trước khi xác nhận dời lịch.');
+    }
+  }
 
   for (const aff of preview.affectedItems) {
     const item = await getTimelineItemById(db, aff.id);

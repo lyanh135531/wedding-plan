@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
-import { checkInGuest, searchGuests, getSummary } from '@/lib/attendance';
+import { checkInGuest, searchGuests, getSummary, isCheckInEnabled } from '@/lib/attendance';
+import { normalizeSearchTerm } from '@/lib/guests/search';
 import { checkInGuestSchema } from '@/schemas/attendance';
 import { enforceOwnerRole, checkArchivalFreezeGuard, handleG10Error } from '@/app/api/v1/g10-utils';
 
@@ -33,17 +34,19 @@ export async function GET(req: NextRequest) {
 
     const query = searchParams.get('q') || '';
 
-    const results = await withTransactionScopedContext(
+    const result = await withTransactionScopedContext(
       session.user.id,
       session.role,
       async (_client, scopedDb) => {
-        return searchGuests(scopedDb, eventId, query);
+        const results = await searchGuests(scopedDb, eventId, session.role === 'owner' ? query : '');
+        const data = session.role === 'owner' ? results : results.filter(r => normalizeSearchTerm(r.fullName).includes(normalizeSearchTerm(query))).map(r => ({ ...r, phone: null, checkedInByUserId: null, checkInNotes: null }));
+        return { data, isCheckInEnabled: await isCheckInEnabled(scopedDb, eventId) };
       }
     );
 
     return NextResponse.json({
-      data: results,
-      total: results.length,
+      ...result,
+      total: result.data.length,
     });
   } catch (err: unknown) {
     return handleG10Error(err);

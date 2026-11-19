@@ -1,4 +1,5 @@
 'use client';
+import { useMutationFetch } from '@/components/common/useMutationFetch';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,7 @@ export interface GiftItem {
     returnedAt: string;
   }>;
   netAmount: string;
+  receivedAt?: string;
 }
 
 export interface GiftSummary {
@@ -96,7 +98,10 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
   const [selectedGift, setSelectedGift] = React.useState<GiftItem | null>(null);
 
   // Form states
+  const mutationFetch = useMutationFetch();
+  const writeLock = React.useRef(false);
   const [giftType, setGiftType] = React.useState<'cash' | 'physical'>('cash');
+  const [receivedAt, setReceivedAt] = React.useState('');
   const [amountInput, setAmountInput] = React.useState('');
   const [descriptionInput, setDescriptionInput] = React.useState('');
   const [proxyInput, setProxyInput] = React.useState('');
@@ -128,14 +133,14 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     if (!eventId) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/v1/gifts?eventId=${eventId}`);
+      const res = await mutationFetch(`/api/v1/gifts?eventId=${eventId}`);
       if (res.ok) {
         const json = await res.json();
         setGifts(json.data || []);
         setSummary(json.summary || null);
-      }
-    } catch (err) {
-      console.error('Lỗi tải sổ quà:', err);
+      } else { const failure = await res.json(); setErrorMsg(failure.message || 'Không thể tải sổ quà mừng.'); }
+    } catch {
+      setErrorMsg('Không thể tải sổ quà mừng. Kiểm tra kết nối và thử lại.');
     } finally {
       setLoading(false);
     }
@@ -163,10 +168,13 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
   // Submit create gift
   const handleCreateGift = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (writeLock.current) return;
+    writeLock.current = true;
     try {
       const payload: any = {
         eventId,
         giftType,
+        receivedAt: receivedAt ? new Date(`${receivedAt}:00+07:00`).toISOString() : undefined,
         receivedByProxy: proxyInput.trim() || undefined,
         envelopeCode: envelopeCodeInput.trim() || undefined,
         isSenderIdentified,
@@ -174,7 +182,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
       };
 
       if (giftType === 'cash') {
-        payload.amount = amountInput.replace(/\D/g, '');
+        payload.amount = amountInput.trim();
       } else {
         payload.description = descriptionInput.trim();
       }
@@ -188,7 +196,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
           }));
       }
 
-      const res = await fetch('/api/v1/gifts', {
+      const res = await mutationFetch('/api/v1/gifts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -209,7 +217,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
       }
     } catch {
       setErrorMsg('Lỗi kết nối máy chủ');
-    }
+    } finally { writeLock.current = false; }
   };
 
   // Submit return
@@ -217,12 +225,14 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     e.preventDefault();
     if (!selectedGift) return;
 
+    if (writeLock.current) return;
+    writeLock.current = true;
     try {
-      const res = await fetch(`/api/v1/gifts/${selectedGift.id}/returns`, {
+      const res = await mutationFetch(`/api/v1/gifts/${selectedGift.id}/returns`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: returnAmount.replace(/\D/g, ''),
+          amount: returnAmount.trim(),
           returnReason: returnReason.trim(),
         }),
       });
@@ -239,7 +249,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
       }
     } catch {
       setErrorMsg('Lỗi kết nối máy chủ');
-    }
+    } finally { writeLock.current = false; }
   };
 
   // Submit void
@@ -247,8 +257,10 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     e.preventDefault();
     if (!selectedGift) return;
 
+    if (writeLock.current) return;
+    writeLock.current = true;
     try {
-      const res = await fetch(`/api/v1/gifts/${selectedGift.id}/void`, {
+      const res = await mutationFetch(`/api/v1/gifts/${selectedGift.id}/void`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -268,7 +280,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
       }
     } catch {
       setErrorMsg('Lỗi kết nối máy chủ');
-    }
+    } finally { writeLock.current = false; }
   };
 
   // Submit thank
@@ -276,8 +288,10 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     e.preventDefault();
     if (!selectedGift) return;
 
+    if (writeLock.current) return;
+    writeLock.current = true;
     try {
-      const res = await fetch(`/api/v1/gifts/${selectedGift.id}/thank`, {
+      const res = await mutationFetch(`/api/v1/gifts/${selectedGift.id}/thank`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -298,19 +312,21 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
       }
     } catch {
       setErrorMsg('Lỗi kết nối máy chủ');
-    }
+    } finally { writeLock.current = false; }
   };
 
   // Submit reconcile
   const handleReconcile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (writeLock.current) return;
+    writeLock.current = true;
     try {
-      const res = await fetch('/api/v1/gifts/reconcile', {
+      const res = await mutationFetch('/api/v1/gifts/reconcile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           eventId,
-          countedCashAmount: countedCash.replace(/\D/g, ''),
+          countedCashAmount: countedCash.trim(),
         }),
       });
 
@@ -323,7 +339,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
       }
     } catch {
       setErrorMsg('Lỗi kết nối máy chủ');
-    }
+    } finally { writeLock.current = false; }
   };
 
   // Filtered gifts
@@ -501,6 +517,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
                     g.envelopeCode &&
                       h('span', { className: 'text-[11px] bg-gray-100 text-gray-700 font-mono px-2 py-0.5 rounded' }, `Mã: ${g.envelopeCode}`)
                   ),
+                  g.receivedAt && h('p', { className: 'text-xs text-text-muted' }, `Nhận lúc ${new Date(g.receivedAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`),
                   // Contributors list (AT25)
                   h(
                     'div',
@@ -596,6 +613,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
             className: 'bg-surface w-full max-w-lg rounded-card border border-border-control p-6 space-y-4 max-h-[90vh] overflow-y-auto',
           },
           h('h3', { className: 'text-base font-bold text-text-main' }, 'Ghi Nhận Quà Mừng Mới'),
+          h('label', { className: 'block text-sm space-y-1' }, 'Thời điểm nhận (giờ Việt Nam, để trống = hiện tại)', h('input', { type: 'datetime-local', value: receivedAt, className: 'w-full min-h-11 border rounded p-2', onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReceivedAt(e.target.value) })),
           h(
             'div',
             { className: 'flex gap-2 border-b border-border-subtle pb-2' },
@@ -633,7 +651,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
                   h('input', {
                     type: 'text',
                     required: true,
-                    value: amountInput,
+                    value: amountInput, inputMode: 'numeric', pattern: '[0-9]+', title: 'Nhập số tiền nguyên bằng chữ số, ví dụ 500000', 'aria-label': 'Số tiền mừng (VND)',
                     onChange: (e) => setAmountInput(e.target.value),
                     placeholder: 'Ví dụ: 1000000',
                     className: 'w-full mt-1 p-2 font-mono border border-border-control rounded focus:ring-1 focus:ring-primary',
@@ -646,7 +664,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
                   h('input', {
                     type: 'text',
                     required: true,
-                    value: descriptionInput,
+                    value: descriptionInput, 'aria-label': 'Mô tả quà',
                     onChange: (e) => setDescriptionInput(e.target.value),
                     placeholder: 'Ví dụ: Bộ ấm chén gốm Bát Tràng',
                     className: 'w-full mt-1 p-2 border border-border-control rounded focus:ring-1 focus:ring-primary',
@@ -706,7 +724,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
                   h('input', {
                     type: 'text',
                     required: true,
-                    value: c.contributorName,
+                    value: c.contributorName, 'aria-label': 'Tên người gửi',
                     onChange: (e) => updateContributor(idx, 'contributorName', e.target.value),
                     placeholder: `Tên người gửi ${idx + 1} *`,
                     className: 'flex-1 p-2 border border-border-control rounded',
@@ -769,7 +787,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
               h('input', {
                 type: 'text',
                 required: true,
-                value: returnAmount,
+                value: returnAmount, inputMode: 'numeric', pattern: '[0-9]+', title: 'Nhập số tiền nguyên bằng chữ số, ví dụ 500000', 'aria-label': 'Số tiền trả lại',
                 onChange: (e) => setReturnAmount(e.target.value),
                 placeholder: 'Số tiền...',
                 className: 'w-full mt-1 p-2 font-mono border border-border-control rounded',
@@ -782,7 +800,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
               h('textarea', {
                 rows: 2,
                 required: true,
-                value: returnReason,
+                value: returnReason, 'aria-label': 'Lý do trả lại',
                 onChange: (e: any) => setReturnReason(e.target.value),
                 placeholder: 'Ví dụ: Không nhận tiền mừng từ họ hàng gần...',
                 className: 'w-full mt-1 p-2 border border-border-control rounded',
@@ -826,7 +844,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
               h('textarea', {
                 rows: 3,
                 required: true,
-                value: voidReason,
+                value: voidReason, 'aria-label': 'Lý do hủy quà',
                 onChange: (e: any) => setVoidReason(e.target.value),
                 placeholder: 'Ví dụ: Nhập trùng phong bì, sai thông tin khách...',
                 className: 'w-full mt-1 p-2 border border-border-control rounded',
@@ -925,7 +943,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
               h('input', {
                 type: 'text',
                 required: true,
-                value: countedCash,
+                value: countedCash, inputMode: 'numeric', pattern: '[0-9]+', title: 'Nhập số tiền nguyên bằng chữ số, ví dụ 500000', 'aria-label': 'Tiền thực đếm',
                 onChange: (e) => setCountedCash(e.target.value),
                 placeholder: 'Nhập số tiền đếm thực tế...',
                 className: 'w-full mt-1 p-2 font-mono border border-border-control rounded',

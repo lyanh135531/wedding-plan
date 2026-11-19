@@ -108,6 +108,7 @@ export async function createWalkInGuest(
   input: WalkInGuestInput,
   userId?: string | null
 ): Promise<AttendanceCheckInDto> {
+  if (!(await isCheckInEnabled(db, input.eventId))) throw new CheckInDisabledError();
   return createWalkInGuestRecord(db, input.eventId, {
     groupId: input.groupId,
     fullName: input.fullName,

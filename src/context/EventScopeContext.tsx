@@ -40,10 +40,19 @@ export const EventScopeProvider: React.FC<EventScopeProviderProps> = ({
   initialDirtyForms = {},
   children,
 }) => {
-  const { isFamily, allowedEventIds } = useRole();
+  const { userId, isFamily, allowedEventIds } = useRole();
   const [currentScope, setCurrentScope] = useState<string>(initialScope);
   const [dirtyForms, setDirtyForms] = useState<Record<string, boolean>>(initialDirtyForms);
   const [pendingScopeChange, setPendingScopeChange] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!userId) return;
+    try {
+      const saved = sessionStorage.getItem('wedding-event-scope');
+      if (saved && (saved === 'all' || saved === 'common' || initialEvents.some(e => e.id === saved && (!isFamily || !allowedEventIds || allowedEventIds.includes(e.id))))) setCurrentScope(saved);
+    } catch { /* Browser storage can be disabled. */ }
+  }, [userId, initialEvents, isFamily, allowedEventIds]);
+  React.useEffect(() => { if (!userId) return; try { sessionStorage.setItem('wedding-event-scope', currentScope); } catch { /* optional */ } }, [userId, currentScope]);
 
   const stateRef = React.useRef({
     currentScope,

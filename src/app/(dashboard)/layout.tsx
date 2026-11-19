@@ -16,6 +16,7 @@ export default async function DashboardLayout({
   const eventList = await withTransactionScopedContext(session.user.id, session.role,
     async (_client, db) => db.select({ id: events.id, title: events.title, status: events.status }).from(events));
   return React.createElement(RoleProvider, {
+    initialUserId: session.user.id,
     initialRole: session.role,
     initialAllowedEventIds: session.role === 'owner' ? null : session.allowedEventIds,
   }, React.createElement(EventScopeProvider, {

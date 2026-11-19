@@ -1,4 +1,6 @@
-> **2026-11-18 Audit Council Sign-off:** Gate G11 and Milestone R3 formally verified and signed off by independent Audit Council (Reviewers, Challengers, Forensic Auditor). All Vitest (1,301), Playwright (296), adversarial drills, and mobile suites pass with 100% clean record. See `docs/MILESTONE_R3_SIGNOFF.md`.
+> **Current release status — 2026-11-19:** Dashboard menus now use persistent APIs; previews and runtime fixture fallbacks were replaced. Docker/PostgreSQL 16 passed 60 live browser tests and persisted database/uploads across restart. The selected installation target is this machine at localhost:3000; see [Local usage](docs/LOCAL_USAGE.md) and [Completion report](docs/COMPLETION_REPORT_2026-11-19.md). Interactive Google sign-in, full UAT and any future HTTPS/offsite deployment remain separate acceptance checks.
+>
+> **Historical 2026-11-18 Audit Council Sign-off:** Gate G11 and Milestone R3 were signed off for the scope documented in `docs/MILESTONE_R3_SIGNOFF.md`; historical test counts are not evidence that all product workflows are complete.
 
 # Project: Wedding Management Platform — Gate G11 & Milestone R3
 

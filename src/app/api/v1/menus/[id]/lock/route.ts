@@ -1,3 +1,4 @@
+import { runIdempotentCreate } from '@/lib/api/mutation';
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
@@ -76,14 +77,14 @@ export async function POST(req: NextRequest, context: RouteContext) {
           eventId = menu.eventId;
         }
 
-        return createAndLockCateringSnapshot(
+        return runIdempotentCreate(req, scopedDb, session!.user.id, bodyJson, async () => createAndLockCateringSnapshot(
           scopedDb,
           eventId,
           id,
           session!.user.id,
           parseResult.data.bufferPercentage,
           parseResult.data.notes ?? undefined
-        );
+        ));
       }
     );
 

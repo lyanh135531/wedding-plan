@@ -11,10 +11,13 @@ import { useSaveAction } from '@/components/common/useSaveAction';
 import { formatVND } from '@/lib/utils';
 import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { CategoryEditor } from './CategoryEditor';
+import { calculateCostItemMetrics } from '@/lib/finance/calculator';
+import { CostActions } from './CostActions';
 import { Wallet, Layers, Receipt, Plus } from 'lucide-react';
 
-interface Category { id: string; name: string; allocatedAmount: string | null }
-interface Cost { id: string; name: string; categoryId: string; eventId: string | null; contractedAmount: string | null; estimatedAmount: string | null; finalSettlementAmount: string | null; status: string }
+interface Category { id: string; name: string; allocatedAmount: string | null; updatedAt: string; defaultOrder?: number }
+interface Cost { id: string; name: string; categoryId: string; eventId: string | null; contractedAmount: string | null; estimatedAmount: string | null; finalSettlementAmount: string | null; status: string; version: number }
 interface Payment { id: string; costItemId: string; costItemName: string; paymentType: 'outflow' | 'refund'; amount: string; transactionTime: string; paymentMethod: string; parentPaymentId: string | null; isVoided: boolean; voidedReason: string | null; version: number }
 type Editor = { type: 'category' | 'cost' | 'payment' } | { type: 'refund' | 'void'; payment: Payment };
 const control = 'w-full min-h-11 border border-border-control rounded-control px-3 bg-surface';
@@ -121,6 +124,10 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
   const ids = new Set(shownCosts.map((cost) => cost.id));
   const shownPayments = payments.filter((payment) => ids.has(payment.costItemId));
   const net = shownPayments.filter((payment) => !payment.isVoided).reduce((sum, payment) => sum + (payment.paymentType === 'outflow' ? 1n : -1n) * BigInt(payment.amount), 0n);
+  const metrics = shownCosts.map(cost=>calculateCostItemMetrics({estimatedAmount:cost.estimatedAmount===null?null:BigInt(cost.estimatedAmount),contractedAmount:cost.contractedAmount===null?null:BigInt(cost.contractedAmount),finalSettlementAmount:cost.finalSettlementAmount===null?null:BigInt(cost.finalSettlementAmount)},shownPayments.filter(p=>p.costItemId===cost.id).map(p=>({...p,amount:BigInt(p.amount)}))));
+  const projected = metrics.reduce((sum,m)=>sum+(m.forecastAmount??0n),0n);
+  const remaining = metrics.reduce((sum,m)=>sum+(m.projectedRemaining??0n),0n);
+  const missing = metrics.filter(m=>m.isPriceMissing).length;
   return <section className="space-y-5">
     <div className="flex flex-wrap justify-between items-center gap-5">
       <div><p className="eyebrow mb-3">Tài chính cho ngày chung đôi</p><h1 className="text-[28px] sm:text-[32px] font-medium">{view === 'budget' ? 'Ngân sách & khoản chi' : 'Thanh toán & chi tiêu'}</h1></div>
@@ -136,13 +143,15 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
       <StatCard label="Khoản chi" value={loading || error ? null : shownCosts.length} unit="khoản" icon={<Receipt className="w-4 h-4" strokeWidth={1.5} />} scopeDescription="Các khoản chi đã ghi nhận" />
       <StatCard label="Danh mục" value={loading || error ? null : categories.length} unit="hạng mục" icon={<Layers className="w-4 h-4" strokeWidth={1.5} />} scopeDescription="Khung ngân sách của gia đình" />
     </div>
+    {!loading && !error && <div className="surface-card p-5 flex flex-wrap gap-5"><p>Tổng dự kiến{missing ? ' (tạm tính)' : ''}: <strong>{formatVND(projected)}</strong></p><p>Còn cần chuẩn bị{missing ? ' (chưa gồm khoản thiếu giá)' : ''}: <strong>{formatVND(remaining)}</strong></p>{missing > 0 && <p className="text-warning">{missing} khoản chưa có giá — chưa thể kết luận đủ ngân sách.</p>}</div>}
     {view === 'budget' && <>
       <div className="surface-card p-5 sm:p-6">
         <h2 className="text-sm font-semibold mb-4">Danh mục ngân sách</h2>
-        {categories.length ? <ul className="flex flex-wrap gap-3">{categories.map((category) => <li key={category.id} className="rounded-control bg-page border border-border-subtle px-4 py-3 text-xs"><span className="font-medium">{category.name}</span><span className="text-text-muted ml-3 tabular-nums">{formatVND(BigInt(category.allocatedAmount || '0'))}</span></li>)}</ul> : <p className="text-xs text-text-muted">Chưa có danh mục. Hãy bắt đầu với các hạng mục dành cho đám cưới của bạn.</p>}
+        {categories.length ? <ul className="flex flex-wrap gap-3">{categories.map((category) => <li key={category.id} className="rounded-control bg-page border border-border-subtle px-4 py-3 text-xs"><span className="font-medium">{category.name}</span><span className="text-text-muted ml-3 tabular-nums">{formatVND(BigInt(category.allocatedAmount || '0'))}</span><CategoryEditor category={category} reload={load}/></li>)}</ul> : <p className="text-xs text-text-muted">Chưa có danh mục. Hãy bắt đầu với các hạng mục dành cho đám cưới của bạn.</p>}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{shownCosts.map((cost) => <article key={cost.id} className="rounded-card border border-border-subtle p-4 bg-surface">
         <h2 className="font-bold">{cost.name}</h2><p>{cost.contractedAmount === null ? 'Chưa có giá hợp đồng' : formatVND(BigInt(cost.contractedAmount))}</p>
+        <CostActions cost={{...cost}} categories={categories} reload={load} />
       </article>)}</div>
       {!loading && !error && !shownCosts.length && <EmptyState title="Một kế hoạch rõ ràng cho từng khoản chi"
         description="Ghi lại chi phí, theo dõi thanh toán và dành ngân sách cho những điều quan trọng với hai bạn."

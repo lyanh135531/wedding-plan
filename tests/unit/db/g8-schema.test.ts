@@ -478,7 +478,7 @@ describe("Gate G8 Database Schemas & RLS Migration (Milestone M8.1)", () => {
         (e: { tag: string }) => e.tag === "0003_seating_catering_logistics"
       );
       expect(entry).toBeDefined();
-      expect(entry.idx).toBe(2);
+      expect(entry.idx).toBe(3);
       expect(entry.version).toBe("7");
     });
   });

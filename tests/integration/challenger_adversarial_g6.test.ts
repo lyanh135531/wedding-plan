@@ -51,6 +51,7 @@ describe('Adversarial Challenger Suite: Gate G6 Import/Export, Consistency & Res
               returning: vi.fn().mockResolvedValue([
                 {
                   id: 'batch-1',
+                  userId: 'user-1',
                   status: 'staged',
                   totalRows: 50,
                   validRows: 49,
@@ -63,15 +64,16 @@ describe('Adversarial Challenger Suite: Gate G6 Import/Export, Consistency & Res
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([
+              limit: vi.fn().mockReturnValue({ for: vi.fn().mockResolvedValue([
                 {
                   id: 'batch-1',
+                  userId: 'user-1',
                   status: 'staged',
                   totalRows: 50,
                   validRows: 49,
                   errorRows: 1, // Error row present!
                 },
-              ]),
+              ]) }),
             }),
           }),
         }),

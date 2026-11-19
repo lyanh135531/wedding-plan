@@ -13,6 +13,8 @@ import { GuestDetailDrawer, type GuestDetailData } from './GuestDetailDrawer';
 import type { GuestOwnerDto, GuestFamilyDto, AttendanceOwnerDto, InvitationOwnerDto } from '@/schemas/guests';
 import { removeVietnameseDiacritics } from '@/lib/utils';
 import { EmptyState } from '@/components/ui/empty-state';
+import { GuestActions } from './GuestActions';
+import { DuplicateReview } from './DuplicateReview';
 import { Plus, Search, Users } from 'lucide-react';
 
 type Guest = GuestOwnerDto | GuestFamilyDto;
@@ -30,6 +32,7 @@ export function LiveGuestsDirectory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [archived, setArchived] = useState(false);
   const [addGuest, setAddGuest] = useState(false);
   const [addFamily, setAddFamily] = useState(false);
   const [rsvpGuest, setRsvpGuest] = useState<string | null>(null);
@@ -43,7 +46,7 @@ export function LiveGuestsDirectory() {
     setError(null);
     try {
       const [people, attendees, cards] = await Promise.all([
-        allPages<Guest>('/api/v1/guests'),
+        allPages<Guest>(`/api/v1/guests?isArchived=${archived}`),
         eventId ? api<{ data: { attendance: AttendanceOwnerDto[]; tables: { id: string; name: string }[]; seats: { guestId: string; tableId: string }[] } }>(`/api/v1/seating?eventId=${eventId}`) : Promise.resolve({ data: { attendance: [], tables: [], seats: [] } }),
         eventId ? api<{ data: InvitationOwnerDto[] }>(`/api/v1/invitations?eventId=${eventId}`) : Promise.resolve({ data: [] }),
       ]);
@@ -53,7 +56,7 @@ export function LiveGuestsDirectory() {
     } catch (failure) {
       if (request === generation.current) setError((failure as Error).message);
     } finally { if (request === generation.current) setLoading(false); }
-  }, [eventId]);
+  }, [eventId, archived]);
   useEffect(() => { void load(); setRsvpGuest(null); setDetail(null); return () => { generation.current++; }; }, [load]);
 
   const createGuest = async (draft: AddGuestDraft) => {
@@ -125,6 +128,7 @@ export function LiveGuestsDirectory() {
       </div>
       <TextInput label="Tìm khách mời" leftAddon={<Search className="w-4 h-4 text-text-muted" />} placeholder="Tìm theo tên khách mời..." value={search} onChange={(e) => setSearch(e.target.value)} />
     </div>
+    {isOwner && <><label className="flex gap-2 items-center min-h-11"><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)} />Xem hồ sơ đã lưu trữ</label><DuplicateReview reload={load} /></>}
     {error && <div role="alert" className="text-danger">{error} <button onClick={() => void load()} className="underline min-h-11">Tải lại</button></div>}
     {loading && <p role="status">Đang tải khách mời…</p>}
     {!loading && !error && shown.length === 0 && <EmptyState type={search ? 'no_filter_match' : 'no_data'}
@@ -140,6 +144,7 @@ export function LiveGuestsDirectory() {
           <button className="text-lg font-semibold text-primary min-h-11 text-left" onClick={() => openDetail(guest)}>{guest.display_name}</button>
           <p>{row ? RSVP[row.rsvp_status] : 'Chưa mời dự buổi này'}</p>
           {card && <p>Thiệp: {card.card_name}</p>}
+          {isOwner && <GuestActions guest={guest as GuestOwnerDto} reload={load} />}
           {row && <p>{row.needs_seat ? 'Cần ghế' : 'Không cần ghế'} · {row.needs_meal ? 'Cần suất ăn' : 'Không cần suất ăn'}</p>}
           {isOwner && <Button variant="secondary" disabled={!eventId || busy} onClick={() => row ? setRsvpGuest(guest.id) : void invite(guest)}>
             {row ? 'Cập nhật RSVP' : 'Mời dự buổi'}

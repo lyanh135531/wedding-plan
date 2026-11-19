@@ -6,6 +6,8 @@ import {
   createFundingEntry,
 } from '@/lib/finance/funds.repository';
 import { createFundingEntrySchema } from '@/schemas/finance';
+import { createDirectThirdPartyPayment } from '@/lib/finance/payments.repository';
+import { withIdempotency } from '@/lib/finance/idempotency.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,21 +72,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const created = await withTransactionScopedContext(
+    const result = await withTransactionScopedContext(
       session.user.id,
       session.role,
       async (_client, txDb) => {
-        return createFundingEntry(txDb, parsed.data, session.user.id);
+        return withIdempotency({ transactionDb: txDb, userId: session.user.id, key: req.headers.get('idempotency-key'), operationType: 'CREATE_FUNDING_ENTRY', payload: parsed.data, execute: async () => {
+          const created = parsed.data.entry_type === 'direct_vendor_payment'
+            ? (await createDirectThirdPartyPayment(txDb, { costItemId: parsed.data.linked_cost_item_id!, amount: BigInt(parsed.data.amount), contributorName: parsed.data.contributor_name || 'Người thân', transactionTime: new Date(parsed.data.contribution_date), notes: parsed.data.notes }, session.user.id)).fundingEntry
+            : await createFundingEntry(txDb, parsed.data, session.user.id);
+          const serialized = JSON.parse(JSON.stringify(created, (_key, value) => typeof value === 'bigint' ? value.toString() : value));
+          return { status: 201, body: { data: serialized } };
+        } });
       }
     );
 
-    const serialized = JSON.parse(
-      JSON.stringify(created, (_key, value) =>
-        typeof value === 'bigint' ? value.toString() : value
-      )
-    );
-
-    return NextResponse.json({ data: serialized }, { status: 201 });
+    return NextResponse.json(result.body, { status: result.status });
   } catch (error: any) {
     console.error('[POST /api/v1/finance/funding-entries error]:', error);
     return NextResponse.json(

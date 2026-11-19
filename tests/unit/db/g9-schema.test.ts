@@ -174,7 +174,7 @@ describe("Gate G9 Database Schemas & RLS Migration (Milestone M9.1)", () => {
       const journalContent = JSON.parse(fs.readFileSync(journalPath, "utf-8"));
       const entry = journalContent.entries.find((e: any) => e.tag === "0004_preparation_support_g9");
       expect(entry).toBeDefined();
-      expect(entry.idx).toBe(3);
+      expect(entry.idx).toBe(4);
     });
   });
 });

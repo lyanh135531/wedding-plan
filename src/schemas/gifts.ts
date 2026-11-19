@@ -4,6 +4,7 @@ import {
   versionSchema,
   vndCurrencyStringSchema,
   notesSchema,
+  dateTimeStringSchema,
 } from './common';
 
 export const GIFT_TYPES = ['cash', 'physical'] as const;
@@ -37,6 +38,7 @@ export const createGiftSchema = z
     eventId: uuidSchema,
     giftType: giftTypeEnum.default('cash'),
     amount: vndCurrencyStringSchema.optional().nullable(),
+    receivedAt: dateTimeStringSchema.optional(),
     description: z.string().trim().max(1000).optional().nullable(),
     receivedByUserId: z.string().trim().optional().nullable(),
     receivedByProxy: z.string().trim().max(255).optional().nullable(),
@@ -114,6 +116,7 @@ export const giftDtoSchema = z.object({
   id: uuidSchema,
   eventId: uuidSchema,
   giftType: giftTypeEnum,
+  receivedAt: dateTimeStringSchema.optional(),
   amount: z.string().nullable(),
   description: z.string().nullable(),
   receivedByUserId: z.string().nullable(),

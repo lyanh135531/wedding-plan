@@ -119,7 +119,7 @@ export async function updateIdea(
     {
       title: input.title,
       category: input.category,
-      status: input.status || 'reference',
+      status: input.status ?? existing.status,
       metadata: updatedMetadata as Record<string, unknown>,
       isShared: input.isShared,
     },

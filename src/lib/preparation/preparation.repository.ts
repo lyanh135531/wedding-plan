@@ -13,6 +13,7 @@ export function mapToPreparationItemDto(
   if (role === 'family_view') {
     // For family_view, sanitize private notes
     const sanitizedMetadata = { ...metadata };
+    delete sanitizedMetadata.linkedCostItemId;
     if ('notes' in sanitizedMetadata) {
       sanitizedMetadata.notes = null;
     }

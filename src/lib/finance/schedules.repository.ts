@@ -12,6 +12,11 @@ export class ScheduleNotFoundError extends Error {
   }
 }
 
+export class ScheduleVersionConflictError extends Error {
+  readonly statusCode = 409;
+  constructor() { super('Đợt thanh toán đã thay đổi. Hãy tải lại trước khi sửa.'); }
+}
+
 export class AllocationNotFoundError extends Error {
   readonly statusCode = 404;
   constructor(message = 'Không tìm thấy phân bổ thanh toán') {
@@ -83,6 +88,7 @@ export async function updatePaymentSchedule(
   if (!existing) {
     throw new ScheduleNotFoundError();
   }
+  if (existing.version !== input.version) throw new ScheduleVersionConflictError();
 
   const updateFields: any = {
     updatedAt: new Date(),
@@ -98,8 +104,10 @@ export async function updatePaymentSchedule(
   const [updated] = await txDb
     .update(paymentSchedules)
     .set(updateFields)
-    .where(eq(paymentSchedules.id, id))
+    .where(and(eq(paymentSchedules.id, id), eq(paymentSchedules.version, input.version)))
     .returning();
+
+  if (!updated) throw new ScheduleVersionConflictError();
 
   await txDb.insert(auditLogs).values({
     userId,

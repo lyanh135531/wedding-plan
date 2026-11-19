@@ -6,6 +6,7 @@ import { costItems, paymentSchedules, payments, fundSettings, fundingEntries } f
 import { computeEffectiveDueDate, EventDateInfo } from './deadlines';
 import { calculateCostItemMetrics, calculateOverallBudgetSummary, calculateCashLedger } from '@/lib/finance/calculator';
 import { getUnifiedCalendarFeed } from './calendar.repository';
+import { getFinanceOverview } from '@/lib/finance/funds.repository';
 import { TxOrDb } from '@/lib/finance/costs.repository';
 import { weddingDateKey, endOfWeddingDay } from '@/lib/dates';
 
@@ -122,11 +123,7 @@ export async function getDashboardOverview(
       return { item, metrics };
     });
 
-    const budgetSummary = calculateOverallBudgetSummary(null, itemsWithMetrics);
-
-    const [settings] = await txDb.select().from(fundSettings).limit(1);
-    const allFundingEntries = await txDb.select().from(fundingEntries);
-    const cashLedger = calculateCashLedger(settings || null, allPayments, allFundingEntries);
+    const { budgetSummary, cashLedger } = await getFinanceOverview(txDb);
 
     // Overdue payments count
     const activeSchedules = await txDb

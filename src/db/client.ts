@@ -98,6 +98,16 @@ export async function withTransactionScopedContext<T>(
         console.error('[DB Transaction Rollback Error]:', rollbackError);
       }
     }
+    let cause: any = error;
+    while (cause) {
+      if (cause.code === '23514' && /chu trình phụ thuộc/.test(cause.message || '')) {
+        throw Object.assign(new Error('Công việc không được tạo chu trình phụ thuộc.'), { statusCode: 409 });
+      }
+      if (cause.code === 'P0001' && /lưu trữ/.test(cause.message || '')) {
+        throw Object.assign(new Error('Đám cưới đang lưu trữ. Hãy mở lại trước khi chỉnh sửa.'), { statusCode: 403 });
+      }
+      cause = cause.cause;
+    }
     throw error;
   } finally {
     // 5. Mandatory session sanitization: DISCARD ALL (AT57)

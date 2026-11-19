@@ -19,7 +19,7 @@ const stageImportBodySchema = z.object({
       group_name: z.string().optional(),
       notes: z.string().optional(),
     })
-  ).min(1, 'Dữ liệu nhập phải có ít nhất 1 dòng'),
+  ).min(1, 'Dữ liệu nhập phải có ít nhất 1 dòng').max(2000, 'Mỗi lô tối đa 2.000 khách'),
 });
 
 export async function POST(req: NextRequest) {

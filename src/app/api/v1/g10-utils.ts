@@ -163,6 +163,8 @@ export function handleG10Error(err: unknown): NextResponse {
     );
   }
 
+  const statusCode = (err as { statusCode?: number })?.statusCode;
+  if (statusCode && statusCode >= 400 && statusCode < 500) return NextResponse.json({ error: 'REQUEST_REJECTED', message: (err as Error).message }, { status: statusCode });
   console.error('[G10 API Error]:', err);
   return NextResponse.json(
     {

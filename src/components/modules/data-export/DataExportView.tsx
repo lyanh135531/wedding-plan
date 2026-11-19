@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, Download, ShieldCheck } from 'lucide-react';
 import { allPages } from '@/lib/api/request';
 import { sanitizeForSpreadsheet } from '@/lib/export/formula-sanitizer';
+import { WorkbookExports } from './WorkbookExports';
 import { Alert } from '@/components/ui/alert';
 
 const h = React.createElement;
@@ -98,6 +99,7 @@ export const DataExportView: React.FC<{ live?: boolean }> = ({ live = false }) =
       )
     ),
 
+    live && h(WorkbookExports),
     error && h(Alert, { variant: 'danger' }, error),
     loading && h('p', { role: 'status' }, 'Đang tải danh sách khách mời...'),
     // Anti-Injection info banner

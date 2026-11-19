@@ -1,0 +1,47 @@
+name: Verify release candidate
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@12.18.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit --incremental false
+      - run: pnpm exec vitest run --maxWorkers=4
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm exec playwright test --workers=4
+      - run: sudo apt-get update && sudo apt-get install -y postgresql postgresql-contrib
+      - run: pg_config --bindir >> "$GITHUB_PATH"
+      - run: pnpm test:live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification-reports
+          path: |
+            test-results/
+            playwright-report/
+  containers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@12.18.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm test:containers
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: container-verification-reports
+          path: |
+            test-results/
+            playwright-report/

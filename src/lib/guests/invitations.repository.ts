@@ -433,9 +433,11 @@ export async function bulkMarkInvitationsSent(
       status: 'sent',
       sentDate,
       updatedAt: new Date(),
+      version: sql`${invitations.version} + 1`,
     })
     .where(inArray(invitations.id, invitationIds))
     .returning({ id: invitations.id });
 
+  for (const invitation of res) await txDb.insert(schema.auditLogs).values({ userId: updaterUserId, action: 'MARK_INVITATION_SENT', entityType: 'invitations', entityId: invitation.id, afterState: { status: 'sent', sentDate } });
   return res.length;
 }

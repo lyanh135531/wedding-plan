@@ -1,4 +1,5 @@
 'use client';
+import { useMutationFetch } from '@/components/common/useMutationFetch';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,8 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
   onNavigateToGifts,
 }) => {
   const { isOwner } = useRole();
+  const mutationFetch = useMutationFetch();
+  const writeLock = React.useRef(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [guests, setGuests] = React.useState<CheckInGuestItem[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -58,19 +61,24 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
   const [walkInNotes, setWalkInNotes] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
+  const fetchGeneration = React.useRef(0);
   // Fetch guests
   const fetchGuests = React.useCallback(async (q = '') => {
+    const generation = ++fetchGeneration.current;
     setLoading(true);
+    setErrorMsg(null);
     try {
-      const res = await fetch(`/api/v1/attendance/check-in?eventId=${eventId}&q=${encodeURIComponent(q)}`);
+      const res = await mutationFetch(`/api/v1/attendance/check-in?eventId=${eventId}&q=${encodeURIComponent(q)}`);
       if (res.ok) {
         const json = await res.json();
+        if (generation !== fetchGeneration.current) return;
         setGuests(json.data || []);
-      }
-    } catch (err) {
-      console.error('Lỗi tải danh sách điểm danh:', err);
+        setIsCheckInEnabled(json.isCheckInEnabled !== false);
+      } else { const failure = await res.json(); setErrorMsg(failure.message || 'Không thể tải điểm danh.'); }
+    } catch {
+      if (generation === fetchGeneration.current) setErrorMsg('Không thể tải điểm danh. Kiểm tra kết nối và thử lại.');
     } finally {
-      setLoading(false);
+      if (generation === fetchGeneration.current) setLoading(false);
     }
   }, [eventId]);
 
@@ -88,7 +96,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
     }
 
     try {
-      const res = await fetch('/api/v1/attendance/check-in', {
+      const res = await mutationFetch('/api/v1/attendance/check-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,7 +121,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
   // Handle undo check in
   const handleUndo = async (guestId: string) => {
     try {
-      const res = await fetch('/api/v1/attendance/check-in/undo', {
+      const res = await mutationFetch('/api/v1/attendance/check-in/undo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -125,7 +133,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
 
       if (res.ok) {
         fetchGuests(searchQuery);
-      }
+      } else { const failure = await res.json(); setErrorMsg(failure.message || 'Không thể hoàn tác điểm danh.'); }
     } catch {
       setErrorMsg('Lỗi hoàn tác điểm danh');
     }
@@ -136,8 +144,10 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
     e.preventDefault();
     if (!walkInName.trim()) return;
 
+    if (writeLock.current) return;
+    writeLock.current=true;
     try {
-      const res = await fetch('/api/v1/attendance/walk-in', {
+      const res = await mutationFetch('/api/v1/attendance/walk-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -162,21 +172,21 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
       }
     } catch {
       setErrorMsg('Lỗi kết nối máy chủ');
-    }
+    } finally { writeLock.current=false; }
   };
 
   // Toggle check in feature
   const handleToggle = async () => {
     const nextVal = !isCheckInEnabled;
     try {
-      const res = await fetch('/api/v1/attendance/toggle', {
+      const res = await mutationFetch('/api/v1/attendance/toggle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, isEnabled: nextVal }),
       });
       if (res.ok) {
         setIsCheckInEnabled(nextVal);
-      }
+      } else { const failure = await res.json(); setErrorMsg(failure.message || 'Không thể bật/tắt điểm danh.'); }
     } catch {
       setErrorMsg('Lỗi bật/tắt tính năng điểm danh');
     }
@@ -436,7 +446,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
               h('input', {
                 type: 'text',
                 required: true,
-                value: walkInName,
+                value: walkInName, 'aria-label': 'Họ và tên khách phát sinh',
                 onChange: (e) => setWalkInName(e.target.value),
                 placeholder: 'Ví dụ: Nguyễn Văn A (Bạn chú rể)',
                 className: 'w-full mt-1 p-2 border border-border-control rounded focus:ring-1 focus:ring-primary',
@@ -448,7 +458,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
               h('label', { className: 'font-semibold text-text-main' }, 'Số điện thoại'),
               h('input', {
                 type: 'tel',
-                value: walkInPhone,
+                value: walkInPhone, 'aria-label': 'Điện thoại khách phát sinh',
                 onChange: (e) => setWalkInPhone(e.target.value),
                 placeholder: '0901234567',
                 className: 'w-full mt-1 p-2 border border-border-control rounded focus:ring-1 focus:ring-primary',
@@ -460,7 +470,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
               h('label', { className: 'font-semibold text-text-main' }, 'Mối quan hệ'),
               h('input', {
                 type: 'text',
-                value: walkInRelation,
+                value: walkInRelation, 'aria-label': 'Quan hệ khách phát sinh',
                 onChange: (e) => setWalkInRelation(e.target.value),
                 placeholder: 'Bạn đồng nghiệp, Họ hàng...',
                 className: 'w-full mt-1 p-2 border border-border-control rounded focus:ring-1 focus:ring-primary',
@@ -472,7 +482,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
               h('label', { className: 'font-semibold text-text-main' }, 'Ghi chú lễ tân'),
               h('textarea', {
                 rows: 2,
-                value: walkInNotes,
+                value: walkInNotes, 'aria-label': 'Ghi chú khách phát sinh',
                 onChange: (e: any) => setWalkInNotes(e.target.value),
                 placeholder: 'Ghi chú bàn tiệc hoặc yêu cầu đặc biệt...',
                 className: 'w-full mt-1 p-2 border border-border-control rounded focus:ring-1 focus:ring-primary',

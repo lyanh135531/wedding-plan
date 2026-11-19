@@ -199,7 +199,7 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
     expect(familyHtml).not.toContain('Thêm khách mới');
   });
 
-  it('renders Notification Bell with unread indicator', () => {
+  it('renders Notification Bell without a fabricated unread indicator', () => {
     const tree = React.createElement(
       RoleProvider,
       { initialRole: 'owner' },
@@ -213,6 +213,6 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
     const html = renderToStaticMarkup(tree);
 
     expect(html).toContain('aria-label="Thông báo"');
-    expect(html).toContain('bg-[#B42318]');
+    expect(html).not.toContain('bg-[#B42318]');
   });
 });

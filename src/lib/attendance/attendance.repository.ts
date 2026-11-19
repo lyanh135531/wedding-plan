@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { attendance, guests } from '@/db/schema/guests';
 import { events } from '@/db/schema/events';
 import { tables, seatAssignments } from '@/db/schema/seating';
@@ -6,6 +6,7 @@ import { normalizeSearchTerm, normalizeVietnamesePhone } from '@/lib/guests/sear
 import { AttendanceCheckInDto } from '@/schemas/attendance';
 import { TxDb } from './types';
 import { AttendanceNotFoundError, TableCapacityExceededError } from './errors';
+import { auditLogs } from '@/db/schema/system';
 
 export async function getEventCheckInStatus(db: TxDb, eventId: string): Promise<boolean> {
   const [event] = await db
@@ -20,7 +21,7 @@ export async function getEventCheckInStatus(db: TxDb, eventId: string): Promise<
 export async function setEventCheckInStatus(db: TxDb, eventId: string, isEnabled: boolean): Promise<void> {
   await db
     .update(events)
-    .set({ isCheckInEnabled: isEnabled, updatedAt: new Date() })
+    .set({ isCheckInEnabled: isEnabled, version: sql`${events.version}+1`, updatedAt: new Date() })
     .where(eq(events.id, eventId));
 }
 
@@ -29,7 +30,7 @@ export async function getAttendanceRecord(db: TxDb, eventId: string, guestId: st
     .select()
     .from(attendance)
     .where(and(eq(attendance.eventId, eventId), eq(attendance.guestId, guestId)))
-    .limit(1);
+    .limit(1).for('update');
 
   return record || null;
 }
@@ -98,11 +99,12 @@ export async function updateAttendanceCheckIn(
     .limit(1);
 
   const seating = await getSeatingInfoForGuest(db, eventId, guestId);
+  await db.insert(auditLogs).values({ userId: data.checkedInByUserId || 'system', action: data.isCheckedIn ? 'CHECK_IN_GUEST' : 'UNDO_CHECK_IN', entityType: 'attendance', entityId: updated.id, afterState: { guestId, eventId, isCheckedIn: data.isCheckedIn, notes: data.checkInNotes } });
 
   return {
     guestId: updated.guestId,
     eventId: updated.eventId,
-    fullName: guest ? guest.fullName : '',
+    fullName: guest ? guest.displayName : '',
     phone: guest ? guest.phone : null,
     rsvpStatus: updated.rsvpStatus,
     isCheckedIn: updated.isCheckedIn,
@@ -138,7 +140,9 @@ export async function createWalkInGuestRecord(
       .select()
       .from(tables)
       .where(eq(tables.id, data.tableId))
-      .limit(1);
+      .limit(1).for('update');
+
+    if (!targetTable || targetTable.eventId !== eventId) throw new AttendanceNotFoundError();
 
     if (targetTable) {
       const currentAssigned = await db
@@ -157,10 +161,9 @@ export async function createWalkInGuestRecord(
     .insert(guests)
     .values({
       groupId: data.groupId ?? null,
-      fullName: data.fullName,
+      displayName: data.fullName,
       phone: data.phone ?? null,
-      relationship: data.relationship ?? null,
-      isOriginOnsite: true,
+      subTags: data.relationship ? [data.relationship] : [],
       version: 1,
     })
     .returning();
@@ -175,7 +178,7 @@ export async function createWalkInGuestRecord(
       rsvpStatus: 'accepted',
       needsSeat: data.needsSeat ?? true,
       needsMeal: data.needsMeal ?? true,
-      mealDietaryTier: data.dietaryTier ?? 'regular',
+      mealDietaryTier: data.dietaryTier === 'child' ? 'child_portion' : data.dietaryTier === 'halal' ? 'special' : data.dietaryTier ?? 'regular',
       isOriginOnsite: true,
       isCheckedIn: true,
       checkInTime,
@@ -207,10 +210,11 @@ export async function createWalkInGuestRecord(
     seatNumber = seating.seatNumber;
   }
 
+  await db.insert(auditLogs).values({ userId: data.userId || 'system', action: 'CREATE_WALK_IN', entityType: 'guests', entityId: createdGuest.id, afterState: { eventId, fullName: data.fullName } });
   return {
     guestId: createdGuest.id,
     eventId,
-    fullName: createdGuest.fullName,
+    fullName: createdGuest.displayName,
     phone: createdGuest.phone,
     rsvpStatus: createdAttendance.rsvpStatus,
     isCheckedIn: createdAttendance.isCheckedIn,
@@ -247,7 +251,7 @@ export async function searchAttendanceGuests(
     const guest = row.guest;
     const att = row.attendance;
 
-    const normName = normalizeSearchTerm(guest.fullName);
+    const normName = normalizeSearchTerm(guest.displayName);
     const guestPhone = guest.phone ? normalizeVietnamesePhone(guest.phone) : null;
 
     let matched = false;
@@ -269,7 +273,7 @@ export async function searchAttendanceGuests(
       results.push({
         guestId: guest.id,
         eventId: att.eventId,
-        fullName: guest.fullName,
+        fullName: guest.displayName,
         phone: guest.phone,
         rsvpStatus: att.rsvpStatus,
         isCheckedIn: att.isCheckedIn,

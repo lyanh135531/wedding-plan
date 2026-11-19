@@ -23,7 +23,10 @@ async function useSession(context: BrowserContext, role: 'owner' | 'family') {
   return token;
 }
 
-test('anonymous dashboard navigation requires authentication', async ({ page }) => {
+test('anonymous dashboard navigation requires authentication', async ({ page, context }) => {
+  const oauth = await context.request.post('/api/auth/sign-in/social', { headers: { Origin: process.env.PLAYWRIGHT_BASE_URL! }, data: { provider: 'google', callbackURL: `${process.env.PLAYWRIGHT_BASE_URL}/setup`, disableRedirect: true } });
+  expect(oauth.ok(), await oauth.text()).toBe(true);
+  expect(new URL((await oauth.json()).url).hostname).toBe('accounts.google.com');
   await page.goto('/vendors');
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('button', { name: /Thêm nhà cung cấp/i })).toHaveCount(0);
@@ -162,15 +165,14 @@ test('tasks, event filters, family DTOs, documents and CSV exports use persisten
   expect((await context.request.put('/api/v1/finance/fund-settings', { data: updateFund })).status()).toBe(409);
 });
 
-test('unfinished screens clearly identify previews and cannot claim successful writes', async ({ page, context }) => {
+test('completed menu routes load without prototype data or browser errors', async ({ page, context }) => {
   await useSession(context, 'owner');
   const runtimeErrors: string[] = [];
-  page.on('pageerror', (error) => runtimeErrors.push(error.message));
-  for (const route of ['/menus', '/logistics', '/ideas', '/support', '/preparation', '/timeline', '/after-wedding', '/data/import']) {
+  page.on('pageerror', error => runtimeErrors.push(error.message));
+  for (const route of ['/menus','/logistics','/ideas','/support','/preparation','/timeline','/after-wedding','/data/import','/invitations','/attendance','/notifications']) {
     await page.goto(route);
-    await expect(page.getByText('Tính năng đang hoàn thiện', { exact: true })).toBeVisible();
-    const preview = page.getByRole('group', { name: 'Bản xem trước, chưa hỗ trợ lưu dữ liệu' });
-    expect(await preview.locator(':scope > div').evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+    await expect(page.getByText('Tính năng đang hoàn thiện', { exact: true })).toHaveCount(0);
+    await expect(page.locator('main')).toBeVisible();
   }
   expect(runtimeErrors).toEqual([]);
 });
@@ -222,7 +224,7 @@ test('family role hides owner actions, forbids writes and revokes sessions immed
   expect(forbidden.status()).toBe(403);
   await db.query('DELETE FROM sessions WHERE token=$1', [token]);
   expect((await context.request.get('/api/v1/vendors')).status()).toBe(401);
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(/\/login$/);
 });
 

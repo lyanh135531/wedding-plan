@@ -1,4 +1,4 @@
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, inArray } from 'drizzle-orm';
 import { importBatches, importRows, auditLogs } from '@/db/schema/system';
 import { guests, guestGroups } from '@/db/schema/guests';
 import { sanitizeFromSpreadsheet } from '@/lib/export/formula-sanitizer';
@@ -84,7 +84,7 @@ export async function stageGuestImport(
       validRowsCount++;
       processedRows.push({
         rowIndex: i + 1,
-        rawData: raw as Record<string, unknown>,
+        rawData: { ...parsed.data, notes: parsed.data.private_notes, group_name: raw.group_name || '' },
         isValid: true,
         errorMessages: [],
         parsedData: parsed.data,
@@ -160,11 +160,14 @@ export async function commitGuestImport(
     .select()
     .from(importBatches)
     .where(eq(importBatches.id, batchId))
-    .limit(1);
+    .limit(1).for('update');
 
   if (!batch) {
     throw new ImportBatchNotFoundError();
   }
+
+  if (batch.userId !== userId) throw new ImportBatchNotFoundError();
+  if (batch.status === 'rolled_back') throw new ImportBatchHasErrorsError('Lô đã hoàn tác. Vui lòng tạo lô nhập mới.');
 
   if (batch.status === 'committed') {
     return { success: true, message: 'Lô đã được commit trước đó', committedCount: batch.validRows };
@@ -194,6 +197,7 @@ export async function commitGuestImport(
         side: raw.side || 'mutual',
         ageTier: raw.age_tier || 'adult',
         privateNotes: raw.notes || null,
+        subTags: raw.sub_tags || (raw.group_name ? [raw.group_name] : []),
         isArchived: false,
         version: 1,
       })
@@ -246,11 +250,13 @@ export async function rollbackGuestImport(
     .select()
     .from(importBatches)
     .where(eq(importBatches.id, batchId))
-    .limit(1);
+    .limit(1).for('update');
 
   if (!batch) {
     throw new ImportBatchNotFoundError();
   }
+  if (batch.userId !== userId) throw new ImportBatchNotFoundError();
+  if (batch.status === 'rolled_back') return { success: true, batchId, status: 'rolled_back' };
 
   // If already committed, delete the inserted guests
   if (batch.status === 'committed') {
@@ -261,7 +267,11 @@ export async function rollbackGuestImport(
 
     const guestIds = rows.map((r: any) => r.targetEntityId).filter(Boolean);
     if (guestIds.length > 0) {
-      await txDb.delete(guests).where(sql`${guests.id} IN ${guestIds}`);
+      const imported = await txDb.select().from(guests).where(inArray(guests.id, guestIds)).for('update');
+      if (imported.some((g: typeof guests.$inferSelect) => g.version !== 1 || g.isArchived)) throw new ImportBatchHasErrorsError('Có khách đã được sửa hoặc lưu trữ. Không thể hoàn tác tự động.');
+      const linked = await txDb.execute(sql`SELECT 1 FROM attendance WHERE guest_id IN (${sql.join(guestIds.map((id: string) => sql`${id}::uuid`), sql`, `)}) LIMIT 1`);
+      if (linked.rows.length) throw new ImportBatchHasErrorsError('Khách đã được liên kết với buổi lễ. Không thể hoàn tác tự động.');
+      await txDb.delete(guests).where(inArray(guests.id, guestIds));
     }
   }
 

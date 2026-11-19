@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useMemo, ReactNode } from '
 export type UserRole = 'owner' | 'family_view';
 
 export interface RoleContextValue {
+  userId?: string;
   role: UserRole;
   isOwner: boolean;
   isFamily: boolean;
@@ -28,15 +29,18 @@ export const FORBIDDEN_FAMILY_ROUTES: readonly string[] = [
   '/data/import',
   '/history',
   '/sharing',
+  '/after-wedding',
 ];
 
 export interface RoleProviderProps {
+  initialUserId?: string;
   initialRole?: UserRole;
   initialAllowedEventIds?: string[] | null;
   children?: ReactNode;
 }
 
 export const RoleProvider: React.FC<RoleProviderProps> = ({
+  initialUserId,
   initialRole = 'owner',
   initialAllowedEventIds = null,
   children,
@@ -59,6 +63,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({
 
   const value = useMemo<RoleContextValue>(
     () => ({
+      userId: initialUserId,
       role,
       isOwner,
       isFamily,
@@ -69,7 +74,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({
       canMutate: isOwner,
       canViewFinance: isOwner,
     }),
-    [role, allowedEventIds, isOwner, isFamily]
+    [role, allowedEventIds, isOwner, isFamily, initialUserId]
   );
 
   return React.createElement(RoleContext.Provider, { value }, children);

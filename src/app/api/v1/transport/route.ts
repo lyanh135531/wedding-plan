@@ -1,3 +1,4 @@
+import { runIdempotentCreate } from '@/lib/api/mutation';
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest) {
       session!.user.id,
       session!.role,
       async (_client, scopedDb) => {
-        return createTransportTrip(scopedDb, parseResult.data);
+        return runIdempotentCreate(req, scopedDb, session!.user.id, bodyJson, async () => createTransportTrip(scopedDb, parseResult.data));
       }
     );
 

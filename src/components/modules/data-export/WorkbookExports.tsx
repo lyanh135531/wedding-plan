@@ -1,0 +1,10 @@
+'use client';
+import React,{useState} from 'react';
+import { Button } from '@/components/ui/button';
+import { useRole } from '@/context/RoleContext';
+import { api } from '@/lib/api/request';
+export function WorkbookExports(){const{isOwner}=useRole();const[busy,setBusy]=useState(false);const[error,setError]=useState('');const[downloaded,setDownloaded]=useState(false);const[notice,setNotice]=useState('');
+  if(!isOwner)return null;
+  const download=async(dataset:string,format='xlsx')=>{if(busy)return;setBusy(true);setError('');try{const response=await fetch(`/api/v1/export/workbook?dataset=${dataset}&format=${format}`,{cache:'no-store'});if(!response.ok)throw new Error('Không thể xuất dữ liệu. Vui lòng thử lại.');const url=URL.createObjectURL(await response.blob());const a=document.createElement('a');a.href=url;a.download=`wedding-${dataset}.${format}`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);if(dataset==='all')setDownloaded(true);}catch(f){setError((f as Error).message);}finally{setBusy(false);}};
+  return <section className="surface-card p-5 space-y-4 print:hidden"><h2 className="font-serif text-xl">Xuất sổ dữ liệu</h2><p>Tệp Excel gồm các sheet riêng cho từng nhóm dữ liệu. Gói JSON chứa toàn bộ dữ liệu nghiệp vụ và metadata tệp; tệp gốc cần sao lưu cùng thư mục uploads.</p>{error&&<p role="alert" className="text-danger">{error}</p>}{notice&&<p role="status">{notice}</p>}<div className="flex flex-wrap gap-3">{[['guests','Khách & Thiệp'],['finance','Tài chính'],['operations','Vận hành'],['all','Toàn bộ Excel']].map(([key,label])=><Button key={key} variant="secondary" disabled={busy} onClick={()=>void download(key)}>{label}</Button>)}<Button disabled={busy} onClick={()=>void download('all','json')}>Toàn bộ JSON</Button></div>{downloaded&&<Button variant="secondary" disabled={busy} onClick={async()=>{if(busy)return;setBusy(true);try{await api('/api/v1/archival/export-confirmation',{method:'POST'});setNotice('Đã ghi nhận hoàn thành xuất và kiểm tra hồ sơ.');}catch(f){setError((f as Error).message);}finally{setBusy(false);}}}>Xác nhận đã kiểm tra bản xuất toàn bộ</Button>}</section>;
+}

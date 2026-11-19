@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { createAuthDatabaseAdapter } from './database-adapter';
 import { db } from "@/db/client";
 import { users, sessions, accounts, verifications, memberInvites } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
@@ -90,16 +90,7 @@ if (process.env.NODE_ENV === "production" && !isBuildTime && (!authSecret || aut
  */
 export const auth = betterAuth({
   // 1. Drizzle ORM adapter mapping existing M1 PostgreSQL schema
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema: {
-      users,
-      sessions,
-      accounts,
-      verifications,
-    },
-    usePlural: true,
-  }),
+  database: createAuthDatabaseAdapter(),
 
   // 2. Secret & Base URL
   secret: authSecret || "wedding_platform_auth_secret_minimum_32_chars_default",

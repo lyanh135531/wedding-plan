@@ -8,6 +8,7 @@ import { Alert } from '@/components/ui/alert';
 import { useRole } from '@/context/RoleContext';
 import { api, jsonBody } from '@/lib/api/request';
 import { formatVND } from '@/lib/utils';
+import { FundingEntriesWorkspace } from '@/components/modules/finance/FundingEntriesWorkspace';
 import { useSaveAction } from '@/components/common/useSaveAction';
 
 const h = React.createElement;
@@ -76,13 +77,7 @@ export default function FundPage() {
           h(TextInput, { label: 'Ghi chú sổ quỹ', value: notes, disabled: saving, onChange: (event: React.ChangeEvent<HTMLInputElement>) => setNotes(event.target.value) }),
           h(Button, { type: 'submit', loading: saving }, 'Lưu mốc mở sổ'),
         ),
-        h('section', { className: 'space-y-3' },
-          h('h2', { className: 'font-semibold text-lg' }, 'Các nguồn tiền đã ghi nhận'),
-          entries.length ? h('ul', { className: 'space-y-2' }, entries.map((entry) => h('li', { key: entry.id, className: 'bg-surface border rounded-card p-4' },
-            h('p', { className: 'font-medium' }, `${entry.contributorName || 'Chưa ghi người đóng góp'} • ${formatVND(BigInt(entry.amount))}`),
-            h('p', { className: 'text-sm text-text-muted' }, entry.isVoided ? 'Đã hủy ghi nhận' : entry.entryType === 'cash_fund' ? 'Đã nhận vào quỹ' : entry.entryType === 'pledged_unreceived' ? 'Cam kết, chưa nhận' : 'Trả trực tiếp nhà cung cấp'),
-          ))) : h('p', null, 'Chưa có nguồn tiền đóng góp được ghi nhận.'),
-        ),
+        h(FundingEntriesWorkspace, { onChanged: () => setRevision((value) => value + 1) }),
       ),
     ));
 }

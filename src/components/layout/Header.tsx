@@ -146,12 +146,9 @@ export const Header: React.FC<HeaderProps> = ({
           className:
             'relative p-2 rounded-full border border-border-subtle text-text-muted hover:text-text-main hover:bg-page min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20',
           'aria-label': 'Thông báo',
+          onClick: () => window.location.assign('/notifications'),
         },
-        h(Bell, { className: 'w-5 h-5 text-text-muted', 'aria-hidden': 'true' }),
-        h('span', {
-          className: 'absolute top-2.5 right-2.5 w-2 h-2 bg-[#B42318] rounded-full',
-          'aria-hidden': 'true',
-        })
+        h(Bell, { className: 'w-5 h-5 text-text-muted', 'aria-hidden': 'true' })
       ),
 
       // Đúng 01 nút Primary CTA: Chỉ hiển thị cho Chủ sở hữu
