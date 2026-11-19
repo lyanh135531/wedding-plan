@@ -4,14 +4,14 @@
 **Target Milestone:** Milestone R1 (Daily Management: Gates G0 to G6)  
 **Author:** Test Infrastructure Writer (`test_writer_infra`)  
 **Status:** Approved & Active Test Runner Baseline  
-**Reference Standards:** `ORIGINAL_REQUEST.md`, `PLAN.md`, `docs/UI_UX_SPEC.md`, `PROJECT.md`, `qa_matrix_spec.md`
+**Reference Standards:** `PLAN.md`, `docs/UI_UX_SPEC.md`, `PROJECT.md`
 
 ---
 
 ## 1. Test Philosophy & Core Engineering Tenets
 
 1. **Opaque-Box & Requirement-Driven**:
-   Tests are formulated directly against explicit business contracts, mathematical invariants, and functional specifications defined in `ORIGINAL_REQUEST.md`, `PROJECT.md`, and `docs/UI_UX_SPEC.md`. Tests verify observable external behavior (HTTP response codes, DTO shapes, database state transitions, UI element visibility, and calculation outputs) rather than internal implementation nuances.
+   Tests are formulated directly against explicit business contracts, mathematical invariants, and functional specifications defined in `PLAN.md`, `PROJECT.md`, and `docs/UI_UX_SPEC.md`. Tests verify observable external behavior (HTTP response codes, DTO shapes, database state transitions, UI element visibility, and calculation outputs) rather than internal implementation nuances.
 
 2. **Absolute Elimination of Facade Tests**:
    No test shall merely assert truthy defaults or mock away business logic to achieve artificial green checkmarks. Every test must execute real assertions with derived expected values, verify failure paths, and test edge conditions.

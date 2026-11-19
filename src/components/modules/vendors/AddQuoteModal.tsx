@@ -215,7 +215,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
             rows: 3,
             placeholder: 'Thực đơn 6 món\nNước ngọt suốt tiệc\nMàn hình LED...',
             className:
-              'w-full p-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2.5 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         ),
         React.createElement(
@@ -232,7 +232,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
             rows: 3,
             placeholder: 'Phí rượu mang ngoài\nVũ đoàn khai mạc...',
             className:
-              'w-full p-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2.5 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         )
       ),
@@ -255,7 +255,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
             rows: 2,
             placeholder: 'Cọc đợt 1 30%, đợt 2 50%...',
             className:
-              'w-full p-2 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         ),
         React.createElement(
@@ -272,7 +272,7 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
             rows: 2,
             placeholder: 'Thời hạn hủy không phạt cọc trước 30 ngày...',
             className:
-              'w-full p-2 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         )
       ),

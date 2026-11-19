@@ -58,7 +58,7 @@ export const CapacityReductionWarningModal: React.FC<CapacityReductionWarningMod
 
       h(
         'div',
-        { className: 'bg-[#FAF9F5] p-3 rounded border border-border-subtle space-y-1 text-text-muted' },
+        { className: 'bg-page p-3 rounded border border-border-subtle space-y-1 text-text-muted' },
         h('p', { className: 'font-semibold text-text-main' }, 'Hướng xử lý hợp lệ:'),
         h('p', null, '1. Gỡ hoặc chuyển bớt khách sang các phòng hoặc chuyến xe khác còn trống.'),
         h('p', null, '2. Sau khi số khách phân bổ ≤ sức chứa mới, thực hiện lại thao tác cập nhật.')

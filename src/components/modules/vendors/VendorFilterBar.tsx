@@ -74,7 +74,7 @@ export const VendorFilterBar: React.FC<VendorFilterBarProps> = ({
             setLocalSearch(e.target.value),
           placeholder: 'Tìm theo tên nhà cung cấp, liên hệ, SĐT...',
           className:
-            'w-full pl-10 pr-10 py-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main placeholder:text-text-muted/60 focus:outline-2 focus:outline-offset-2 focus:outline-focus min-h-[44px]',
+            'w-full pl-10 pr-10 py-2.5 bg-page border border-border-control rounded-control text-base text-text-main placeholder:text-text-muted/60 focus:outline-2 focus:outline-offset-2 focus:outline-focus min-h-[44px]',
           'aria-label': 'Tìm kiếm nhà cung cấp',
         }),
         localSearch &&
@@ -105,7 +105,7 @@ export const VendorFilterBar: React.FC<VendorFilterBarProps> = ({
             onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
               onServiceTypeChange(e.target.value),
             className:
-              'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-offset-2 focus:outline-focus min-h-[44px]',
+              'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-offset-2 focus:outline-focus min-h-[44px]',
             'aria-label': 'Lọc theo loại dịch vụ',
           },
           React.createElement('option', { value: '' }, 'Tất cả dịch vụ'),
@@ -130,7 +130,7 @@ export const VendorFilterBar: React.FC<VendorFilterBarProps> = ({
             onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
               onStatusChange(e.target.value),
             className:
-              'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-offset-2 focus:outline-focus min-h-[44px]',
+              'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-offset-2 focus:outline-focus min-h-[44px]',
             'aria-label': 'Lọc theo trạng thái hợp đồng',
           },
           React.createElement('option', { value: '' }, 'Tất cả trạng thái'),

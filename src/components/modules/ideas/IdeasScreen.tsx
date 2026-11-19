@@ -254,7 +254,7 @@ export const IdeasScreen: React.FC<IdeasScreenProps> = ({
         'div',
         {
           className:
-            'flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-white rounded-xl border border-gray-200 shadow-2xs',
+            'flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-surface rounded-xl border border-gray-200 shadow-2xs',
         },
         // Search & Filters
         h(
@@ -285,7 +285,7 @@ export const IdeasScreen: React.FC<IdeasScreenProps> = ({
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 setCategoryFilter(e.target.value),
               className:
-                'px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white text-gray-700',
+                'px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface text-gray-700',
             },
             h('option', { value: 'all' }, 'Tất cả phân loại'),
             h('option', { value: 'style' }, 'Phong cách'),
@@ -301,7 +301,7 @@ export const IdeasScreen: React.FC<IdeasScreenProps> = ({
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 setStatusFilter(e.target.value),
               className:
-                'px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white text-gray-700',
+                'px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface text-gray-700',
             },
             h('option', { value: 'all' }, 'Tất cả trạng thái'),
             h('option', { value: 'decided' }, 'Đã chốt'),

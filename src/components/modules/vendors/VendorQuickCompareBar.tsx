@@ -35,7 +35,7 @@ export const VendorQuickCompareBar: React.FC<VendorQuickCompareBarProps> = ({
     'aside',
     {
       className:
-        'fixed bottom-16 lg:bottom-0 left-0 right-0 z-40 bg-[#1F2933] text-white py-3.5 px-4 shadow-xl border-t border-white/10 transition-transform duration-200 ease-out',
+        'fixed bottom-16 lg:bottom-0 left-0 right-0 z-40 bg-text-main text-white py-3.5 px-4 shadow-xl border-t border-white/10 transition-transform duration-200 ease-out',
       role: 'region',
       'aria-label': 'Thanh công cụ so sánh nhanh đối tác',
     },

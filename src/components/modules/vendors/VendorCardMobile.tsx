@@ -77,7 +77,7 @@ export const VendorCardMobile: React.FC<VendorCardMobileProps> = ({
                 'span',
                 {
                   className:
-                    'text-xs text-text-muted bg-[#FAF9F5] px-2 py-0.5 rounded border border-border-subtle',
+                    'text-xs text-text-muted bg-page px-2 py-0.5 rounded border border-border-subtle',
                 },
                 serviceLabel
               ),
@@ -116,7 +116,7 @@ export const VendorCardMobile: React.FC<VendorCardMobileProps> = ({
             'div',
             {
               className:
-                'my-2.5 p-2.5 bg-[#FAF9F5] rounded border border-border-subtle text-xs space-y-1',
+                'my-2.5 p-2.5 bg-page rounded border border-border-subtle text-xs space-y-1',
             },
             vendor.capacity &&
               React.createElement(

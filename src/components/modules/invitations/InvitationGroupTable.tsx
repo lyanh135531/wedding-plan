@@ -51,7 +51,7 @@ export const InvitationGroupTable: React.FC<InvitationGroupTableProps> = ({
       { className: 'w-full text-left border-collapse text-sm', 'aria-label': 'Danh sách nhóm thiệp mời' },
       h(
         'thead',
-        { className: 'bg-[#FAF9F5] border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
+        { className: 'bg-page border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
         h(
           'tr',
           null,
@@ -64,7 +64,7 @@ export const InvitationGroupTable: React.FC<InvitationGroupTableProps> = ({
                 type: 'button',
                 onClick: onToggleSelectAll,
                 className:
-                  'w-5 h-5 rounded border border-[#7A8881] flex items-center justify-center bg-white hover:border-primary',
+                  'w-5 h-5 rounded border border-border-control flex items-center justify-center bg-surface hover:border-primary',
                 'aria-label': allSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả',
               },
               allSelected && h(Check, { className: 'w-3.5 h-3.5 stroke-[3] text-primary' })
@@ -91,7 +91,7 @@ export const InvitationGroupTable: React.FC<InvitationGroupTableProps> = ({
             'tr',
             {
               key: inv.id,
-              className: `hover:bg-[#FAF9F5]/70 transition-colors ${
+              className: `hover:bg-page/70 transition-colors ${
                 isSelected ? 'bg-primary/5' : ''
               }`,
             },
@@ -105,7 +105,7 @@ export const InvitationGroupTable: React.FC<InvitationGroupTableProps> = ({
                   type: 'button',
                   onClick: () => onToggleSelect(inv.id),
                   className: `w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-primary border-primary text-white' : 'border-[#7A8881] bg-white'
+                    isSelected ? 'bg-primary border-primary text-white' : 'border-border-control bg-surface'
                   }`,
                   'aria-label': `Chọn thiệp ${inv.cardName}`,
                 },

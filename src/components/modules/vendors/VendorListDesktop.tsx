@@ -33,7 +33,7 @@ export const VendorListDesktop: React.FC<VendorListDesktopProps> = ({
       { className: 'w-full text-left border-collapse' },
       React.createElement(
         'thead',
-        { className: 'bg-[#FAF9F5] border-b border-border-subtle' },
+        { className: 'bg-page border-b border-border-subtle' },
         React.createElement(
           'tr',
           { className: 'text-xs font-semibold text-text-muted uppercase tracking-wider' },
@@ -95,7 +95,7 @@ export const VendorListDesktop: React.FC<VendorListDesktopProps> = ({
             'tr',
             {
               key: vendor.id,
-              className: `transition-colors hover:bg-[#FAF9F5]/70 ${
+              className: `transition-colors hover:bg-page/70 ${
                 isSelected ? 'bg-primary/5' : ''
               }`,
             },
@@ -146,7 +146,7 @@ export const VendorListDesktop: React.FC<VendorListDesktopProps> = ({
                   { className: 'flex items-center gap-2 text-xs text-text-muted' },
                   React.createElement(
                     'span',
-                    { className: 'bg-[#FAF9F5] px-2 py-0.5 rounded border border-border-subtle' },
+                    { className: 'bg-page px-2 py-0.5 rounded border border-border-subtle' },
                     serviceLabel
                   ),
                   vendor.address &&

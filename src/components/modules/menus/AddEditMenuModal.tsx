@@ -89,7 +89,7 @@ export const AddEditMenuModal: React.FC<AddEditMenuModalProps> = ({
         h('label', { className: 'block font-semibold text-text-main' }, 'Tên thực đơn *'),
         h('input', {
           className:
-            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
           value: name,
           onChange: (e: any) => setName(e.target.value),
           placeholder: 'Ví dụ: Thực đơn Tiệc Cưới VIP 01',
@@ -110,7 +110,7 @@ export const AddEditMenuModal: React.FC<AddEditMenuModalProps> = ({
               value: mealType,
               onChange: (e: any) => setMealType(e.target.value as MealType),
               className:
-                'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+                'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
             },
             h('option', { value: 'banquet' }, 'Bàn tiệc truyền thống (Banquet)'),
             h('option', { value: 'buffet' }, 'Tiệc đứng (Buffet)'),
@@ -123,7 +123,7 @@ export const AddEditMenuModal: React.FC<AddEditMenuModalProps> = ({
           h('label', { className: 'block font-semibold text-text-main' }, 'Đơn vị giá tham khảo / bàn (₫)'),
           h('input', {
             className:
-              'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+              'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
             type: 'number',
             value: pricePerTable,
             onChange: (e: any) => setPricePerTable(parseInt(e.target.value, 10) || 0),

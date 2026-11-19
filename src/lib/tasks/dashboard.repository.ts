@@ -1,4 +1,4 @@
-import { eq, and, sql, desc, asc } from 'drizzle-orm';
+import { eq, and, inArray, sql, desc, asc } from 'drizzle-orm';
 import { guests, attendance, invitations } from '@/db/schema/guests';
 import { tasks, appointments } from '@/db/schema/tasks';
 import { events } from '@/db/schema/events';
@@ -7,6 +7,7 @@ import { computeEffectiveDueDate, EventDateInfo } from './deadlines';
 import { calculateCostItemMetrics, calculateOverallBudgetSummary, calculateCashLedger } from '@/lib/finance/calculator';
 import { getUnifiedCalendarFeed } from './calendar.repository';
 import { TxOrDb } from '@/lib/finance/costs.repository';
+import { weddingDateKey, endOfWeddingDay } from '@/lib/dates';
 
 export interface DashboardOverviewParams {
   role: 'owner' | 'family_view';
@@ -31,7 +32,7 @@ export async function getDashboardOverview(
 
   const eventsMap = new Map<string, EventDateInfo>();
   for (const e of allEvents) {
-    const solarDateStr = e.startTime ? new Date(e.startTime).toISOString().slice(0, 10) : null;
+    const solarDateStr = e.startTime ? weddingDateKey(e.startTime) : null;
     eventsMap.set(e.id, {
       id: e.id,
       solarDate: solarDateStr,
@@ -41,8 +42,8 @@ export async function getDashboardOverview(
 
   // 2. Guest & Attendance Counts
   let attQuery = txDb.select().from(attendance).$dynamic();
-  if (role === 'family_view' && allowedEventIds.length > 0) {
-    attQuery = attQuery.where(sql`${attendance.eventId} IN ${allowedEventIds}`);
+  if (role === 'family_view') {
+    attQuery = attQuery.where(inArray(attendance.eventId, allowedEventIds));
   }
   const allAttendances = await attQuery;
 
@@ -115,7 +116,7 @@ export async function getDashboardOverview(
       });
     }
 
-    const itemsWithMetrics = allCostItems.map((item: any) => {
+    const itemsWithMetrics: Array<{ item: typeof costItems.$inferSelect; metrics: ReturnType<typeof calculateCostItemMetrics> }> = allCostItems.map((item: typeof costItems.$inferSelect) => {
       const itemPayments = paymentsByItem.get(item.id) || [];
       const metrics = calculateCostItemMetrics(item, itemPayments);
       return { item, metrics };
@@ -136,7 +137,7 @@ export async function getDashboardOverview(
     let overduePaymentsCount = 0;
     const nowEpoch = currentDate.getTime();
     for (const s of activeSchedules) {
-      const dueEpoch = new Date(`${s.dueDate}T23:59:59.999Z`).getTime();
+      const dueEpoch = endOfWeddingDay(s.dueDate).getTime();
       if (nowEpoch > dueEpoch) {
         overduePaymentsCount++;
       }
@@ -146,6 +147,12 @@ export async function getDashboardOverview(
       budgetSummary,
       cashLedger,
       overduePaymentsCount,
+      topExpenses: itemsWithMetrics.filter(({ metrics }) => metrics.forecastAmount !== null)
+        .sort((a, b) => a.metrics.forecastAmount! > b.metrics.forecastAmount! ? -1 : a.metrics.forecastAmount! < b.metrics.forecastAmount! ? 1 : 0)
+        .slice(0, 5).map(({ item, metrics }) => ({
+          id: item.id, name: item.name, amount: metrics.forecastAmount,
+          category: '', status: item.finalSettlementAmount !== null ? 'settled' : item.contractedAmount !== null ? 'contracted' : 'estimated',
+        })),
     };
   }
 
@@ -180,7 +187,7 @@ export async function getDashboardOverview(
       id: e.id,
       title: e.title,
       startTime: e.startTime,
-      solarDate: e.startTime ? new Date(e.startTime).toISOString().slice(0, 10) : null,
+      solarDate: e.startTime ? weddingDateKey(e.startTime) : null,
       isDateConfirmed: e.status === 'confirmed',
     })),
   };

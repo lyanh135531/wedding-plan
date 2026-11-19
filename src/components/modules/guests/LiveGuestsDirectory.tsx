@@ -12,6 +12,8 @@ import { RsvpUpdateDrawer, type MemberRsvpState } from './RsvpUpdateDrawer';
 import { GuestDetailDrawer, type GuestDetailData } from './GuestDetailDrawer';
 import type { GuestOwnerDto, GuestFamilyDto, AttendanceOwnerDto, InvitationOwnerDto } from '@/schemas/guests';
 import { removeVietnameseDiacritics } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Plus, Search, Users } from 'lucide-react';
 
 type Guest = GuestOwnerDto | GuestFamilyDto;
 const RSVP: Record<string, string> = { accepted: 'Sẽ tham dự', declined: 'Không tham dự', tentative: 'Cân nhắc', pending_reply: 'Chưa phản hồi', not_contacted: 'Chưa liên hệ' };
@@ -110,17 +112,26 @@ export function LiveGuestsDirectory() {
 
   return <section className="space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-bold">Danh Sách Khách Mời</h1>
+      <div><p className="eyebrow mb-3">Những người thương quý</p><h1 className="text-[28px] sm:text-[32px] font-medium">Danh sách khách mời</h1></div>
       {isOwner && <div className="flex flex-wrap gap-2">
-        <Button onClick={() => setAddGuest(true)}>Thêm khách mời</Button>
+        <Button leftIcon={<Plus className="w-4 h-4" />} onClick={() => setAddGuest(true)}>Thêm khách mời</Button>
         <Button variant="secondary" disabled={!eventId} onClick={() => setAddFamily(true)}>Thêm gia đình</Button>
       </div>}
     </div>
-    <p>Phản hồi và thiệp cho buổi: <strong>{event?.name || 'Chưa có buổi lễ'}</strong>. Chọn buổi khác ở thanh phạm vi.</p>
-    <TextInput label="Tìm khách mời" value={search} onChange={(e) => setSearch(e.target.value)} />
+    <div className="surface-card p-5 sm:p-6 space-y-4">
+      <div className="flex flex-wrap justify-between items-center gap-3 text-xs text-text-muted">
+        <p>Phản hồi và thiệp cho buổi: <strong className="font-medium text-primary">{event?.name || 'Chưa có buổi lễ'}</strong></p>
+        {!loading && !error && <span className="inline-flex items-center gap-2 text-primary bg-primary/5 rounded-full px-3 py-1.5"><Users className="w-3.5 h-3.5" />{guests.length} khách mời</span>}
+      </div>
+      <TextInput label="Tìm khách mời" leftAddon={<Search className="w-4 h-4 text-text-muted" />} placeholder="Tìm theo tên khách mời..." value={search} onChange={(e) => setSearch(e.target.value)} />
+    </div>
     {error && <div role="alert" className="text-danger">{error} <button onClick={() => void load()} className="underline min-h-11">Tải lại</button></div>}
     {loading && <p role="status">Đang tải khách mời…</p>}
-    {!loading && !error && shown.length === 0 && <p>Chưa có khách mời phù hợp.</p>}
+    {!loading && !error && shown.length === 0 && <EmptyState type={search ? 'no_filter_match' : 'no_data'}
+      title={search ? 'Không tìm thấy khách mời phù hợp' : 'Những gương mặt thân thương, bắt đầu từ đây'}
+      description={search ? 'Thử tìm bằng một tên khác hoặc xóa từ khóa tìm kiếm.' : 'Thêm khách mời để cùng theo dõi thiệp mời, phản hồi và sắp xếp chỗ ngồi cho ngày chung vui.'}
+      icon={<Users className="w-7 h-7 text-accent" strokeWidth={1.4} />}
+      action={isOwner && !search ? { label: 'Thêm khách mời đầu tiên', onClick: () => setAddGuest(true) } : undefined} />}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {shown.map((guest) => {
         const row = attendance.find((item) => item.guest_id === guest.id);

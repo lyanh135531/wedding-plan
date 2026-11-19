@@ -1,4 +1,5 @@
-import { eq, and, sql, desc, asc } from 'drizzle-orm';
+import { eq, and, or, isNull, inArray, sql, desc, asc } from 'drizzle-orm';
+import { weddingDateKey } from '@/lib/dates';
 import {
   tasks,
   taskChecklistItems,
@@ -45,6 +46,16 @@ export interface ListTasksParams {
   allowedEventIds?: string[];
 }
 
+function toFamilyTask(task: typeof tasks.$inferSelect & { computed_due_date?: string | null; is_waiting_official_date?: boolean }) {
+  return toTaskFamilyDto({
+    id: task.id, title: task.title, category: task.category, event_id: task.eventId,
+    priority: task.priority, status: task.status, deadline_type: task.deadlineType,
+    shared_with_family: task.sharedWithFamily, shared_public_title: task.sharedPublicTitle,
+    shared_public_notes: task.sharedPublicNotes, computed_due_date: task.computed_due_date,
+    is_waiting_official_date: task.is_waiting_official_date,
+  });
+}
+
 export async function listTasks(txDb: TxOrDb, params: ListTasksParams) {
   const { status, priority, categoryId, eventId, search, limit = 100, offset = 0, role, allowedEventIds = [] } = params;
 
@@ -59,7 +70,7 @@ export async function listTasks(txDb: TxOrDb, params: ListTasksParams) {
 
   const eventsMap = new Map<string, EventDateInfo>();
   for (const e of allEvents) {
-    const solarDateStr = e.startTime ? new Date(e.startTime).toISOString().slice(0, 10) : null;
+    const solarDateStr = e.startTime ? weddingDateKey(e.startTime) : null;
     eventsMap.set(e.id, {
       id: e.id,
       solarDate: solarDateStr,
@@ -78,9 +89,7 @@ export async function listTasks(txDb: TxOrDb, params: ListTasksParams) {
   // Family role masking: ONLY shared_with_family = true, and scoped to allowed events (AT59)
   if (role === 'family_view') {
     conditions.push(eq(tasks.sharedWithFamily, true));
-    if (allowedEventIds.length > 0) {
-      conditions.push(sql`${tasks.eventId} IS NULL OR ${tasks.eventId} IN ${allowedEventIds}`);
-    }
+    conditions.push(or(isNull(tasks.eventId), inArray(tasks.eventId, allowedEventIds))!);
   }
 
   if (status) {
@@ -98,7 +107,7 @@ export async function listTasks(txDb: TxOrDb, params: ListTasksParams) {
   if (search && search.trim() !== '') {
     const clean = search.trim();
     conditions.push(
-      sql`public.immutable_unaccent(${tasks.title}) ILIKE public.immutable_unaccent(${'%' + clean + '%'})`
+      sql`public.immutable_unaccent(${role === 'family_view' ? tasks.sharedPublicTitle : tasks.title}) ILIKE public.immutable_unaccent(${'%' + clean + '%'})`
     );
   }
 
@@ -124,7 +133,7 @@ export async function listTasks(txDb: TxOrDb, params: ListTasksParams) {
 
   // 4. Transform for Family View if needed (AT59)
   if (role === 'family_view') {
-    return computedList.map((t: any) => toTaskFamilyDto(t));
+    return computedList.map((t: any) => toFamilyTask(t));
   }
 
   return computedList;
@@ -178,7 +187,7 @@ export async function getTaskById(
     .from(events);
   const eventsMap = new Map<string, EventDateInfo>();
   for (const e of allEvents) {
-    const solarDateStr = e.startTime ? new Date(e.startTime).toISOString().slice(0, 10) : null;
+    const solarDateStr = e.startTime ? weddingDateKey(e.startTime) : null;
     eventsMap.set(e.id, {
       id: e.id,
       solarDate: solarDateStr,
@@ -197,7 +206,7 @@ export async function getTaskById(
   };
 
   if (role === 'family_view') {
-    return toTaskFamilyDto(fullTask);
+    return toFamilyTask(fullTask);
   }
 
   return fullTask;

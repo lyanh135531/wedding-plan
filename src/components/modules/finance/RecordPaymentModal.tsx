@@ -108,7 +108,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         { onSubmit: handleSubmit, className: 'space-y-4' },
         h(
           'div',
-          { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded text-xs' },
+          { className: 'p-3 bg-page border border-border-subtle rounded text-xs' },
           h('span', { className: 'text-text-muted block' }, 'Khoản chi liên kết:'),
           h('span', { className: 'font-semibold text-text-main text-sm mt-0.5 block' }, costItemName)
         ),
@@ -149,7 +149,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
                   className: `h-9 text-xs rounded border font-medium transition-colors ${
                     isSelected
                       ? 'bg-primary text-white border-primary'
-                      : 'bg-white text-text-main border-[#7A8881] hover:bg-[#F7F5F0]'
+                      : 'bg-surface text-text-main border-border-control hover:bg-page'
                   }`,
                 },
                 labels[p]
@@ -200,7 +200,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
             {
               value: method,
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setMethod(e.target.value as any),
-              className: 'w-full h-9 px-2.5 text-xs bg-white border border-[#7A8881] rounded',
+              className: 'w-full h-9 px-2.5 text-xs bg-surface border border-border-control rounded',
             },
             h('option', { value: 'transfer' }, 'Chuyển khoản ngân hàng'),
             h('option', { value: 'cash' }, 'Tiền mặt'),

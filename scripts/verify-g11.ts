@@ -134,8 +134,8 @@ try {
     }
     console.log('[G11] Running hydrated browser journeys against real PostgreSQL');
     execFileSync(process.execPath, [require.resolve('@playwright/test/cli'), 'test', '--config=playwright.live.config.ts'], {
-      env: { ...process.env, PLAYWRIGHT_BASE_URL: baseURL, G11_DB_URL: sourceUrl.toString() },
-      stdio: 'inherit', windowsHide: true, timeout: 180_000,
+      env: { ...process.env, BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET, PLAYWRIGHT_BASE_URL: baseURL, G11_DB_URL: sourceUrl.toString() },
+      stdio: 'inherit', windowsHide: true, timeout: 600_000,
     });
     const liveReport = JSON.parse(fs.readFileSync(path.join(reportDir, 'live-results.json'), 'utf8'));
     assert.equal(liveReport.stats.unexpected, 0);

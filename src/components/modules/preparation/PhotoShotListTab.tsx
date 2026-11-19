@@ -90,7 +90,7 @@ export const PhotoShotListTab: React.FC<PhotoShotListTabProps> = ({
       'div',
       {
         className:
-          'flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-white rounded-xl border border-gray-200 shadow-2xs print:hidden',
+          'flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-surface rounded-xl border border-gray-200 shadow-2xs print:hidden',
       },
       // Left filters
       h(
@@ -104,7 +104,7 @@ export const PhotoShotListTab: React.FC<PhotoShotListTabProps> = ({
             onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
               setPriorityFilter(e.target.value),
             className:
-              'px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white text-gray-700',
+              'px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface text-gray-700',
           },
           h('option', { value: 'all' }, 'Tất cả mức ưu tiên'),
           h('option', { value: 'must_have' }, 'Bắt buộc (Must-have)'),
@@ -237,7 +237,7 @@ export const PhotoShotListTab: React.FC<PhotoShotListTabProps> = ({
                     ? 'bg-gray-800 border-gray-700 text-white'
                     : shot.completed
                     ? 'bg-emerald-50/50 border-emerald-200'
-                    : 'bg-white border-gray-200 shadow-2xs'
+                    : 'bg-surface border-gray-200 shadow-2xs'
                 }`,
                 'data-testid': `photo-shot-${shot.id}`,
               },

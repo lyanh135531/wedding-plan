@@ -40,7 +40,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   return h(
     'nav',
     {
-      className: `lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#E2E8E4] z-40 transition-transform duration-180 ${
+      className: `mobile-navigation lg:hidden fixed bottom-0 left-0 right-0 h-16 border-t border-border-subtle z-40 transition-transform duration-180 ${
         isVisible ? 'translate-y-0' : 'translate-y-full'
       }`,
       'aria-label': 'Thanh điều hướng di động',
@@ -58,16 +58,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           {
             key: tab.href,
             href: tab.href,
+            prefetch: false,
             className: `flex flex-col items-center justify-center flex-1 py-1 min-h-[44px] transition-colors ${
               isActive
-                ? 'text-[#23483E] font-semibold'
-                : 'text-[#52616B] hover:text-[#1F2933]'
+                ? 'text-primary font-semibold'
+                : 'text-text-muted hover:text-text-main'
             }`,
             'aria-current': isActive ? 'page' : undefined,
           },
           h(TabIcon, {
             className: `w-5 h-5 mb-0.5 ${
-              isActive ? 'text-[#23483E]' : 'text-[#7A8881]'
+              isActive ? 'text-primary' : 'text-text-muted'
             }`,
             'aria-hidden': 'true',
           }),
@@ -88,10 +89,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           type: 'button',
           onClick: onOpenMobileMenu,
           className:
-            'flex flex-col items-center justify-center flex-1 py-1 min-h-[44px] text-[#52616B] hover:text-[#1F2933] transition-colors',
+            'flex flex-col items-center justify-center flex-1 py-1 min-h-[44px] text-text-muted hover:text-text-main transition-colors',
           'aria-label': 'Mở danh mục điều hướng mở rộng',
         },
-        h(MenuIcon, { className: 'w-5 h-5 mb-0.5 text-[#7A8881]', 'aria-hidden': 'true' }),
+        h(MenuIcon, { className: 'w-5 h-5 mb-0.5 text-border-control', 'aria-hidden': 'true' }),
         h('span', { className: 'text-[12px] leading-tight text-center' }, 'Menu')
       )
     )

@@ -343,7 +343,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(createMockSession('owner') as any);
       const nonExistent = '99999999-9999-4999-8999-999999999999';
       const req = new NextRequest('http://localhost:3000/api/v1/tables/' + nonExistent);
-      const res = await tableDetailRoute.GET(req, { params: { id: nonExistent } });
+      const res = await tableDetailRoute.GET(req, { params: Promise.resolve({ id: nonExistent }) });
       expect(res.status).toBe(404);
     });
 
@@ -353,7 +353,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
         method: 'PATCH',
         body: JSON.stringify({ name: 'Tên Sửa' }),
       });
-      const res = await tableDetailRoute.PATCH(req, { params: { id: tableId } });
+      const res = await tableDetailRoute.PATCH(req, { params: Promise.resolve({ id: tableId }) });
       expect(res.status).toBe(403);
     });
 
@@ -366,7 +366,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           version: 999, // Stale version
         }),
       });
-      const res = await tableDetailRoute.PATCH(req, { params: { id: tableId } });
+      const res = await tableDetailRoute.PATCH(req, { params: Promise.resolve({ id: tableId }) });
       expect(res.status).toBe(409);
       const body = await res.json();
       expect(body.error).toBe('OPTIMISTIC_LOCK_CONFLICT');
@@ -393,7 +393,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           version: 1,
         }),
       });
-      const res = await tableDetailRoute.PATCH(req, { params: { id: tableId } });
+      const res = await tableDetailRoute.PATCH(req, { params: Promise.resolve({ id: tableId }) });
       expect(res.status).toBe(422);
       const body = await res.json();
       expect(body.error).toBe('INVALID_CAPACITY_REDUCTION');
@@ -411,7 +411,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           version: 1,
         }),
       });
-      const res = await tableDetailRoute.PATCH(req, { params: { id: tableId } });
+      const res = await tableDetailRoute.PATCH(req, { params: Promise.resolve({ id: tableId }) });
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.data.name).toBe('Bàn VIP 01 Cập Nhật');
@@ -424,7 +424,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
       const req = new NextRequest('http://localhost:3000/api/v1/tables/' + tableId, {
         method: 'DELETE',
       });
-      const res = await tableDetailRoute.DELETE(req, { params: { id: tableId } });
+      const res = await tableDetailRoute.DELETE(req, { params: Promise.resolve({ id: tableId }) });
       expect(res.status).toBe(403);
     });
 
@@ -461,7 +461,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           guestId: thirdAdult,
         }),
       });
-      const res = await tableSeatsRoute.POST(req, { params: { id: tableId } });
+      const res = await tableSeatsRoute.POST(req, { params: Promise.resolve({ id: tableId }) });
       expect(res.status).toBe(409);
       const body = await res.json();
       expect(body.error).toBe('CAPACITY_EXCEEDED');
@@ -486,7 +486,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           guestId: infantGuest,
         }),
       });
-      const res = await tableSeatsRoute.POST(req, { params: { id: tableId } });
+      const res = await tableSeatsRoute.POST(req, { params: Promise.resolve({ id: tableId }) });
       expect(res.status).toBe(201);
       const body = await res.json();
       expect(body.data.guestId).toBe(infantGuest);
@@ -499,7 +499,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
         { method: 'DELETE' }
       );
       const res = await tableSeatGuestRoute.DELETE(req, {
-        params: { id: tableId, guestId: adultGuest1 },
+        params: Promise.resolve({ id: tableId, guestId: adultGuest1 }),
       });
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -558,7 +558,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           version: 999,
         }),
       });
-      const res = await menuDetailRoute.PATCH(req, { params: { id: menuId } });
+      const res = await menuDetailRoute.PATCH(req, { params: Promise.resolve({ id: menuId }) });
       expect(res.status).toBe(409);
       const body = await res.json();
       expect(body.error).toBe('OPTIMISTIC_LOCK_CONFLICT');
@@ -574,7 +574,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           courseOrder: 2,
         }),
       });
-      const res = await menuItemsRoute.POST(req, { params: { id: menuId } });
+      const res = await menuItemsRoute.POST(req, { params: Promise.resolve({ id: menuId }) });
       expect(res.status).toBe(201);
       const body = await res.json();
       expect(body.data.name).toBe('Gà Hấp Lá Chanh');
@@ -605,7 +605,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           notes: 'Chốt số lượng chính thức với nhà hàng',
         }),
       });
-      const res = await menuLockRoute.POST(req, { params: { id: menuId } });
+      const res = await menuLockRoute.POST(req, { params: Promise.resolve({ id: menuId }) });
       expect(res.status).toBe(201);
       const body = await res.json();
       expect(body.data.isLocked).toBe(true);
@@ -659,7 +659,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           version: 1,
         }),
       });
-      const res = await transportDetailRoute.PATCH(req, { params: { id: tripId } });
+      const res = await transportDetailRoute.PATCH(req, { params: Promise.resolve({ id: tripId }) });
       expect(res.status).toBe(422);
       const body = await res.json();
       expect(body.error).toBe('INVALID_CAPACITY_REDUCTION');
@@ -685,7 +685,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           guestId: infantGuest,
         }),
       });
-      const res = await transportPassengersRoute.POST(req, { params: { id: tripId } });
+      const res = await transportPassengersRoute.POST(req, { params: Promise.resolve({ id: tripId }) });
       expect(res.status).toBe(409);
       const body = await res.json();
       expect(body.error).toBe('CAPACITY_EXCEEDED');
@@ -698,7 +698,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
         { method: 'DELETE' }
       );
       const res = await transportPassengerGuestRoute.DELETE(req, {
-        params: { id: tripId, guestId: adultGuest1 },
+        params: Promise.resolve({ id: tripId, guestId: adultGuest1 }),
       });
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -742,7 +742,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
           guestId: adultGuest2,
         }),
       });
-      const res = await accommodationRoomsRoute.POST(req, { params: { id: accommodationId } });
+      const res = await accommodationRoomsRoute.POST(req, { params: Promise.resolve({ id: accommodationId }) });
       expect(res.status).toBe(201);
       const body = await res.json();
       expect(body.data.roomNumber).toBe('Room 602');
@@ -756,7 +756,7 @@ describe('Gate G8 API Route Handlers Integration Tests (M8.3, AT03, AT07, AT21, 
         { method: 'DELETE' }
       );
       const res = await accommodationRoomDetailRoute.DELETE(req, {
-        params: { id: accommodationId, assignmentId: roomAssignmentId },
+        params: Promise.resolve({ id: accommodationId, assignmentId: roomAssignmentId }),
       });
       expect(res.status).toBe(200);
       const body = await res.json();

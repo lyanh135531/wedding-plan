@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
 import { IdeasScreen } from '@/components/modules/ideas';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 import { usePrototype } from '@/components/testing/PrototypeToolbar';
 
 const h = React.createElement;
@@ -21,8 +22,8 @@ export default function IdeasPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(IdeasScreen, {
+    h(FeaturePreview, null, h(IdeasScreen, {
       initialState: state,
-    })
+    }))
   );
 }

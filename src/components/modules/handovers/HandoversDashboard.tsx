@@ -274,7 +274,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
               className: `shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full border font-medium ${
                 selectedSnapshotId === s.id
                   ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-text-main border-border-control'
+                  : 'bg-surface text-text-main border-border-control'
               }`,
             },
             `Bản v${s.version}: ${s.title}${s.handoverStatus === 'handed_over' ? ' (Đã giao)' : ''}`
@@ -285,7 +285,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
     // A4 Printable Document Body
     h(
       'div',
-      { className: 'bg-white border border-border-subtle rounded-card shadow-sm p-6 sm:p-10 space-y-8 print:border-none print:shadow-none print:p-0' },
+      { className: 'bg-surface border border-border-subtle rounded-card shadow-sm p-6 sm:p-10 space-y-8 print:border-none print:shadow-none print:p-0' },
       // Document header with event info & export timestamp
       h(
         'div',

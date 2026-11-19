@@ -84,13 +84,13 @@ export const CalendarAgendaView: React.FC<CalendarAgendaViewProps> = ({
           { className: 'flex items-center gap-2' },
           h(
             'button',
-            { className: 'p-2 border border-[#7A8881] rounded-control hover:bg-[#FAF9F5]', 'aria-label': 'Tháng trước' },
+            { className: 'p-2 border border-border-control rounded-control hover:bg-page', 'aria-label': 'Tháng trước' },
             h(ChevronLeft, { className: 'w-4 h-4 text-text-main' })
           ),
           h('span', { className: 'text-sm font-semibold px-2' }, 'Tháng 11, 2026'),
           h(
             'button',
-            { className: 'p-2 border border-[#7A8881] rounded-control hover:bg-[#FAF9F5]', 'aria-label': 'Tháng sau' },
+            { className: 'p-2 border border-border-control rounded-control hover:bg-page', 'aria-label': 'Tháng sau' },
             h(ChevronRight, { className: 'w-4 h-4 text-text-main' })
           )
         )
@@ -104,7 +104,7 @@ export const CalendarAgendaView: React.FC<CalendarAgendaViewProps> = ({
           'div',
           { className: 'grid grid-cols-7 gap-px bg-border-subtle rounded overflow-hidden text-center text-xs' },
           ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'].map((d) =>
-            h('div', { key: d, className: 'bg-[#FAF9F5] p-2.5 font-bold text-text-muted uppercase' }, d)
+            h('div', { key: d, className: 'bg-page p-2.5 font-bold text-text-muted uppercase' }, d)
           ),
           // Days grid mock
           Array.from({ length: 35 }).map((_, idx) => {
@@ -118,8 +118,8 @@ export const CalendarAgendaView: React.FC<CalendarAgendaViewProps> = ({
               'div',
               {
                 key: idx,
-                className: `bg-white p-2 min-h-[90px] text-left flex flex-col justify-between ${
-                  !isCurrentMonth ? 'bg-[#FAF9F5]/40 text-text-muted/40' : ''
+                className: `bg-surface p-2 min-h-[90px] text-left flex flex-col justify-between ${
+                  !isCurrentMonth ? 'bg-page/40 text-text-muted/40' : ''
                 }`,
               },
               h('span', { className: 'font-semibold text-xs tabular-nums' }, isCurrentMonth ? dayNum : ''),

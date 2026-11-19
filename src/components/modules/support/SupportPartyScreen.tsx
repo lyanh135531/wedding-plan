@@ -175,7 +175,7 @@ export const SupportPartyScreen: React.FC<SupportPartyScreenProps> = ({
         'div',
         {
           className:
-            'flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-xl border border-gray-200 shadow-2xs',
+            'flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-surface rounded-xl border border-gray-200 shadow-2xs',
         },
         // Search & Role select
         h(
@@ -205,7 +205,7 @@ export const SupportPartyScreen: React.FC<SupportPartyScreenProps> = ({
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 setRoleFilter(e.target.value),
               className:
-                'px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white text-gray-700',
+                'px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface text-gray-700',
             },
             h('option', { value: 'all' }, 'Tất cả 9 vai trò'),
             Object.entries(ROLE_CONFIG).map(([roleKey, conf]) =>

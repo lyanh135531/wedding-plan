@@ -5,14 +5,14 @@
 @layer base {
   :root {
     /* Color Tokens */
-    --bg-page: #F7F5F0;
-    --bg-surface: #FFFFFF;
-    --color-primary: #23483E;
-    --color-primary-hover: #19382F;
-    --color-text-main: #1F2933;
-    --color-text-muted: #52616B;
-    --border-control: #7A8881;
-    --border-subtle: #E2E8E4;
+    --bg-page: #F7F5EF;
+    --bg-surface: #FFFEFB;
+    --color-primary: #244C40;
+    --color-primary-hover: #193B31;
+    --color-text-main: #283E35;
+    --color-text-muted: #6A756D;
+    --border-control: #B9C1B6;
+    --border-subtle: #E4E7DD;
 
     /* Semantic Tokens */
     --color-success: #166534;
@@ -23,7 +23,7 @@
     --bg-danger: #FEF3F2;
     --color-info: #175CD3;
     --bg-info: #EFF8FF;
-    --color-focus: #1D4ED8;
+    --color-focus: #967638;
 
     /* Layout Dimensions */
     --sidebar-width: 240px;
@@ -65,17 +65,57 @@
     font-display: swap;
   }
 
+  @font-face {
+    font-family: 'Playfair Display';
+    src: url('/fonts/playfair-display/PlayfairDisplay-Variable.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
   html {
-    font-family: 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: var(--bg-page);
-    color: var(--color-text-main);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 84px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+
+  h2, h3, h4, h5, h6 {
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: -0.018em;
   }
 
   body {
     min-height: 100vh;
-    overflow-x: hidden;
+    background: var(--bg-page);
+    color: var(--color-text-main);
+    font-size: 14px;
+    line-height: 1.65;
+    font-synthesis: none;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+  }
+
+  input, select, textarea {
+    accent-color: var(--color-primary);
+  }
+
+  input::file-selector-button { font-family: inherit; cursor: pointer; }
+
+  ::selection {
+    color: #173C33;
+    background: #E5D9BA;
   }
 
   /* Focus ring rule */
@@ -99,5 +139,50 @@
   /* Number formatting utilities */
   .tabular-nums {
     font-variant-numeric: tabular-nums lining-nums;
+  }
+}
+
+@layer components {
+  .app-sidebar { background: #173C33; color: #F6F3E9; scrollbar-width: thin; scrollbar-color: #527064 transparent; }
+  .app-sidebar .nav-group-title { color: #B8C4B8; font-family: 'Be Vietnam Pro', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: .17em; }
+  .app-sidebar .nav-link { color: #D3DDD4; border: 1px solid transparent; font-size: 12px; }
+  .app-sidebar .nav-link:hover { color: #FFFEFB; background: #244B40; }
+  .app-sidebar .nav-link--active { color: #173C33; background: #F3EEDC; border-color: #F3EEDC; }
+  .app-sidebar .nav-link--active:hover { color: #173C33; background: #FFFBEE; }
+  .app-sidebar .nav-link svg { opacity: .75; }
+  .app-sidebar .nav-link--active svg { opacity: 1; }
+  .app-header { background: rgb(255 254 251 / .96); box-shadow: 0 1px 0 rgb(30 64 45 / .035); }
+  .workspace-content { animation: content-enter 260ms ease-out; }
+  .workspace-content > section > h1, .workspace-content > div > h1 { font-weight: 500; }
+  .surface-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 18px; box-shadow: 0 4px 24px -8px rgb(31 58 43 / .09); }
+  .eyebrow { font-family: 'Be Vietnam Pro', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: #8C703C; }
+  .auth-page { min-height: 100svh; background: #F7F5EF; padding: 28px; }
+  .auth-panel { min-height: min(760px, calc(100svh - 56px)); max-width: 1180px; width: 100%; display: grid; grid-template-columns: 1.05fr 1fr; background: #FFFEFB; border: 1px solid #DFE3D7; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 70px -30px rgb(23 60 51 / .18); }
+  .auth-story { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 48px; background: #173C33; color: #F6F3E9; }
+  .auth-story::before { content: ''; position: absolute; width: 360px; height: 460px; border: 1px solid rgb(210 191 143 / .25); border-radius: 180px 180px 0 0; right: -125px; bottom: -90px; transform: rotate(-16deg); pointer-events: none; }
+  .auth-story::after { content: ''; position: absolute; width: 330px; height: 430px; border: 1px solid rgb(210 191 143 / .2); border-radius: 165px 165px 0 0; right: -85px; bottom: -100px; transform: rotate(12deg); pointer-events: none; }
+  .auth-content { display: flex; align-items: center; justify-content: center; padding: 64px 48px; }
+  .auth-login-card { width: 100%; max-width: 370px; text-align: left; }
+  .auth-login-card h1 { font-size: clamp(28px, 3vw, 38px); line-height: 1.3; }
+  .auth-login-card .auth-signin { width: 100%; height: 52px; }
+  .auth-footer { color: #7D887D; font-size: 11px; line-height: 1.8; }
+  .stat-card { position: relative; overflow: hidden; min-width: 0; }
+  .stat-card::before { content: ''; display: block; width: 30px; height: 2px; background: #B39B68; position: absolute; top: 0; left: 24px; }
+  .stat-card .stat-value { font-weight: 500; font-size: clamp(22px, 2vw, 29px); overflow-wrap: anywhere; line-height: 1.4; }
+  .mobile-navigation { padding-bottom: env(safe-area-inset-bottom); height: calc(64px + env(safe-area-inset-bottom)); background: rgb(255 254 251 / .98); box-shadow: 0 -5px 24px rgb(23 60 51 / .035); }
+  .mobile-navigation [aria-current='page'] { position: relative; }
+  .mobile-navigation [aria-current='page']::before { content: ''; position: absolute; top: -3px; width: 24px; height: 2px; border-radius: 2px; background: #967638; }
+  @keyframes content-enter { from { opacity: .6; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 767px) {
+    .auth-page { padding: 16px; }
+    .auth-panel { grid-template-columns: 1fr; min-height: calc(100svh - 32px); border-radius: 20px; }
+    .auth-story { padding: 24px 28px 30px; min-height: 230px; }
+    .auth-story::before, .auth-story::after { width: 200px; height: 270px; right: -65px; bottom: -140px; }
+    .auth-content { padding: 32px 28px; }
+  }
+  @media print {
+    .app-sidebar, .app-header, .mobile-navigation { display: none !important; }
+    #main-content { padding: 0 !important; }
+    body { background: white; }
   }
 }

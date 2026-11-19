@@ -67,7 +67,7 @@ export const CreateSnapshotModal: React.FC<CreateSnapshotModalProps> = ({
       'div',
       {
         className:
-          'bg-white rounded-xl shadow-2xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
+          'bg-surface rounded-xl shadow-2xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
       },
       // Header
       h(
@@ -199,7 +199,7 @@ export const CreateSnapshotModal: React.FC<CreateSnapshotModalProps> = ({
                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => setHandedOverTo(e.target.value),
                 placeholder: 'Anh Hùng (Quản lý sảnh)',
                 className:
-                  'w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-white',
+                  'w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-surface',
               })
             ),
             h(
@@ -212,7 +212,7 @@ export const CreateSnapshotModal: React.FC<CreateSnapshotModalProps> = ({
                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => setHandoverChannel(e.target.value),
                 placeholder: 'Biên bản giấy, Zalo...',
                 className:
-                  'w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-white',
+                  'w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded bg-surface',
               })
             )
           )

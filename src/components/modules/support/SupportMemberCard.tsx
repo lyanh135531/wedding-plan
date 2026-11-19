@@ -59,7 +59,7 @@ export const SupportMemberCard: React.FC<SupportMemberCardProps> = ({
   return h(
     'div',
     {
-      className: `bg-white rounded-xl border border-gray-200 p-5 shadow-2xs hover:shadow-xs transition space-y-4 flex flex-col justify-between ${className}`,
+      className: `bg-surface rounded-xl border border-gray-200 p-5 shadow-2xs hover:shadow-xs transition space-y-4 flex flex-col justify-between ${className}`,
       'data-testid': `support-member-card-${member.id}`,
     },
     // Top: Name, Roles & Badges

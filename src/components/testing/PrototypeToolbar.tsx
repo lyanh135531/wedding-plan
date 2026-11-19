@@ -208,7 +208,7 @@ export function PrototypeToolbar() {
       {
         onClick: () => setCollapsed(false),
         className:
-          'fixed bottom-4 right-4 z-50 bg-[#23483E] text-white p-3 rounded-full shadow-lg hover:bg-[#19382F] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] print:hidden',
+          'fixed bottom-4 right-4 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] print:hidden',
         title: 'Mở công cụ Prototype Switcher',
         'aria-label': 'Mở Prototype Switcher',
       },
@@ -220,24 +220,24 @@ export function PrototypeToolbar() {
     'aside',
     {
       className:
-        'fixed bottom-4 right-4 z-50 bg-white border border-[#7A8881] rounded-xl shadow-2xl p-4 w-[340px] text-[#1F2933] text-sm print:hidden',
+        'fixed bottom-4 right-4 z-50 bg-surface border border-border-control rounded-xl shadow-2xl p-4 w-[340px] text-text-main text-sm print:hidden',
       'aria-label': 'Bảng điều khiển Prototype Testing',
       role: 'region',
     },
     // Header
     h(
       'div',
-      { className: 'flex justify-between items-center mb-3 border-b border-[#E2E8E4] pb-2' },
+      { className: 'flex justify-between items-center mb-3 border-b border-border-subtle pb-2' },
       h(
         'span',
-        { className: 'font-semibold text-xs tracking-wider uppercase text-[#52616B]' },
+        { className: 'font-semibold text-xs tracking-wider uppercase text-text-muted' },
         'Prototype Switcher'
       ),
       h(
         'button',
         {
           onClick: () => setCollapsed(true),
-          className: 'text-xs text-[#52616B] hover:text-[#1F2933] px-1',
+          className: 'text-xs text-text-muted hover:text-text-main px-1',
           'aria-label': 'Thu nhỏ bảng điều khiển',
         },
         'Thu nhỏ ✕'
@@ -254,7 +254,7 @@ export function PrototypeToolbar() {
         null,
         h(
           'label',
-          { htmlFor: 'proto-screen-select', className: 'block text-xs font-medium text-[#52616B] mb-1' },
+          { htmlFor: 'proto-screen-select', className: 'block text-xs font-medium text-text-muted mb-1' },
           'Màn hình (Screen):'
         ),
         h(
@@ -265,7 +265,7 @@ export function PrototypeToolbar() {
             onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
               setScreen(e.target.value as PrototypeScreen),
             className:
-              'w-full h-9 px-2 text-sm border border-[#7A8881] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+              'w-full h-9 px-2 text-sm border border-border-control rounded-lg bg-surface focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
           },
           h('option', { value: 's01_setup' }, 'S01 / S02: Thiết lập (Setup)'),
           h('option', { value: 's03_overview' }, 'S03: Tổng quan (Overview)'),
@@ -284,7 +284,7 @@ export function PrototypeToolbar() {
         null,
         h(
           'label',
-          { className: 'block text-xs font-medium text-[#52616B] mb-1' },
+          { className: 'block text-xs font-medium text-text-muted mb-1' },
           'Trạng thái (State):'
         ),
         h(
@@ -311,8 +311,8 @@ export function PrototypeToolbar() {
                   onClick: () => setState(s),
                   className: `h-7 text-xs rounded border transition-colors ${
                     isSelected
-                      ? 'bg-[#23483E] text-white border-[#23483E] font-medium'
-                      : 'bg-white text-[#1F2933] border-[#E2E8E4] hover:bg-[#F7F5F0]'
+                      ? 'bg-primary text-white border-primary font-medium'
+                      : 'bg-surface text-text-main border-border-subtle hover:bg-page'
                   }`,
                 },
                 labelMap[s]
@@ -328,7 +328,7 @@ export function PrototypeToolbar() {
         null,
         h(
           'label',
-          { className: 'block text-xs font-medium text-[#52616B] mb-1' },
+          { className: 'block text-xs font-medium text-text-muted mb-1' },
           'Vai trò (Role):'
         ),
         h(
@@ -341,8 +341,8 @@ export function PrototypeToolbar() {
               onClick: () => setRole('owner'),
               className: `h-8 text-xs font-medium rounded-lg border transition-colors ${
                 role === 'owner'
-                  ? 'bg-[#23483E] text-white border-[#23483E]'
-                  : 'bg-white text-[#1F2933] border-[#7A8881] hover:bg-[#F7F5F0]'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-surface text-text-main border-border-control hover:bg-page'
               }`,
             },
             'Chủ sở hữu (Owner)'
@@ -355,7 +355,7 @@ export function PrototypeToolbar() {
               className: `h-8 text-xs font-medium rounded-lg border transition-colors ${
                 role === 'family_view'
                   ? 'bg-[#854D0E] text-white border-[#854D0E]'
-                  : 'bg-white text-[#1F2933] border-[#7A8881] hover:bg-[#F7F5F0]'
+                  : 'bg-surface text-text-main border-border-control hover:bg-page'
               }`,
             },
             'Người nhà (Family)'
@@ -366,11 +366,11 @@ export function PrototypeToolbar() {
       // Viewport test helper hint
       h(
         'div',
-        { className: 'pt-2 border-t border-[#E2E8E4] flex items-center justify-between text-[11px] text-[#52616B]' },
+        { className: 'pt-2 border-t border-border-subtle flex items-center justify-between text-[11px] text-text-muted' },
         h('span', null, 'Viewport test:'),
         h(
           'span',
-          { className: 'font-mono text-xs text-[#23483E] font-medium' },
+          { className: 'font-mono text-xs text-primary font-medium' },
           '360 | 390 | 768 | 1440'
         )
       )

@@ -88,7 +88,7 @@ export const SevenDayAgenda: React.FC<SevenDayAgendaProps> = ({
                 'div',
                 {
                   key: item.id,
-                  className: 'p-3 rounded-control border border-border-subtle bg-white text-left',
+                  className: 'p-3 rounded-control border border-border-subtle bg-surface text-left',
                 },
                 h(
                   'div',
@@ -99,7 +99,7 @@ export const SevenDayAgenda: React.FC<SevenDayAgendaProps> = ({
                       className: `text-xs font-semibold px-2 py-0.5 rounded ${
                         item.dayLabel === 'Hôm nay'
                           ? 'bg-primary/10 text-primary'
-                          : 'bg-[#FAF9F5] text-text-muted border border-border-subtle'
+                          : 'bg-page text-text-muted border border-border-subtle'
                       }`,
                     },
                     item.dayLabel

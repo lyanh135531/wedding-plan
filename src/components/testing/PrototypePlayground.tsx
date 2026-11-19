@@ -46,7 +46,7 @@ function Playground() {
         <p className="text-sm">Bạn có thể thử các nút và biểu mẫu. Thay đổi chỉ nằm trong phiên xem; tải lại trang sẽ đặt lại dữ liệu. Các liên kết ngoài danh sách màn hình thử chưa mở tại đây.</p>
         <nav aria-label="Màn hình dùng thử" className="flex flex-wrap gap-2">
           {screens.map((item) => <button key={item.path} onClick={() => setPath(item.path)} aria-pressed={item.path === path}
-            className={`min-h-11 px-3 py-2 rounded-control border ${item.path === path ? 'bg-primary text-white' : 'bg-white'}`}>{item.label}</button>)}
+            className={`min-h-11 px-3 py-2 rounded-control border ${item.path === path ? 'bg-primary text-white' : 'bg-surface'}`}>{item.label}</button>)}
         </nav>
         <div className="flex flex-wrap items-center gap-3">
           <label>Vai trò <select className="border rounded p-2 min-h-11" value={role} onChange={(e) => setRoleForPreview(e.target.value as 'owner' | 'family_view')}>
@@ -56,7 +56,7 @@ function Playground() {
             <option value="populated">Có dữ liệu</option><option value="empty">Chưa có dữ liệu</option>
             <option value="loading">Đang tải</option><option value="error">Lỗi tải</option>
           </select></label>
-          <button className="min-h-11 border rounded px-3 bg-white" onClick={() => setReset((value) => value + 1)}>Đặt lại màn hình</button>
+          <button className="min-h-11 border rounded px-3 bg-surface" onClick={() => setReset((value) => value + 1)}>Đặt lại màn hình</button>
         </div>
       </div>
       {!isOwner && screen.finance ? <p>Người nhà không được xem tài chính.</p> : <Component key={`${path}:${state}:${reset}`} initialState={state} />}

@@ -5,6 +5,7 @@ import { events } from '@/db/schema/events';
 import { computeEffectiveDueDate, EventDateInfo } from './deadlines';
 import { UnifiedCalendarItem } from './types';
 import { TxOrDb } from '@/lib/finance/costs.repository';
+import { weddingDateKey } from '@/lib/dates';
 
 export interface CalendarFeedParams {
   startDate?: Date | string;
@@ -39,7 +40,7 @@ export async function getUnifiedCalendarFeed(
 
   const eventsMap = new Map<string, EventDateInfo>();
   for (const e of allEvents) {
-    const solarDateStr = e.startTime ? new Date(e.startTime).toISOString().slice(0, 10) : null;
+    const solarDateStr = e.startTime ? weddingDateKey(e.startTime) : null;
     eventsMap.set(e.id, {
       id: e.id,
       solarDate: solarDateStr,
@@ -56,7 +57,7 @@ export async function getUnifiedCalendarFeed(
     }
     if (e.startTime) {
       const dt = new Date(e.startTime);
-      const solarDateStr = dt.toISOString().slice(0, 10);
+      const solarDateStr = weddingDateKey(dt);
       if (dt.getTime() >= startEpoch && dt.getTime() <= endEpoch) {
         items.push({
           id: `event-${e.id}`,
@@ -99,7 +100,7 @@ export async function getUnifiedCalendarFeed(
           itemType: 'task',
           title: `Việc: ${title}`,
           dateTime: metrics.effectiveDueDate,
-          dateString: metrics.effectiveDueDate.toISOString().slice(0, 10),
+          dateString: weddingDateKey(metrics.effectiveDueDate),
           status: t.status,
           priority: t.priority as any,
           sourceId: t.id,
@@ -128,7 +129,7 @@ export async function getUnifiedCalendarFeed(
         itemType: 'appointment',
         title: `Hẹn: ${a.title}`,
         dateTime: new Date(a.startTime),
-        dateString: new Date(a.startTime).toISOString().slice(0, 10),
+        dateString: weddingDateKey(a.startTime),
         status: 'scheduled',
         location: a.location || undefined,
         sourceId: a.id,

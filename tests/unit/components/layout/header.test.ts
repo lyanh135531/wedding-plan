@@ -31,7 +31,8 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
     expect(html).toContain('lg:left-[240px]');
     expect(html).toContain('<h1');
     expect(html).toContain('Quản lý Khách mời');
-    expect(html).toContain('lg:text-[28px]');
+    expect(html).toContain('font-sans');
+    expect(html).toContain('sm:text-lg');
   });
 
   it('renders mobile menu button when onToggleSidebarMobile is provided', () => {

@@ -4,7 +4,7 @@ import { createMockUserSession, TEST_USERS, UserSession } from '@tests/helpers/a
 
 /**
  * Gate G8 Adversarial Test Suite: Family View Permissions, Privacy & Data Redaction
- * Standards: AT03, AT26, ORIGINAL_REQUEST.md R1 & R3, PLAN §12, §13, §20, §25, docs/UI_UX_SPEC §7.11
+ * Standards: AT03, AT26, PLAN §12, §13, §20, §25, docs/UI_UX_SPEC §7.11
  *
  * Core Invariants:
  * 1. Read Access: family_view can view shared table and menu lists for allowed events (200 OK).

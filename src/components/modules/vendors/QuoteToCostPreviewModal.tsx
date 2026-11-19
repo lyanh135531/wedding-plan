@@ -240,7 +240,7 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
             'div',
             {
               className:
-                'p-3.5 bg-[#FAF9F5] border border-border-control/60 rounded-control space-y-1.5 text-xs',
+                'p-3.5 bg-page border border-border-control/60 rounded-control space-y-1.5 text-xs',
             },
             React.createElement(
               'div',
@@ -303,7 +303,7 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
                 value: categoryId,
                 onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setCategoryId(e.target.value),
                 className:
-                  'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
+                  'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
                 required: true,
               },
               React.createElement('option', { value: '' }, '-- Chọn hạng mục chi phí --'),
@@ -334,7 +334,7 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
                   value: eventId,
                   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setEventId(e.target.value),
                   className:
-                    'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
+                    'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
                 },
                 React.createElement('option', { value: '' }, 'Tất cả / Chung cho đám cưới'),
                 previewData.available_events.map((evt) =>
@@ -362,7 +362,7 @@ export const QuoteToCostPreviewModal: React.FC<QuoteToCostPreviewModalProps> = (
               rows: 2,
               placeholder: 'Ghi chú cho khoản chi khi vào ngân sách...',
               className:
-                'w-full p-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+                'w-full p-2.5 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
             })
           ),
 

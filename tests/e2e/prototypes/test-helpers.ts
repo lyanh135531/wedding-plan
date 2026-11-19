@@ -91,7 +91,7 @@ export function getFullPageHtml(
   </style>
 </head>
 <body>
-  <div id="__next" class="min-h-screen bg-[#F7F5F0]">${markup}</div>
+  <div id="__next" class="min-h-screen bg-page">${markup}</div>
 </body>
 </html>`;
 }

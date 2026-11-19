@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     screens: {
       xs: '360px',
-      sm: '390px',
+      sm: '640px',
       md: '768px',
       lg: '1024px',
       xl: '1280px',
@@ -17,16 +17,22 @@ const config: Config = {
     },
     extend: {
       colors: {
-        page: 'var(--bg-page)',
-        surface: 'var(--bg-surface)',
+        page: '#F7F5EF',
+        bg: { page: '#F7F5EF' },
+        surface: '#FFFEFB',
         primary: {
-          DEFAULT: 'var(--color-primary)',
-          hover: 'var(--color-primary-hover)',
+          DEFAULT: '#244C40',
+          hover: '#193B31',
+          luxury: '#173C33',
         },
-        'text-main': 'var(--color-text-main)',
-        'text-muted': 'var(--color-text-muted)',
-        'border-control': 'var(--border-control)',
-        'border-subtle': 'var(--border-subtle)',
+        accent: {
+          DEFAULT: '#8C703C',
+          hover: '#745B2D',
+        },
+        'text-main': '#283E35',
+        'text-muted': '#6A756D',
+        'border-control': '#B9C1B6',
+        'border-subtle': '#E4E7DD',
         success: {
           DEFAULT: 'var(--color-success)',
           bg: 'var(--bg-success)',
@@ -47,10 +53,11 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['"Be Vietnam Pro"', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
       },
       borderRadius: {
-        control: '8px',
-        card: '12px',
+        control: '10px',
+        card: '18px',
       },
       minHeight: {
         touch: '44px',
@@ -70,7 +77,8 @@ const config: Config = {
         micro: '150ms',
       },
       boxShadow: {
-        overlay: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+        overlay: '0 24px 80px -16px rgba(23, 60, 51, 0.24)',
+        card: '0 4px 24px -8px rgba(31, 58, 43, 0.09)',
       },
     },
   },

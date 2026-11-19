@@ -102,7 +102,7 @@ export const CreateCostModal: React.FC<CreateCostModalProps> = ({
               value: category,
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setCategory(e.target.value),
               className:
-                'w-full h-10 px-3 text-sm bg-white border border-[#7A8881] rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+                'w-full h-10 px-3 text-sm bg-surface border border-border-control rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
             },
             h('option', { value: 'Tiệc cưới' }, 'Tiệc cưới & Địa điểm'),
             h('option', { value: 'Trang phục' }, 'Trang phục & Make-up'),
@@ -116,7 +116,7 @@ export const CreateCostModal: React.FC<CreateCostModalProps> = ({
         // Missing price checkbox (UXT06)
         h(
           'div',
-          { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control' },
+          { className: 'p-3 bg-page border border-border-subtle rounded-control' },
           h(Checkbox, {
             checked: isMissingPrice,
             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -16,7 +16,8 @@ interface RouteContext {
  * Xem trước tạo công việc và khoản chi từ ý tưởng (PLAN §15).
  * Thao tác này KHÔNG tự động tạo bản ghi trong DB.
  */
-export async function GET(req: NextRequest, { params }: RouteContext) {
+export async function GET(req: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const session = await getCurrentSession(req);
     const authError = enforceOwnerRole(session);

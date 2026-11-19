@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
 import { TimelineManager } from '@/components/modules/timeline/TimelineManager';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 import { usePrototype } from '@/components/testing/PrototypeToolbar';
 
 const h = React.createElement;
@@ -21,8 +22,8 @@ export default function TimelinePage() {
       showScopeSelector: false,
       maxWidth: 'standard',
     },
-    h(TimelineManager, {
+    h(FeaturePreview, null, h(TimelineManager, {
       initialState: state,
-    })
+    }))
   );
 }

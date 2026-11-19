@@ -35,6 +35,11 @@ export class FundingEntryNotFoundError extends Error {
   }
 }
 
+export class FundVersionConflictError extends Error {
+  readonly statusCode = 409;
+  constructor() { super('Sổ quỹ đã thay đổi. Vui lòng tải lại trước khi lưu.'); }
+}
+
 /**
  * Gets the current wedding fund settings (opening_as_of anchor & initial balance).
  * Returns null if not yet configured (AT37).
@@ -70,6 +75,7 @@ export async function updateFundSettings(
   const openingAsOf = input.opening_as_of ? new Date(input.opening_as_of) : null;
 
   if (existing) {
+    if (existing.version !== input.version) throw new FundVersionConflictError();
     const [updated] = await txDb
       .update(fundSettings)
       .set({
@@ -81,8 +87,10 @@ export async function updateFundSettings(
         version: existing.version + 1,
         updatedAt: new Date(),
       })
-      .where(eq(fundSettings.id, existing.id))
+      .where(and(eq(fundSettings.id, existing.id), eq(fundSettings.version, input.version)))
       .returning();
+
+    if (!updated) throw new FundVersionConflictError();
 
     await txDb.insert(auditLogs).values({
       userId,

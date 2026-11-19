@@ -38,7 +38,7 @@ export const VendorCountersBar: React.FC<VendorCountersBarProps> = ({
       value: researchingOrContacted,
       sublabel: 'Chờ nhận thông tin',
       icon: React.createElement(Clock, { className: 'w-5 h-5 text-text-muted', 'aria-hidden': 'true' }),
-      bgColor: 'bg-[#FAF9F5]',
+      bgColor: 'bg-page',
     },
     {
       label: 'Đã nhận báo giá',

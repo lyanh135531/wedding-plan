@@ -64,7 +64,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
   return h(
     'div',
     {
-      className: `group flex flex-col justify-between bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden ${
+      className: `group flex flex-col justify-between bg-surface rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden ${
         idea.status === 'discarded' ? 'opacity-70 bg-gray-50/50' : ''
       } ${className}`,
       'data-testid': `idea-card-${idea.id}`,

@@ -58,7 +58,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
       className: cn(
         'w-full flex items-center gap-1 overflow-x-auto select-none no-scrollbar',
         variant === 'underline' && 'border-b border-border-subtle',
-        variant === 'pill' && 'p-1 bg-[#FAF9F5] rounded-control border border-border-subtle',
+        variant === 'pill' && 'p-1 bg-page rounded-control border border-border-subtle',
         className
       ),
     },

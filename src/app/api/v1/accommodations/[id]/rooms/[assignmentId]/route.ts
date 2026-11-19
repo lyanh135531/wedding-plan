@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 const uuidParamSchema = z.string().uuid();
 
 type RouteContext = {
-  params: { id: string; assignmentId: string } | Promise<{ id: string; assignmentId: string }>;
+  params: Promise<{ id: string; assignmentId: string }>;
 };
 
 /**
@@ -24,7 +24,7 @@ type RouteContext = {
  */
 export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
-    const { assignmentId } = await Promise.resolve(context.params);
+    const { assignmentId } = await context.params;
     const parseAssignmentId = uuidParamSchema.safeParse(assignmentId);
     if (!parseAssignmentId.success) {
       return NextResponse.json(

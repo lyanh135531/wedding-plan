@@ -24,12 +24,21 @@ if (process.platform === 'win32') {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   output: 'standalone',
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
   webpack: (config) => {
+    // Production audit artifacts must not trigger continuous dev recompilation.
+    const ignored = config.watchOptions?.ignored;
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: ignored instanceof RegExp
+        ? new RegExp(`(?:${ignored.source})|(?:[\\\\/]\\.next-audit(?:[\\\\/]|$))`, ignored.flags)
+        : [...(Array.isArray(ignored) ? ignored : typeof ignored === 'string' ? [ignored] : []), '**/.next-audit/**'],
+    };
     if (config.cache && typeof config.cache === 'object') {
       config.cache.buildDependencies = {
         ...config.cache.buildDependencies,

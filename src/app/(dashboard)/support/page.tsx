@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
 import { SupportPartyScreen } from '@/components/modules/support';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 import { usePrototype } from '@/components/testing/PrototypeToolbar';
 
 const h = React.createElement;
@@ -21,8 +22,8 @@ export default function SupportPartyPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(SupportPartyScreen, {
+    h(FeaturePreview, null, h(SupportPartyScreen, {
       initialState: state,
-    })
+    }))
   );
 }

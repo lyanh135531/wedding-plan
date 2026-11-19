@@ -123,7 +123,7 @@ export const DrawerSheet: React.FC<DrawerSheetProps> = ({
       footer &&
         h(
           'div',
-          { className: 'px-6 py-4 border-t border-border-subtle bg-[#FAF9F5] shrink-0' },
+          { className: 'px-6 py-4 border-t border-border-subtle bg-page shrink-0' },
           footer
         )
     )

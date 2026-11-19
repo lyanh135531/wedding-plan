@@ -43,7 +43,7 @@ export const StepWeddingDate: React.FC<StepWeddingDateProps> = ({
     // Checkbox toggle: Chưa chốt ngày chính thức
     h(
       'div',
-      { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control' },
+      { className: 'p-3 bg-page border border-border-subtle rounded-control' },
       h(Checkbox, {
         checked: isUnconfirmedDate,
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => {

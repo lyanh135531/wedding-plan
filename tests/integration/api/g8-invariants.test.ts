@@ -8,7 +8,7 @@ import {
 
 /**
  * Gate G8 Integration Test Suite: Invariants (AT06, AT07, AT10)
- * Standards: ORIGINAL_REQUEST.md R2, PLAN §12, §13, §20, §25, TEST_INFRA.md §9
+ * Standards: PLAN §12, §13, §20, §25, TEST_INFRA.md §9
  *
  * Scenarios:
  * 1. AT06: 4-person family on 1 invitation handled properly:

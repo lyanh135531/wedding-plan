@@ -14,7 +14,7 @@ describe('PermissionDeniedView Component (UI/UX Spec §3.2, §4)', () => {
     expect(html).toContain('Phân hệ này dành riêng cho hai chủ sở hữu');
     expect(html).toContain('href="/overview"');
     expect(html).toContain('Quay về Tổng quan');
-    expect(html).toContain('bg-[#23483E]');
+    expect(html).toContain('bg-primary');
     expect(html).toContain('min-h-[44px]');
   });
 

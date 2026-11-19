@@ -1,9 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation.js';
 import { Button } from '@/components/ui/button';
 import { UninvitedAccountBanner } from './UninvitedAccountBanner';
+import { authClient } from '@/lib/auth-client';
+import { Alert } from '@/components/ui/alert';
+import { BrandMark } from '@/components/common/BrandMark';
 
 const h = React.createElement;
 
@@ -12,6 +14,7 @@ export interface GoogleLoginCardProps {
   uninvitedEmail?: string;
   onLogin?: () => void;
   isLoading?: boolean;
+  initialError?: string | null;
 }
 
 export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
@@ -19,25 +22,33 @@ export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
   uninvitedEmail = 'guest.uninvited@gmail.com',
   onLogin,
   isLoading = false,
+  initialError = null,
 }) => {
-  let router: any = null;
-  try {
-    router = useRouter();
-  } catch {
-    router = null;
-  }
   const [showUninvited, setShowUninvited] = React.useState(isUninvited);
+  const [signingIn, setSigningIn] = React.useState(false);
+  const [loginError, setLoginError] = React.useState<string | null>(initialError);
+  React.useEffect(() => { setLoginError(initialError); }, [initialError]);
 
   React.useEffect(() => {
     setShowUninvited(isUninvited);
   }, [isUninvited]);
 
-  const handleGoogleClick = () => {
-    if (onLogin) {
-      onLogin();
-    } else {
-      // Prototype default behavior: redirect to /setup or /overview
-      router.push('/setup');
+  const handleGoogleClick = async () => {
+    if (signingIn) return;
+    setSigningIn(true);
+    setLoginError(null);
+    try {
+      if (onLogin) { await onLogin(); }
+      else {
+        const result = await authClient.signIn.social({
+          provider: 'google', callbackURL: '/setup', errorCallbackURL: '/login',
+        });
+        if (result.error) throw new Error(result.error.message || 'Không thể đăng nhập bằng Google.');
+      }
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Không thể kết nối đăng nhập. Vui lòng thử lại.');
+    } finally {
+      setSigningIn(false);
     }
   };
 
@@ -45,28 +56,30 @@ export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
     'div',
     {
       className:
-        'w-full max-w-md mx-auto bg-surface rounded-card border border-border-subtle shadow-md p-8 text-center',
+        'auth-login-card mx-auto',
     },
     // Monogram / Icon
     h(
       'div',
       {
         className:
-          'w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-5 text-2xl font-bold',
+          'hidden md:flex w-14 h-14 rounded-full border border-accent/30 text-accent items-center justify-center mb-7',
       },
-      '💍'
+      h(BrandMark, { className: 'w-9 h-9' })
     ),
+    h('p', { className: 'eyebrow mb-3' }, 'Chào mừng trở về'),
     h(
       'h1',
-      { className: 'text-2xl font-bold text-text-main tracking-tight mb-2' },
+      { className: 'font-serif font-medium text-primary-luxury tracking-tight mb-4' },
       'Sổ Quản Lý Đám Cưới'
     ),
     h(
       'p',
-      { className: 'text-sm text-text-muted mb-8 leading-relaxed' },
-      'Trang web quản lý nội bộ dành riêng cho hai chủ sở hữu và gia đình hai bên.'
+      { className: 'text-[13px] text-text-muted mb-9 leading-7' },
+      'Đăng nhập để tiếp tục chuẩn bị ngày cưới, cùng gia đình và những người bạn yêu thương.'
     ),
 
+    loginError && h(Alert, { variant: 'danger', className: 'mb-4' }, loginError),
     showUninvited
       ? h(UninvitedAccountBanner, {
           email: uninvitedEmail,
@@ -81,9 +94,9 @@ export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
               variant: 'primary',
               size: 'lg',
               onClick: handleGoogleClick,
-              loading: isLoading,
+              loading: isLoading || signingIn,
               loadingText: 'Đang xác thực tài khoản...',
-              className: 'w-full h-12 text-base font-medium shadow-sm flex items-center justify-center gap-3',
+              className: 'auth-signin w-full font-medium shadow-sm flex items-center justify-center gap-3',
             },
             h(
               'svg',
@@ -110,12 +123,12 @@ export const GoogleLoginCard: React.FC<GoogleLoginCardProps> = ({
 
           h(
             'div',
-            { className: 'pt-4 border-t border-border-subtle text-xs text-text-muted space-y-1' },
-            h('p', null, 'Hệ thống bảo mật nghiêm ngặt.'),
+            { className: 'auth-footer pt-6 border-t border-border-subtle space-y-1' },
+            h('p', { className: 'font-medium text-text-main' }, 'Một không gian riêng cho gia đình.'),
             h(
               'p',
               null,
-              'Chỉ những tài khoản email được thêm vào danh sách phân quyền mới có thể truy cập dữ liệu.'
+              'Chỉ tài khoản đã được chủ sở hữu cấp quyền mới có thể truy cập sổ cưới.'
             )
           )
         )

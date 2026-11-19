@@ -166,7 +166,7 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
         activeMilestone &&
           h(
             'div',
-            { className: 'p-4 bg-[#23483E] text-white rounded-card shadow-md space-y-2' },
+            { className: 'p-4 bg-primary text-white rounded-card shadow-md space-y-2' },
             h(
               'div',
               { className: 'flex items-center justify-between' },
@@ -220,8 +220,8 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                   m.status === 'in_progress'
                     ? 'border-primary bg-primary/5'
                     : m.status === 'completed'
-                    ? 'border-border-subtle bg-[#FAF9F5]/50 opacity-80'
-                    : 'border-border-subtle bg-white'
+                    ? 'border-border-subtle bg-page/50 opacity-80'
+                    : 'border-border-subtle bg-surface'
                 }`,
               },
               h(
@@ -292,7 +292,7 @@ export const TimelineManager: React.FC<TimelineManagerProps> = ({
                     className: `h-9 text-xs rounded border font-medium ${
                       delayShiftMinutes === mins
                         ? 'bg-primary text-white border-primary'
-                        : 'bg-white text-text-main border-[#7A8881]'
+                        : 'bg-surface text-text-main border-border-control'
                     }`,
                   },
                   `+${mins} phút`

@@ -11,10 +11,8 @@ const addDependencyBodySchema = z.object({
   prerequisite_task_id: uuidSchema,
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
@@ -60,10 +58,8 @@ export async function POST(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });

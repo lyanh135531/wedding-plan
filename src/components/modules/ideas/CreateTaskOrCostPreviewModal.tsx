@@ -76,7 +76,7 @@ export const CreateTaskOrCostPreviewModal: React.FC<CreateTaskOrCostPreviewModal
       'div',
       {
         className:
-          'bg-white rounded-xl shadow-2xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col',
+          'bg-surface rounded-xl shadow-2xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col',
       },
       // Header
       h(

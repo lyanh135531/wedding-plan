@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
     'header',
     {
       className:
-        'h-16 fixed top-0 right-0 left-0 lg:left-[240px] bg-white border-b border-[#E2E8E4] z-20 flex items-center justify-between px-4 sm:px-6 lg:px-8',
+        'app-header h-16 fixed top-0 right-0 left-0 lg:left-[240px] border-b border-border-subtle z-20 flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-9',
     },
     // Khối bên trái: Nút Menu di động + Tiêu đề H1 + Badge vai trò
     h(
@@ -41,10 +41,10 @@ export const Header: React.FC<HeaderProps> = ({
               type: 'button',
               onClick: onToggleSidebarMobile,
               className:
-                'lg:hidden p-2 -ml-2 rounded-lg text-[#1F2933] hover:bg-[#F7F5F0] min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+                'lg:hidden p-2 -ml-2 rounded-lg text-text-main hover:bg-page min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
               'aria-label': 'Mở thanh điều hướng',
             },
-            h(Menu, { className: 'w-6 h-6 text-[#1F2933]', 'aria-hidden': 'true' })
+            h(Menu, { className: 'w-6 h-6 text-text-main', 'aria-hidden': 'true' })
           )
         : null,
 
@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
           'h1',
           {
             className:
-              'text-xl sm:text-2xl lg:text-[28px] font-semibold text-[#1F2933] tracking-tight truncate leading-tight',
+              'font-sans text-base sm:text-lg font-medium text-text-main tracking-tight truncate leading-snug',
           },
           title
         ),
@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
               value: currentScope,
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setScope(e.target.value),
               className:
-                'h-10 px-3 py-1.5 text-sm bg-[#F7F5F0] text-[#1F2933] border border-[#7A8881] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] transition-colors',
+                'h-11 max-w-[200px] lg:max-w-[260px] px-3.5 py-1.5 text-xs bg-page text-text-main border border-border-subtle rounded-control focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors',
             },
             h('option', { value: 'all' }, 'Tất cả buổi (Tổng hợp)'),
             isOwner
@@ -126,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
       'div',
       { className: 'flex items-center gap-2 sm:gap-3 shrink-0' },
       // Toggle Role Switcher
-      process.env.NODE_ENV !== 'production' && h(
+      process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_ENABLE_PROTOTYPE_TOOLS === 'true' && h(
         'button',
         {
           type: 'button',
@@ -144,10 +144,10 @@ export const Header: React.FC<HeaderProps> = ({
         {
           type: 'button',
           className:
-            'relative p-2 rounded-lg text-[#52616B] hover:text-[#1F2933] hover:bg-[#F7F5F0] min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+            'relative p-2 rounded-full border border-border-subtle text-text-muted hover:text-text-main hover:bg-page min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20',
           'aria-label': 'Thông báo',
         },
-        h(Bell, { className: 'w-5 h-5 text-[#52616B]', 'aria-hidden': 'true' }),
+        h(Bell, { className: 'w-5 h-5 text-text-muted', 'aria-hidden': 'true' }),
         h('span', {
           className: 'absolute top-2.5 right-2.5 w-2 h-2 bg-[#B42318] rounded-full',
           'aria-hidden': 'true',

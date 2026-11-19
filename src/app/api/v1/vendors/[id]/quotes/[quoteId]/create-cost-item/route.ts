@@ -16,7 +16,7 @@ export const runtime = 'nodejs';
 const uuidParamSchema = z.string().uuid({ message: 'Mã định danh không hợp lệ (phải là UUID).' });
 
 type RouteContext = {
-  params: { id: string; quoteId: string } | Promise<{ id: string; quoteId: string }>;
+  params: Promise<{ id: string; quoteId: string }>;
 };
 
 /**
@@ -32,7 +32,7 @@ type RouteContext = {
  */
 export async function GET(req: NextRequest, context: RouteContext) {
   try {
-    const { id: vendorId, quoteId } = await Promise.resolve(context.params);
+    const { id: vendorId, quoteId } = await context.params;
 
     const parseVendorId = uuidParamSchema.safeParse(vendorId);
     const parseQuoteId = uuidParamSchema.safeParse(quoteId);
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
  */
 export async function POST(req: NextRequest, context: RouteContext) {
   try {
-    const { id: vendorId, quoteId } = await Promise.resolve(context.params);
+    const { id: vendorId, quoteId } = await context.params;
 
     const parseVendorId = uuidParamSchema.safeParse(vendorId);
     const parseQuoteId = uuidParamSchema.safeParse(quoteId);

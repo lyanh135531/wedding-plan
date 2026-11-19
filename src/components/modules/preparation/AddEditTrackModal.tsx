@@ -88,7 +88,7 @@ export const AddEditTrackModal: React.FC<AddEditTrackModalProps> = ({
       'div',
       {
         className:
-          'bg-white rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
+          'bg-surface rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
       },
       // Header
       h(
@@ -189,7 +189,7 @@ export const AddEditTrackModal: React.FC<AddEditTrackModalProps> = ({
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 setMoment(e.target.value as CeremonyMoment),
               className:
-                'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white',
+                'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface',
             },
             CEREMONY_MOMENTS.map((m) =>
               h('option', { key: m.key, value: m.key }, `${m.label} — ${m.desc}`)

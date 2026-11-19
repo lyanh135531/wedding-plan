@@ -5,10 +5,8 @@ import { rollbackGuestImport } from '@/lib/import/import.service';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { batchId: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ batchId: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });

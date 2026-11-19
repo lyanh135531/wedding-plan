@@ -81,7 +81,7 @@ export const TaskDeadlineGroups: React.FC<TaskDeadlineGroupsProps> = ({
                 className: `text-xs font-semibold px-2 py-0.5 rounded-full tabular-nums ${
                   b.key === 'overdue' && bucketTasks.length > 0
                     ? 'bg-danger-bg text-danger'
-                    : 'bg-[#FAF9F5] text-text-muted'
+                    : 'bg-page text-text-muted'
                 }`,
               },
               bucketTasks.length
@@ -110,7 +110,7 @@ export const TaskDeadlineGroups: React.FC<TaskDeadlineGroupsProps> = ({
                   {
                     key: task.id,
                     className:
-                      'p-3 rounded-control border border-border-subtle hover:border-border-control transition-colors flex items-center justify-between gap-3 bg-white',
+                      'p-3 rounded-control border border-border-subtle hover:border-border-control transition-colors flex items-center justify-between gap-3 bg-surface',
                   },
                   // Left: Checkbox + Title
                   h(
@@ -124,7 +124,7 @@ export const TaskDeadlineGroups: React.FC<TaskDeadlineGroupsProps> = ({
                         className: `w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
                           task.isCompleted
                             ? 'bg-primary border-primary text-white'
-                            : 'border-[#7A8881] bg-white hover:border-primary'
+                            : 'border-border-control bg-surface hover:border-primary'
                         }`,
                         'aria-label': `Đánh dấu hoàn tất ${displayTitle}`,
                       },
@@ -172,7 +172,7 @@ export const TaskDeadlineGroups: React.FC<TaskDeadlineGroupsProps> = ({
                             : task.bucket === 'today'
                             ? 'bg-[#FFF8E1] text-[#D97706]'
                             : task.bucket === 'unset'
-                            ? 'bg-[#FAF9F5] text-text-muted border border-border-subtle'
+                            ? 'bg-page text-text-muted border border-border-subtle'
                             : 'bg-primary/10 text-primary'
                         }`,
                       },

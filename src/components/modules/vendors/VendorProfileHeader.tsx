@@ -43,7 +43,7 @@ export const VendorProfileHeader: React.FC<VendorProfileHeaderProps> = ({
         { className: 'flex items-center gap-3 flex-wrap' },
         React.createElement(
           'h1',
-          { className: 'text-2xl md:text-3xl font-bold text-text-main tracking-tight' },
+          { className: 'text-2xl md:text-3xl font-serif font-semibold text-primary-luxury tracking-tight' },
           vendor.name
         ),
         React.createElement(StatusBadge, {
@@ -54,7 +54,7 @@ export const VendorProfileHeader: React.FC<VendorProfileHeaderProps> = ({
           'span',
           {
             className:
-              'text-xs text-text-muted bg-[#FAF9F5] px-2.5 py-1 rounded-full border border-border-subtle font-medium',
+              'text-xs text-text-muted bg-page px-2.5 py-1 rounded-full border border-border-subtle font-medium',
           },
           serviceLabel
         ),
@@ -63,9 +63,9 @@ export const VendorProfileHeader: React.FC<VendorProfileHeaderProps> = ({
             'span',
             {
               className:
-                'inline-flex items-center gap-1 text-xs text-warning bg-warning-bg px-2.5 py-1 rounded-full border border-warning/30 font-semibold',
+                'inline-flex items-center gap-1 text-xs text-accent bg-accent/10 px-2.5 py-1 rounded-full border border-accent/30 font-semibold',
             },
-            React.createElement(Star, { className: 'w-3.5 h-3.5 fill-warning text-warning', 'aria-hidden': 'true' }),
+            React.createElement(Star, { className: 'w-3.5 h-3.5 fill-accent text-accent', 'aria-hidden': 'true' }),
             `${vendor.rating} / 5 sao`
           )
       ),
@@ -106,8 +106,8 @@ export const VendorProfileHeader: React.FC<VendorProfileHeaderProps> = ({
           Button,
           {
             variant: 'primary',
+            className: 'bg-accent hover:bg-accent-hover text-white min-h-[44px]',
             onClick: onAddQuoteClick,
-            className: 'min-h-[44px]',
             leftIcon: React.createElement(Plus, { className: 'w-4 h-4', 'aria-hidden': 'true' }),
           },
           'Thêm báo giá'

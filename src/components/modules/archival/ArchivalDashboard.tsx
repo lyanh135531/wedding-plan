@@ -206,7 +206,7 @@ export const ArchivalDashboard: React.FC = () => {
               size: 'sm',
               leftIcon: h(Unlock, { className: 'w-4 h-4' }),
               onClick: () => setIsUnarchiveModalOpen(true),
-              className: 'bg-white text-slate-900 hover:bg-slate-100',
+              className: 'bg-surface text-slate-900 hover:bg-slate-100',
             },
             'Mở lại đám cưới (Unarchive)'
           )

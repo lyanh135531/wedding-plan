@@ -36,7 +36,7 @@ export const CostItemsTable: React.FC<CostItemsTableProps> = ({
       { className: 'w-full text-left border-collapse text-sm', 'aria-label': 'Danh sách các khoản chi ngân sách' },
       h(
         'thead',
-        { className: 'bg-[#FAF9F5] border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
+        { className: 'bg-page border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
         h(
           'tr',
           null,
@@ -62,7 +62,7 @@ export const CostItemsTable: React.FC<CostItemsTableProps> = ({
             'tr',
             {
               key: item.id,
-              className: 'hover:bg-[#FAF9F5]/70 transition-colors',
+              className: 'hover:bg-page/70 transition-colors',
             },
             // Name
             h(

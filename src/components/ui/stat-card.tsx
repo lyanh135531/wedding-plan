@@ -37,7 +37,7 @@ export const StatCard: React.FC<StatCardProps> = ({
     'div',
     {
       className: cn(
-        'p-5 rounded-card bg-surface border border-border-subtle shadow-sm flex flex-col justify-between transition-all duration-150',
+        'stat-card p-6 rounded-card bg-surface border border-border-subtle shadow-card flex flex-col justify-between transition-all duration-150',
         isClickable &&
           'hover:border-primary/40 hover:shadow cursor-pointer focus-visible:outline-2 focus-visible:outline-focus',
         className
@@ -75,7 +75,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             { className: 'flex items-baseline gap-2' },
             h(
               'span',
-              { className: 'text-2xl sm:text-3xl font-bold text-text-muted/50 tabular-nums' },
+              { className: 'stat-value text-2xl font-medium text-text-muted/50 tabular-nums' },
               '—'
             ),
             h('span', { className: 'text-xs text-text-muted font-normal' }, 'Chưa có dữ liệu')
@@ -87,7 +87,7 @@ export const StatCard: React.FC<StatCardProps> = ({
               'span',
               {
                 className:
-                  'text-2xl sm:text-3xl font-bold text-text-main tabular-nums tracking-tight',
+                  'stat-value text-2xl font-medium text-text-main tabular-nums tracking-tight',
               },
               value
             ),

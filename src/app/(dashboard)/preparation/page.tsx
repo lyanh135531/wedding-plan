@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PageShell } from '@/components/layout/PageShell';
 import { PreparationScreen, PreparationTab } from '@/components/modules/preparation';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 import { usePrototype } from '@/components/testing/PrototypeToolbar';
 
 const h = React.createElement;
@@ -22,10 +23,10 @@ function PreparationContent() {
     // In environments where useSearchParams is not available
   }
 
-  return h(PreparationScreen, {
+  return h(FeaturePreview, null, h(PreparationScreen, {
     initialState: state,
     initialTab,
-  });
+  }));
 }
 
 export default function PreparationPage() {

@@ -79,7 +79,7 @@ export const MenuCourseList: React.FC<MenuCourseListProps> = ({
       default:
         return h(
           'span',
-          { key: flag, className: 'text-[10px] px-1.5 py-0.5 rounded bg-[#FAF9F5] text-text-muted font-medium' },
+          { key: flag, className: 'text-[10px] px-1.5 py-0.5 rounded bg-page text-text-muted font-medium' },
           flag
         );
     }
@@ -163,7 +163,7 @@ export const MenuCourseList: React.FC<MenuCourseListProps> = ({
         items.length === 0
           ? h(
               'div',
-              { className: 'p-3 bg-[#FAF9F5] border border-dashed border-border-subtle rounded-control text-xs text-text-muted italic' },
+              { className: 'p-3 bg-page border border-dashed border-border-subtle rounded-control text-xs text-text-muted italic' },
               'Chưa có món nào trong phân nhóm này.'
             )
           : h(
@@ -223,7 +223,7 @@ export const MenuCourseList: React.FC<MenuCourseListProps> = ({
                               type: 'button',
                               onClick: () => onEditItem(item),
                               className:
-                                'p-1 text-text-muted hover:text-primary rounded hover:bg-[#FAF9F5]',
+                                'p-1 text-text-muted hover:text-primary rounded hover:bg-page',
                               title: 'Sửa món',
                             },
                             h(Edit, { className: 'w-3.5 h-3.5' })

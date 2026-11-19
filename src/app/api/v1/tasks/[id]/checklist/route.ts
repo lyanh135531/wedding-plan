@@ -12,10 +12,8 @@ const addChecklistBodySchema = z.object({
   sort_order: z.number().int().default(0),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
@@ -58,10 +56,8 @@ const toggleChecklistBodySchema = z.object({
   is_completed: z.boolean(),
 });
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });

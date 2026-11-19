@@ -11,15 +11,16 @@ import { SetupWizard } from '@/components/modules/auth/SetupWizard';
 const h = React.createElement;
 
 describe('S01: Authentication Entrypoint (GoogleLoginCard & Uninvited Banner)', () => {
-  it('renders Google Login Card with 48px action button and privacy notices', () => {
+  it('renders Google Login Card with its accessible action and privacy notices', () => {
     const html = renderToStaticMarkup(
       h(GoogleLoginCard, { isUninvited: false })
     );
 
     expect(html).toContain('Sổ Quản Lý Đám Cưới');
     expect(html).toContain('Đăng nhập bằng Google');
-    expect(html).toContain('h-12'); // 48px touch ergonomics
-    expect(html).toContain('Hệ thống bảo mật nghiêm ngặt');
+    expect(html).toContain('auth-signin');
+    expect(html).toContain('Một không gian riêng cho gia đình.');
+    expect(html).toContain('Chỉ tài khoản đã được chủ sở hữu cấp quyền');
   });
 
   it('renders uninvited account banner with friendly 403 and zero owner metadata disclosure', () => {

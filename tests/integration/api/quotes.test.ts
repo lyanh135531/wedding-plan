@@ -115,7 +115,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(ownerSession as any);
 
       const req = new NextRequest('http://localhost:3000/api/v1/vendors/bad-id/quotes');
-      const res = await quotesRoute.GET(req, { params: { id: 'bad-id' } });
+      const res = await quotesRoute.GET(req, { params: Promise.resolve({ id: 'bad-id' }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -126,7 +126,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(null);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}/quotes`);
-      const res = await quotesRoute.GET(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(401);
       const body = await res.json();
@@ -138,7 +138,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(familySession as any);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}/quotes`);
-      const res = await quotesRoute.GET(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(403);
       const body = await res.json();
@@ -152,7 +152,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
       vi.spyOn(vendorsRepo, 'getVendorById').mockResolvedValue(null);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}/quotes`);
-      const res = await quotesRoute.GET(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(404);
       const body = await res.json();
@@ -166,7 +166,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
       const listQuotesSpy = vi.spyOn(quotesRepo, 'listQuotesByVendorId').mockResolvedValue([mockQuoteDtoV2]);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}/quotes`);
-      const res = await quotesRoute.GET(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -184,7 +184,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
         .mockResolvedValue([mockQuoteDtoV2, mockQuoteDtoV1]);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}/quotes?includeSuperseded=true`);
-      const res = await quotesRoute.GET(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -205,7 +205,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
         method: 'POST',
         body: JSON.stringify({ quote_name: 'Test', received_date: '2026-11-12' }),
       });
-      const res = await quotesRoute.POST(req, { params: { id: 'bad-id' } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: 'bad-id' }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -220,7 +220,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
         method: 'POST',
         body: JSON.stringify({ quote_name: 'Family Quote', received_date: '2026-11-12' }),
       });
-      const res = await quotesRoute.POST(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(403);
       const body = await res.json();
@@ -235,7 +235,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
         method: 'POST',
         body: JSON.stringify({ received_date: '2026-11-12' }),
       });
-      const res = await quotesRoute.POST(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -254,7 +254,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
           valid_until: '2026-11-10', // Invalid: prior to received_date
         }),
       });
-      const res = await quotesRoute.POST(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -282,7 +282,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
         method: 'POST',
         body: JSON.stringify(payload),
       });
-      const res = await quotesRoute.POST(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(201);
       const body = await res.json();
@@ -309,7 +309,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
           total_amount: null,
         }),
       });
-      const res = await quotesRoute.POST(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(201);
       const body = await res.json();
@@ -340,7 +340,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
         method: 'POST',
         body: JSON.stringify(revisionPayload),
       });
-      const res = await quotesRoute.POST(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(201);
       const body = await res.json();
@@ -370,7 +370,7 @@ describe('Quotes API Route Handlers Integration Tests (M8.3, AT03, AT24, AT41)',
           total_amount: '170000000',
         }),
       });
-      const res = await quotesRoute.POST(req, { params: { id: validVendorId } });
+      const res = await quotesRoute.POST(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(404);
       const body = await res.json();

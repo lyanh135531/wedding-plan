@@ -1,3 +1,4 @@
+import { endOfWeddingDay } from '@/lib/dates';
 import {
   CostItemModel,
   PaymentModel,
@@ -337,7 +338,7 @@ export function calculateInstallmentStatus(
     schedule.amountDue > allocatedAmount ? schedule.amountDue - allocatedAmount : 0n;
 
   // Due date comparison: string YYYY-MM-DD
-  const dueEpoch = new Date(`${schedule.dueDate}T23:59:59.999Z`).getTime();
+  const dueEpoch = endOfWeddingDay(schedule.dueDate).getTime();
   const nowEpoch = currentDate.getTime();
   const isOverdue = remainingDue > 0n && nowEpoch > dueEpoch && schedule.status !== 'cancelled';
 

@@ -108,7 +108,7 @@ export const AssignPassengerModal: React.FC<AssignPassengerModalProps> = ({
             disabled: isFull,
             onChange: (e: any) => setSelectedGuestId(e.target.value),
             className:
-              'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed',
+              'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed',
           },
           availableGuests.map((g) =>
             h('option', { key: g.id, value: g.id }, g.name)
@@ -123,7 +123,7 @@ export const AssignPassengerModal: React.FC<AssignPassengerModalProps> = ({
         h('label', { className: 'block font-semibold text-text-main' }, 'Điểm đón cụ thể (tùy chọn)'),
         h('input', {
           className:
-            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed',
+            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed',
           value: pickupPoint,
           disabled: isFull,
           onChange: (e: any) => setPickupPoint(e.target.value),

@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
 import { LogisticsScreen } from '@/components/modules/logistics';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 import { usePrototype } from '@/components/testing/PrototypeToolbar';
 
 const h = React.createElement;
@@ -21,8 +22,8 @@ export default function LogisticsPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(LogisticsScreen, {
+    h(FeaturePreview, null, h(LogisticsScreen, {
       initialState: state,
-    })
+    }))
   );
 }

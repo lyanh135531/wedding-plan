@@ -47,6 +47,8 @@
 | M11.3 | Network Failure & Backup Restore Drills | Real sandbox restore (54 tables, 79 FKs), credential reset, tamper rejection, live offline/reconnect form drill verified | M11.1 | DONE |
 | M11.4 | Operational Handover Documentation | README, operations runbook, DR manual, and milestone sign-off documentation | M11.1 | DONE |
 | M11.5 | Independent Audit Council Sign-off | Formal sign-off: Reviewers (APPROVE), Challengers (APPROVE), Forensic Auditor (CLEAN) | M11.2, M11.3, M11.4 | DONE |
+| M11.6 | Luxury UI Enhancements | Design system (colors/typography), Dashboard/Screen refinement | M11.5 | DONE |
+
 
 ---
 

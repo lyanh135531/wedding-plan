@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRole } from '@/context/RoleContext';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { Plus, UserPlus, DollarSign, CheckSquare } from 'lucide-react';
+import { Plus, UserPlus, DollarSign, CheckSquare, CalendarDays } from 'lucide-react';
 
 const h = React.createElement;
 
@@ -30,17 +30,18 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
     'div',
     {
       className:
-        'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border-subtle mb-6',
+        'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 pb-7 border-b border-border-subtle mb-6',
     },
     h(
       'div',
-      null,
+      { className: 'min-w-0' },
+      h('p', { className: 'eyebrow mb-3' }, 'Hành trình ngày chung đôi'),
       h(
         'div',
         { className: 'flex items-center gap-2.5 flex-wrap' },
         h(
           'h1',
-          { className: 'text-2xl sm:text-3xl font-bold text-text-main tracking-tight' },
+          { className: 'text-[28px] sm:text-[36px] font-serif font-medium text-primary-luxury tracking-tight break-words' },
           coupleNames
         ),
         isFamily &&
@@ -52,7 +53,7 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
       h(
         'p',
         { className: 'text-sm text-text-muted mt-1 flex items-center gap-2' },
-        h('span', null, '📅'),
+        h(CalendarDays, { className: 'w-3.5 h-3.5 text-accent', strokeWidth: 1.5, 'aria-hidden': true }),
         h('span', null, weddingDateNote)
       )
     ),
@@ -66,6 +67,7 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
           Button,
           {
             variant: 'primary',
+            className: 'bg-accent hover:bg-accent-hover text-white',
             leftIcon: h(Plus, { className: 'w-4 h-4' }),
             onClick: () => setMenuOpen(!menuOpen),
             'aria-expanded': menuOpen,
@@ -86,42 +88,42 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
               'button',
               {
                 className:
-                  'w-full text-left px-3.5 py-2 text-sm text-text-main hover:bg-[#FAF9F5] flex items-center gap-2.5',
+                  'w-full text-left px-3.5 py-2 text-sm text-text-main hover:bg-page flex items-center gap-2.5',
                 role: 'menuitem',
                 onClick: () => {
                   setMenuOpen(false);
                   onQuickAddGuest?.();
                 },
               },
-              h(UserPlus, { className: 'w-4 h-4 text-primary' }),
+              h(UserPlus, { className: 'w-4 h-4 text-accent' }),
               'Thêm khách mời'
             ),
             h(
               'button',
               {
                 className:
-                  'w-full text-left px-3.5 py-2 text-sm text-text-main hover:bg-[#FAF9F5] flex items-center gap-2.5',
+                  'w-full text-left px-3.5 py-2 text-sm text-text-main hover:bg-page flex items-center gap-2.5',
                 role: 'menuitem',
                 onClick: () => {
                   setMenuOpen(false);
                   onQuickAddCost?.();
                 },
               },
-              h(DollarSign, { className: 'w-4 h-4 text-primary' }),
+              h(DollarSign, { className: 'w-4 h-4 text-accent' }),
               'Thêm khoản chi'
             ),
             h(
               'button',
               {
                 className:
-                  'w-full text-left px-3.5 py-2 text-sm text-text-main hover:bg-[#FAF9F5] flex items-center gap-2.5',
+                  'w-full text-left px-3.5 py-2 text-sm text-text-main hover:bg-page flex items-center gap-2.5',
                 role: 'menuitem',
                 onClick: () => {
                   setMenuOpen(false);
                   onQuickAddTask?.();
                 },
               },
-              h(CheckSquare, { className: 'w-4 h-4 text-primary' }),
+              h(CheckSquare, { className: 'w-4 h-4 text-accent' }),
               'Thêm công việc'
             )
           )

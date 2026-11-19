@@ -121,7 +121,7 @@ export const AccommodationsTab: React.FC<AccommodationsTabProps> = ({
           // Total rooms / Occupancy badge
           h(
             'div',
-            { className: 'text-xs px-2.5 py-1 rounded-control bg-[#FAF9F5] border border-border-subtle font-semibold text-text-main self-start sm:self-auto' },
+            { className: 'text-xs px-2.5 py-1 rounded-control bg-page border border-border-subtle font-semibold text-text-main self-start sm:self-auto' },
             `Đã xếp ${assignedRooms.length} / ${acc.totalRooms} phòng`
           )
         ),
@@ -147,7 +147,7 @@ export const AccommodationsTab: React.FC<AccommodationsTabProps> = ({
                       key: ra.id,
                       'data-testid': `room-assignment-${ra.id}`,
                       className:
-                        'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control flex items-start justify-between gap-2 text-xs',
+                        'p-3 bg-page border border-border-subtle rounded-control flex items-start justify-between gap-2 text-xs',
                     },
                     h(
                       'div',

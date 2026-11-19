@@ -122,7 +122,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
         h('input', {
           id: `${formId}-name`,
           className:
-            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
           value: name,
           onChange: (e: any) => setName(e.target.value),
           placeholder: 'Ví dụ: Bàn A1 (Họ hàng nhà trai)',
@@ -140,7 +140,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
           h('label', { className: 'block text-xs font-semibold text-text-main' }, 'Số bàn / Ký hiệu'),
           h('input', {
             className:
-              'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+              'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
             value: tableNumber,
             onChange: (e: any) => setTableNumber(e.target.value),
             placeholder: 'A1, 01, VIP1...',
@@ -156,7 +156,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
               value: shape,
               onChange: (e: any) => setShape(e.target.value as TableShape),
               className:
-                'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+                'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
             },
             h('option', { value: 'round' }, 'Bàn tròn (Round)'),
             h('option', { value: 'rectangular' }, 'Bàn chữ nhật (Rectangular)')
@@ -181,7 +181,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
         ),
         h('input', {
           className:
-            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-white text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+            'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
           type: 'number',
           min: 1,
           value: capacity,

@@ -17,7 +17,7 @@ export const runtime = 'nodejs';
 const uuidParamSchema = z.string().uuid({ message: 'Mã nơi lưu trú không hợp lệ.' });
 
 type RouteContext = {
-  params: { id: string } | Promise<{ id: string }>;
+  params: Promise<{ id: string }>;
 };
 
 /**
@@ -26,7 +26,7 @@ type RouteContext = {
  */
 export async function GET(req: NextRequest, context: RouteContext) {
   try {
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await context.params;
     const parseId = uuidParamSchema.safeParse(id);
     if (!parseId.success) {
       return NextResponse.json(
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
  */
 export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await context.params;
     const parseId = uuidParamSchema.safeParse(id);
     if (!parseId.success) {
       return NextResponse.json(
@@ -137,7 +137,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
  */
 export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await context.params;
     const parseId = uuidParamSchema.safeParse(id);
     if (!parseId.success) {
       return NextResponse.json(

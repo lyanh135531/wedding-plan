@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -17,7 +17,8 @@ interface RouteContext {
  * Ghi nhận bàn giao cảnh chụp cho ekip ảnh (PLAN §15).
  * Invariant: Bản ghi thời điểm bàn giao (handedOverAt) là bất biến (immutable) sau khi đã thiết lập.
  */
-export async function POST(req: NextRequest, { params }: RouteContext) {
+export async function POST(req: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const session = await getCurrentSession(req);
     const authError = enforceOwnerRole(session);

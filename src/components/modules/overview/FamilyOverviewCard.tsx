@@ -45,7 +45,7 @@ export const FamilyOverviewCard: React.FC<FamilyOverviewCardProps> = ({
       // Date card
       h(
         'div',
-        { className: 'p-4 bg-[#FAF9F5] border border-border-subtle rounded-control flex items-start gap-3' },
+        { className: 'p-4 bg-page border border-border-subtle rounded-control flex items-start gap-3' },
         h(Calendar, { className: 'w-5 h-5 text-primary shrink-0 mt-0.5' }),
         h(
           'div',
@@ -57,7 +57,7 @@ export const FamilyOverviewCard: React.FC<FamilyOverviewCardProps> = ({
       // Shared Tasks card
       h(
         'div',
-        { className: 'p-4 bg-[#FAF9F5] border border-border-subtle rounded-control flex items-start gap-3' },
+        { className: 'p-4 bg-page border border-border-subtle rounded-control flex items-start gap-3' },
         h(HeartHandshake, { className: 'w-5 h-5 text-primary shrink-0 mt-0.5' }),
         h(
           'div',
@@ -69,7 +69,7 @@ export const FamilyOverviewCard: React.FC<FamilyOverviewCardProps> = ({
       // Contacts card
       h(
         'div',
-        { className: 'p-4 bg-[#FAF9F5] border border-border-subtle rounded-control flex items-start gap-3' },
+        { className: 'p-4 bg-page border border-border-subtle rounded-control flex items-start gap-3' },
         h(Users, { className: 'w-5 h-5 text-primary shrink-0 mt-0.5' }),
         h(
           'div',
@@ -90,7 +90,7 @@ export const FamilyOverviewCard: React.FC<FamilyOverviewCardProps> = ({
           'div',
           {
             key: idx,
-            className: 'p-3 bg-white border border-border-control/60 rounded-control flex items-start gap-3',
+            className: 'p-3 bg-surface border border-border-control/60 rounded-control flex items-start gap-3',
           },
           h(MapPin, { className: 'w-4 h-4 text-primary shrink-0 mt-1' }),
           h(

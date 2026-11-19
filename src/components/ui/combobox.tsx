@@ -224,7 +224,7 @@ export const Combobox: React.FC<ComboboxProps> = ({
         },
         h(
           'div',
-          { className: 'p-2 border-b border-border-subtle flex items-center gap-2 bg-[#F7F5F0]' },
+          { className: 'p-2 border-b border-border-subtle flex items-center gap-2 bg-page' },
           h(Search, { className: 'w-4 h-4 text-text-muted shrink-0' }),
           h('input', {
             ref: searchInputRef,

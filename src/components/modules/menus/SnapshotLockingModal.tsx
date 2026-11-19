@@ -67,7 +67,7 @@ export const SnapshotLockingModal: React.FC<SnapshotLockingModalProps> = ({
       // Snapshot numbers summary
       h(
         'div',
-        { className: 'bg-[#FAF9F5] p-3 rounded-control border border-border-subtle space-y-2' },
+        { className: 'bg-page p-3 rounded-control border border-border-subtle space-y-2' },
         h('h4', { className: 'font-bold text-text-main text-xs uppercase' }, 'Dữ liệu suất chốt bàn giao:'),
         h(
           'div',

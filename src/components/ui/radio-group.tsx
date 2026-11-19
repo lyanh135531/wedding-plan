@@ -114,7 +114,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
                     : 'border-border-control bg-surface group-hover:border-text-main/80'
                 ),
               },
-              isSelected && h('div', { className: 'w-2 h-2 rounded-full bg-white' })
+              isSelected && h('div', { className: 'w-2 h-2 rounded-full bg-surface' })
             )
           ),
           h(

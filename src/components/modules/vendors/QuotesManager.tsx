@@ -329,7 +329,7 @@ export const QuotesManager: React.FC<QuotesManagerProps> = ({
                 (latestQuote.deposit_conditions || latestQuote.terms) &&
                   React.createElement(
                     'div',
-                    { className: 'p-3 bg-[#FAF9F5] rounded border border-border-subtle text-xs space-y-1 text-text-muted' },
+                    { className: 'p-3 bg-page rounded border border-border-subtle text-xs space-y-1 text-text-muted' },
                     latestQuote.deposit_conditions &&
                       React.createElement(
                         'p',
@@ -352,7 +352,7 @@ export const QuotesManager: React.FC<QuotesManagerProps> = ({
                 'div',
                 {
                   className:
-                    'px-5 py-3.5 bg-[#FAF9F5]/70 border-t border-border-subtle flex items-center justify-between gap-3 flex-wrap',
+                    'px-5 py-3.5 bg-page/70 border-t border-border-subtle flex items-center justify-between gap-3 flex-wrap',
                 },
                 // Version History Button (if older versions exist)
                 olderQuotes.length > 0

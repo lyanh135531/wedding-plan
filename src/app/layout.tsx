@@ -20,6 +20,10 @@ export default function RootLayout({
   return h(
     'html',
     { lang: 'vi' },
+    h('head', null,
+      h('link', { rel: 'preload', href: '/fonts/be-vietnam-pro/BeVietnamPro-Regular.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' }),
+      h('link', { rel: 'preload', href: '/fonts/playfair-display/PlayfairDisplay-Variable.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' }),
+    ),
     h(
       'body',
       { className: 'min-h-screen bg-bg-page text-text-main font-sans antialiased' },

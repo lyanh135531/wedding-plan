@@ -30,6 +30,18 @@ export async function validateLoginEligibility(email: string): Promise<{
     };
   }
 
+  // Fallback: Check environment variables for hardcoded owners if DB is not yet seeded
+  if (
+    normalizedEmail === process.env.OWNER_EMAIL_1?.toLowerCase() ||
+    normalizedEmail === process.env.OWNER_EMAIL_2?.toLowerCase()
+  ) {
+    return {
+      eligible: true,
+      role: "owner",
+    };
+  }
+
+
   // 2. Check if email has a valid pending invite in member_invites (Family workflow - AT50)
   const [pendingInvite] = await db
     .select()
@@ -58,6 +70,8 @@ export async function validateLoginEligibility(email: string): Promise<{
 }
 
 const authSecret = process.env.BETTER_AUTH_SECRET;
+const authBaseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
+const secureCookies = authBaseURL.startsWith("https://");
 const isBuildTime =
   process.env.NEXT_PHASE === "phase-production-build" ||
   process.env.NEXT_PHASE === "phase-export" ||
@@ -89,7 +103,7 @@ export const auth = betterAuth({
 
   // 2. Secret & Base URL
   secret: authSecret || "wedding_platform_auth_secret_minimum_32_chars_default",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: authBaseURL,
 
   // 3. Role field extension (immutable from client payload)
   user: {
@@ -133,10 +147,10 @@ export const auth = betterAuth({
 
   // 7. Cookie Security & Flags (PLAN §21.4)
   advanced: {
-    useSecureCookies: process.env.NODE_ENV === "production",
+    useSecureCookies: secureCookies,
     defaultCookieAttributes: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: secureCookies,
       sameSite: "lax", // Required for OAuth redirect navigation
       path: "/",
     },
@@ -145,7 +159,7 @@ export const auth = betterAuth({
         name: "session_token",
         attributes: {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          secure: secureCookies,
           sameSite: "lax",
           path: "/",
         },
@@ -164,6 +178,7 @@ export const auth = betterAuth({
             console.warn(`[AUTH GATEKEEPER] Blocked uninvited email sign-in attempt: ${user.email}`);
             return false; // Aborts user creation in Better Auth
           }
+
 
           return {
             data: {

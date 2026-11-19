@@ -105,7 +105,7 @@ export const ActionRequiredList: React.FC<ActionRequiredListProps> = ({
         ? h(
             'div',
             { className: 'py-8 text-center text-sm text-text-muted' },
-            '🎉 Tuyệt vời! Hiện tại không có đầu việc nào quá hạn hoặc cần xử lý gấp.'
+            'Chưa có công việc quá hạn hoặc cần xử lý gấp.'
           )
         : h(
             'div',
@@ -117,7 +117,7 @@ export const ActionRequiredList: React.FC<ActionRequiredListProps> = ({
                   key: item.id,
                   href: item.href,
                   className:
-                    'p-3 rounded-control border border-border-subtle hover:border-border-control transition-colors bg-[#FAF9F5] flex items-center justify-between gap-3 group block',
+                    'p-3 rounded-control border border-border-subtle hover:border-border-control transition-colors bg-page flex items-center justify-between gap-3 group block',
                 },
                 h(
                   'div',

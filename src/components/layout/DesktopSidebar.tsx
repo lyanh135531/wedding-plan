@@ -4,13 +4,23 @@ import React from 'react';
 import Link from 'next/link.js';
 import { usePathname } from 'next/navigation.js';
 import { useRole } from '@/context/RoleContext';
+import { BrandMark } from '@/components/common/BrandMark';
+import { Home, CheckSquare, Calendar, Briefcase, FileText, Lightbulb, Users, Mail, LayoutGrid, Utensils, Truck, Wallet, Receipt, Landmark, Gift, Clock, ClipboardList, HeartHandshake, Package, Settings, Upload, Download, History, Lock, type LucideIcon } from 'lucide-react';
+
+const NAV_ICONS: Record<string, LucideIcon> = {
+  '/overview': Home, '/history': History, '/tasks': CheckSquare, '/calendar': Calendar,
+  '/vendors': Briefcase, '/documents': FileText, '/ideas': Lightbulb, '/guests': Users,
+  '/invitations': Mail, '/seating': LayoutGrid, '/menus': Utensils, '/logistics': Truck,
+  '/budget': Wallet, '/payments': Receipt, '/fund': Landmark, '/gifts': Gift,
+  '/timeline': Clock, '/handovers': ClipboardList, '/support': HeartHandshake,
+  '/preparation': Package, '/settings': Settings, '/data/import': Upload, '/data/export': Download,
+};
 
 export interface NavItemConfig {
   name: string;
   href: string;
   icon?: string;
   badge?: string;
-  milestone?: 'R1' | 'R2' | 'R3';
   isFinancial?: boolean;
 }
 
@@ -24,53 +34,50 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroupConfig[] = [
   {
     groupTitle: 'Tổng quan',
     items: [
-      { name: 'Trang chủ', href: '/overview', milestone: 'R1' },
-      { name: 'Thông báo', href: '/notifications', milestone: 'R1' },
-      { name: 'Nhật ký hoạt động', href: '/history', milestone: 'R1' },
+      { name: 'Trang chủ', href: '/overview' },
+      { name: 'Nhật ký hoạt động', href: '/history' },
     ],
   },
   {
     groupTitle: 'Chuẩn bị',
     items: [
-      { name: 'Công việc', href: '/tasks', milestone: 'R1' },
-      { name: 'Lịch hẹn', href: '/calendar', milestone: 'R1' },
-      { name: 'Nhà cung cấp', href: '/vendors', milestone: 'R2' },
-      { name: 'Tài liệu & Ảnh', href: '/documents', milestone: 'R2' },
-      { name: 'Ý tưởng cưới', href: '/ideas', milestone: 'R2' },
+      { name: 'Công việc', href: '/tasks' },
+      { name: 'Lịch hẹn', href: '/calendar' },
+      { name: 'Nhà cung cấp', href: '/vendors' },
+      { name: 'Tài liệu & Ảnh', href: '/documents' },
+      { name: 'Ý tưởng cưới', href: '/ideas' },
     ],
   },
   {
     groupTitle: 'Khách & tiệc',
     items: [
-      { name: 'Khách mời', href: '/guests', milestone: 'R1' },
-      { name: 'Thiệp mời', href: '/invitations', milestone: 'R1' },
-      { name: 'Xếp bàn', href: '/seating', milestone: 'R2' },
-      { name: 'Thực đơn', href: '/menus', milestone: 'R2' },
-      { name: 'Lưu trú & Xe', href: '/logistics', milestone: 'R2' },
+      { name: 'Khách mời', href: '/guests' },
+      { name: 'Thiệp mời', href: '/invitations' },
+      { name: 'Xếp bàn', href: '/seating' },
+      { name: 'Thực đơn', href: '/menus' },
+      { name: 'Lưu trú & Xe', href: '/logistics' },
     ],
   },
   {
     groupTitle: 'Tài chính',
     isFinancialGroup: true,
     items: [
-      { name: 'Ngân sách', href: '/budget', milestone: 'R1', isFinancial: true },
-      { name: 'Thanh toán & Chi', href: '/payments', milestone: 'R1', isFinancial: true },
-      { name: 'Sổ quỹ & Nguồn tiền', href: '/fund', milestone: 'R1', isFinancial: true },
-      { name: 'Quà mừng', href: '/gifts', milestone: 'R3', isFinancial: true },
+      { name: 'Ngân sách', href: '/budget', isFinancial: true },
+      { name: 'Thanh toán & Chi', href: '/payments', isFinancial: true },
+      { name: 'Sổ quỹ & Nguồn tiền', href: '/fund', isFinancial: true },
+      { name: 'Quà mừng', href: '/gifts', isFinancial: true },
     ],
   },
   {
     groupTitle: 'Ngày cưới & cài đặt',
     items: [
-      { name: 'Lịch trình ngày cưới', href: '/timeline', milestone: 'R3' },
-      { name: 'Bộ bàn giao ngày cưới', href: '/handovers', milestone: 'R3' },
-      { name: 'Đội hỗ trợ', href: '/support', milestone: 'R2' },
-      { name: 'Đồ dùng cần chuẩn bị', href: '/preparation', milestone: 'R2' },
-      { name: 'Hậu cưới & Lưu trữ', href: '/after-wedding', milestone: 'R3' },
-      { name: 'Cài đặt chung', href: '/settings', milestone: 'R1' },
-      { name: 'Chia sẻ quyền', href: '/sharing', milestone: 'R1' },
-      { name: 'Nhập dữ liệu', href: '/data/import', milestone: 'R1' },
-      { name: 'Xuất dữ liệu & Bản in', href: '/data/export', milestone: 'R1' },
+      { name: 'Lịch trình ngày cưới', href: '/timeline' },
+      { name: 'Bộ bàn giao ngày cưới', href: '/handovers' },
+      { name: 'Đội hỗ trợ', href: '/support' },
+      { name: 'Đồ dùng cần chuẩn bị', href: '/preparation' },
+      { name: 'Cài đặt chung', href: '/settings' },
+      { name: 'Nhập dữ liệu', href: '/data/import' },
+      { name: 'Xuất dữ liệu & Bản in', href: '/data/export' },
     ],
   },
 ];
@@ -91,8 +98,8 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
   const h = React.createElement;
 
   const containerClasses = isDrawer
-    ? `flex flex-col w-full h-full bg-white select-none overflow-y-auto ${className}`
-    : `hidden lg:flex flex-col w-[240px] h-screen fixed top-0 left-0 bg-white border-r border-[#E2E8E4] z-30 select-none overflow-y-auto ${className}`;
+    ? `app-sidebar flex flex-col w-full h-full select-none overflow-y-auto ${className}`
+    : `app-sidebar hidden lg:flex flex-col w-[240px] h-screen fixed top-0 left-0 border-r border-white/5 z-30 select-none overflow-y-auto ${className}`;
 
   return h(
     'aside',
@@ -103,18 +110,19 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
     // Brand Header
     h(
       'div',
-      { className: 'h-16 flex items-center px-6 border-b border-[#E2E8E4] shrink-0' },
+      { className: 'min-h-[96px] flex items-center gap-3 px-5 py-5 border-b border-white/10 shrink-0' },
+      h(BrandMark, { className: 'w-10 h-10 shrink-0 text-[#D4BF8F]' }),
       h(
         'div',
         null,
         h(
           'span',
-          { className: 'font-semibold text-base text-[#1F2933] block leading-tight' },
+          { className: 'font-serif font-medium text-[17px] text-[#F6F3E9] block leading-snug' },
           'Sổ Quản Lý Đám Cưới'
         ),
         h(
           'span',
-          { className: 'text-xs text-[#52616B] block mt-0.5' },
+          { className: 'text-[10px] text-[#B8C4B8] block mt-2' },
           isFamily ? 'Quyền: Người nhà (Chỉ xem)' : 'Quyền: Chủ sở hữu'
         )
       )
@@ -123,7 +131,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
     // Nav Groups
     h(
       'div',
-      { className: 'flex-1 py-4 px-3 space-y-6' },
+      { className: 'flex-1 py-5 px-3 space-y-5' },
       SIDEBAR_NAV_GROUPS.map((group) => {
         // BẢO MẬT: Ẩn 100% nhóm Tài chính nếu là Người nhà
         if (group.isFinancialGroup && isFamily) {
@@ -150,7 +158,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
             'h3',
             {
               className:
-                'px-3 text-xs font-semibold text-[#52616B] uppercase tracking-wider mb-2',
+                'nav-group-title px-3 uppercase mb-2',
             },
             group.groupTitle
           ),
@@ -160,6 +168,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
             visibleItems.map((item) => {
               const isActive =
                 pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const Icon = NAV_ICONS[item.href] || FileText;
 
               return h(
                 'li',
@@ -168,28 +177,17 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
                   Link,
                   {
                     href: item.href,
+                    prefetch: false,
                     onClick: onNavigate,
-                    className: `flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className: `nav-link flex items-center gap-3 px-3 py-2.5 rounded-control font-normal transition-colors min-h-[44px] lg:min-h-10 ${
                       isActive
-                        ? 'bg-[#23483E] text-white'
-                        : 'text-[#1F2933] hover:bg-[#F7F5F0] hover:text-[#19382F]'
+                        ? 'nav-link--active'
+                        : ''
                     }`,
                     'aria-current': isActive ? 'page' : undefined,
                   },
-                  h('span', { className: 'truncate' }, item.name),
-                  item.milestone && item.milestone !== 'R1'
-                    ? h(
-                        'span',
-                        {
-                          className: `text-[10px] px-1.5 py-0.5 rounded font-normal shrink-0 ${
-                            isActive
-                              ? 'bg-[#19382F] text-gray-200'
-                              : 'bg-[#E2E8E4] text-[#52616B]'
-                          }`,
-                        },
-                        item.milestone
-                      )
-                    : null
+                  h(Icon, { className: 'w-[15px] h-[15px] shrink-0', strokeWidth: 1.5, 'aria-hidden': true }),
+                  h('span', { className: 'truncate' }, item.name)
                 )
               );
             })
@@ -201,9 +199,9 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
     // Footer System Info
     h(
       'div',
-      { className: 'p-4 border-t border-[#E2E8E4] text-xs text-[#52616B] shrink-0' },
-      h('div', null, 'Múi giờ: Asia/Ho_Chi_Minh'),
-      h('div', { className: 'mt-0.5 font-mono text-[11px]' }, 'Tiền tệ: VND (bigint)')
+      { className: 'p-5 border-t border-white/10 text-[10px] text-[#B8C4B8] shrink-0 space-y-2' },
+      h('div', { className: 'flex items-center gap-2' }, h(Lock, { className: 'w-3 h-3', 'aria-hidden': true }), 'Không gian riêng của gia đình'),
+      h('div', { className: 'text-[#8DA397] tracking-wide' }, 'Giờ Việt Nam · VND')
     )
   );
 };

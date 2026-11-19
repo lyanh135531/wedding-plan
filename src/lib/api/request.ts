@@ -6,9 +6,13 @@ export async function api<T>(url: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   const response = await fetch(url, { ...init, headers, cache: 'no-store' });
-  const body = await response.json();
+  if (response.status === 204) return undefined as T;
+  let body: any;
+  try { body = await response.json(); } catch {
+    throw new HttpError(response.status, 'Máy chủ trả về dữ liệu không hợp lệ. Vui lòng thử lại.');
+  }
   if (!response.ok) {
-    throw new HttpError(response.status, body.message || body.issues?.[0]?.message || body.error || 'Không thể lưu dữ liệu. Hãy thử lại.');
+    throw new HttpError(response.status, body?.message || body?.issues?.[0]?.message || body?.error || 'Không thể lưu dữ liệu. Hãy thử lại.');
   }
   return body as T;
 }

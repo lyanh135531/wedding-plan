@@ -101,7 +101,7 @@ export const LinkedIdeasTab: React.FC<LinkedIdeasTabProps> = ({
           {
             key: idea.id,
             className:
-              'p-4 bg-white rounded-xl border border-gray-200 shadow-2xs hover:shadow-xs transition space-y-3 flex flex-col justify-between',
+              'p-4 bg-surface rounded-xl border border-gray-200 shadow-2xs hover:shadow-xs transition space-y-3 flex flex-col justify-between',
             'data-testid': `linked-idea-${idea.id}`,
           },
           h(

@@ -111,7 +111,7 @@ describe('MobileBottomNav Component (UI/UX Spec §2.3, §3.1, §3.2)', () => {
     const html = renderToStaticMarkup(tree);
 
     expect(html).toContain('aria-current="page"');
-    expect(html).toContain('text-[#23483E]');
+    expect(html).toContain('text-primary');
     expect(html).toContain('font-semibold');
   });
 

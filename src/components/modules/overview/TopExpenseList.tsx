@@ -63,6 +63,7 @@ export const TopExpenseList: React.FC<TopExpenseListProps> = ({
     h(
       'div',
       { className: 'divide-y divide-border-subtle' },
+      items.length === 0 && h('p', { className: 'py-7 text-xs text-text-muted text-center' }, 'Những khoản chi sẽ được tổng hợp tại đây.'),
       items.map((item) =>
         h(
           'div',

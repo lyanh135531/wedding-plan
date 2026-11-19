@@ -372,7 +372,7 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
         'div',
         {
           className:
-            'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-text-main',
+            'p-3 bg-page border border-border-subtle rounded-control flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs text-text-main',
         },
         h(
           'div',
@@ -403,7 +403,7 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
               value: shapeFilter,
               onChange: (e: any) => setShapeFilter(e.target.value),
               className:
-                'h-8 px-2 border border-border-control rounded text-xs bg-white text-text-main focus:outline-none focus:ring-1 focus:ring-primary',
+                'h-8 px-2 border border-border-control rounded text-xs bg-surface text-text-main focus:outline-none focus:ring-1 focus:ring-primary',
             },
             h('option', { value: 'all' }, 'Tất cả kiểu bàn'),
             h('option', { value: 'round' }, 'Chỉ bàn tròn'),
@@ -438,7 +438,7 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
               'span',
               {
                 className:
-                  'text-xs font-semibold px-2 py-0.5 rounded-full bg-[#FAF9F5] text-text-muted tabular-nums',
+                  'text-xs font-semibold px-2 py-0.5 rounded-full bg-page text-text-muted tabular-nums',
               },
               guests.filter((g) => !g.tableId).length
             )
@@ -473,7 +473,7 @@ export const SeatingManager: React.FC<SeatingManagerProps> = ({
                         } ${
                           isSelected
                             ? 'border-primary bg-primary/10 font-bold ring-2 ring-primary'
-                            : 'border-border-subtle bg-white hover:border-border-control'
+                            : 'border-border-subtle bg-surface hover:border-border-control'
                         }`,
                       },
                       h(

@@ -1,4 +1,5 @@
 import { TaskModel, ComputedTaskMetrics, RelativeDirection } from './types';
+import { endOfWeddingDay } from '@/lib/dates';
 
 export interface EventDateInfo {
   id: string;
@@ -39,7 +40,7 @@ export function computeEffectiveDueDate(
         isPastDrift: false,
       };
     }
-    const dueDate = new Date(`${task.fixedDate}T23:59:59.999Z`);
+    const dueDate = endOfWeddingDay(task.fixedDate);
     const isOverdue = !isTerminalStatus && currentDate.getTime() > dueDate.getTime();
     return {
       effectiveDueDate: dueDate,
@@ -94,7 +95,7 @@ export function computeEffectiveDueDate(
       };
     }
 
-    const eventDate = new Date(`${event.solarDate}T23:59:59.999Z`);
+    const eventDate = endOfWeddingDay(event.solarDate);
     const offsetDays = task.relativeOffsetDays || 0;
     const offsetMs = offsetDays * 24 * 60 * 60 * 1000;
 

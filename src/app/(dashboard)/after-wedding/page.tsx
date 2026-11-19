@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
 import { ArchivalDashboard } from '@/components/modules/archival/ArchivalDashboard';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 
 const h = React.createElement;
 
@@ -18,6 +19,6 @@ export default function AfterWeddingPage() {
       showScopeSelector: false,
       maxWidth: 'standard',
     },
-    h(ArchivalDashboard)
+    h(FeaturePreview, null, h(ArchivalDashboard))
   );
 }

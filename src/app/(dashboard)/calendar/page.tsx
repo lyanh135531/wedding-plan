@@ -2,13 +2,11 @@
 
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { CalendarAgendaView } from '@/components/modules/calendar/CalendarAgendaView';
-import { usePrototype } from '@/components/testing/PrototypeToolbar';
+import { LiveCalendarView } from '@/components/modules/calendar/LiveCalendarView';
 
 const h = React.createElement;
 
 export default function CalendarPage() {
-  const { state } = usePrototype();
 
   return h(
     PageShell,
@@ -18,11 +16,9 @@ export default function CalendarPage() {
         { label: 'Trang chủ', href: '/overview' },
         { label: 'Lịch hẹn', href: '/calendar' },
       ],
-      showScopeSelector: true,
+      showScopeSelector: false,
       maxWidth: 'standard',
     },
-    h(CalendarAgendaView, {
-      initialState: state,
-    })
+    h(LiveCalendarView)
   );
 }

@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
 import { DataImportWizard } from '@/components/modules/data-import/DataImportWizard';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 import { usePrototype } from '@/components/testing/PrototypeToolbar';
 
 const h = React.createElement;
@@ -21,8 +22,8 @@ export default function DataImportPage() {
       showScopeSelector: false,
       maxWidth: 'standard',
     },
-    h(DataImportWizard, {
+    h(FeaturePreview, null, h(DataImportWizard, {
       initialState: state,
-    })
+    }))
   );
 }

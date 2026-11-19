@@ -139,6 +139,9 @@ export const EventScopeProvider: React.FC<EventScopeProviderProps> = ({
       cancelScopeChange,
     }),
     [
+      currentScope,
+      dirtyForms,
+      pendingScopeChange,
       availableEvents,
       setScope,
       registerDirtyForm,

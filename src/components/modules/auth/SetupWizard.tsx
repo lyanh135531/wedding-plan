@@ -10,17 +10,20 @@ import { PrototypeState } from '@/components/testing/PrototypeToolbar';
 import { StepNames } from './StepNames';
 import { StepWeddingDate } from './StepWeddingDate';
 import { StepCategoryPreview, DEFAULT_STARTER_CATEGORIES, StarterCategory } from './StepCategoryPreview';
+import { api, jsonBody } from '@/lib/api/request';
 
 const h = React.createElement;
 
 export interface SetupWizardProps {
   initialState?: PrototypeState;
   onComplete?: (data: any) => void;
+  prefillExampleData?: boolean;
 }
 
 export const SetupWizard: React.FC<SetupWizardProps> = ({
   initialState = 'populated',
   onComplete,
+  prefillExampleData = true,
 }) => {
   let router: any = null;
   try {
@@ -29,20 +32,24 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
     router = null;
   }
   const [currentStep, setCurrentStep] = React.useState<number>(1);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [ready, setReady] = React.useState(false);
+  const savingRef = React.useRef(false);
+  React.useEffect(() => { setReady(true); }, []);
 
   // Form values
   const [groomName, setGroomName] = React.useState<string>(
-    initialState === 'populated' ? 'Nguyễn Văn Minh' : ''
+    initialState === 'populated' && prefillExampleData ? 'Nguyễn Văn Minh' : ''
   );
   const [brideName, setBrideName] = React.useState<string>(
-    initialState === 'populated' ? 'Trần Phương Linh' : ''
+    initialState === 'populated' && prefillExampleData ? 'Trần Phương Linh' : ''
   );
   const [weddingDate, setWeddingDate] = React.useState<string | null>(null);
   const [isUnconfirmedDate, setIsUnconfirmedDate] = React.useState<boolean>(
     initialState === 'populated' ? true : false
   );
   const [estimatedDateNote, setEstimatedDateNote] = React.useState<string>(
-    initialState === 'populated' ? 'Dự kiến sau Tết âm lịch 2028' : ''
+    initialState === 'populated' && prefillExampleData ? 'Dự kiến sau Tết âm lịch 2028' : ''
   );
   const [categories, setCategories] = React.useState<StarterCategory[]>(DEFAULT_STARTER_CATEGORIES);
 
@@ -53,7 +60,7 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
   );
 
   React.useEffect(() => {
-    if (initialState === 'populated') {
+    if (initialState === 'populated' && prefillExampleData) {
       setGroomName('Nguyễn Văn Minh');
       setBrideName('Trần Phương Linh');
       setIsUnconfirmedDate(true);
@@ -76,7 +83,7 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
         bride: 'Họ và tên Cô dâu không được để trống',
       });
     }
-  }, [initialState]);
+  }, [initialState, prefillExampleData]);
 
   const handleToggleCategory = (id: string, selected: boolean) => {
     setCategories((prev) =>
@@ -115,7 +122,8 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleFinish = (skipped = false) => {
+  const handleFinish = async (skipped = false) => {
+    if (savingRef.current) return;
     const payload = {
       groomName,
       brideName,
@@ -124,10 +132,22 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
       estimatedDateNote,
       categories: skipped ? [] : categories.filter((c) => c.selected),
     };
-    if (onComplete) {
-      onComplete(payload);
-    } else {
-      router.push('/overview');
+    savingRef.current = true;
+    setIsSaving(true);
+    setGlobalError(null);
+    try {
+      if (onComplete) {
+        await onComplete(payload);
+      } else {
+        await api('/api/v1/settings', { method: 'POST', body: jsonBody(payload) });
+        router.replace('/overview');
+        router.refresh();
+      }
+    } catch (error) {
+      setGlobalError(error instanceof Error ? error.message : 'Không thể lưu thiết lập. Vui lòng thử lại.');
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
   };
 
@@ -150,7 +170,8 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
   return h(
     StateWrapper,
     {
-      state: initialState,
+      // Do not accept input before hydration; early input can otherwise be reset.
+      state: !ready && !prefillExampleData ? 'loading' : initialState,
       loadingSkeleton,
       emptyTitle: 'Bắt đầu thiết lập sổ cưới',
       emptyDescription: 'Nhập thông tin ban đầu để hoàn thiện không gian quản lý đám cưới.',
@@ -180,7 +201,7 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
         ),
         h(
           'span',
-          { className: 'text-xs font-semibold px-2.5 py-1 bg-[#FAF9F5] border border-border-control rounded-full text-text-muted' },
+          { className: 'text-xs font-semibold px-2.5 py-1 bg-page border border-border-control rounded-full text-text-muted' },
           `Bước ${currentStep} / 3`
         )
       ),
@@ -238,6 +259,7 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
               {
                 variant: 'secondary',
                 onClick: handleBack,
+                disabled: isSaving,
               },
               'Quay lại'
             )
@@ -260,6 +282,7 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
                 {
                   variant: 'ghost',
                   onClick: () => handleFinish(true),
+                  disabled: isSaving,
                 },
                 'Bỏ qua bước này'
               ),
@@ -268,6 +291,8 @@ export const SetupWizard: React.FC<SetupWizardProps> = ({
                 {
                   variant: 'primary',
                   onClick: () => handleFinish(false),
+                  loading: isSaving,
+                  loadingText: 'Đang lưu thiết lập...',
                 },
                 'Hoàn tất thiết lập'
               )

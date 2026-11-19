@@ -67,7 +67,7 @@ export const VersionConflictModal: React.FC<VersionConflictModalProps> = ({
           'div',
           {
             className:
-              'grid grid-cols-2 bg-[#FAF9F5] border-b border-border-subtle text-xs font-semibold text-text-muted',
+              'grid grid-cols-2 bg-page border-b border-border-subtle text-xs font-semibold text-text-muted',
           },
           h(
             'div',

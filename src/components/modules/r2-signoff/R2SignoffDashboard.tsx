@@ -229,7 +229,7 @@ export const R2SignoffDashboard: React.FC<R2SignoffDashboardProps> = ({
         'div',
         {
           className:
-            'bg-white rounded-xl border border-gray-200 p-5 shadow-2xs space-y-3.5 print:hidden',
+            'bg-surface rounded-xl border border-gray-200 p-5 shadow-2xs space-y-3.5 print:hidden',
         },
         h(
           'div',
@@ -277,7 +277,7 @@ export const R2SignoffDashboard: React.FC<R2SignoffDashboardProps> = ({
       // Section 3: Immutable Snapshots History Table
       h(
         'div',
-        { className: 'bg-white rounded-xl border border-gray-200 overflow-hidden shadow-2xs space-y-0' },
+        { className: 'bg-surface rounded-xl border border-gray-200 overflow-hidden shadow-2xs space-y-0' },
         h(
           'div',
           {

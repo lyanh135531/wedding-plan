@@ -169,7 +169,7 @@ export const LogisticsScreen: React.FC<LogisticsScreenProps> = ({
             className: `px-4 py-2 rounded-t-control text-xs font-semibold flex items-center gap-2 transition-all border-b-2 ${
               activeTab === 'transport'
                 ? 'border-primary text-primary bg-primary/5'
-                : 'border-transparent text-text-muted hover:text-text-main hover:bg-[#FAF9F5]'
+                : 'border-transparent text-text-muted hover:text-text-main hover:bg-page'
             }`,
           },
           h(Bus, { className: 'w-4 h-4' }),
@@ -188,7 +188,7 @@ export const LogisticsScreen: React.FC<LogisticsScreenProps> = ({
             className: `px-4 py-2 rounded-t-control text-xs font-semibold flex items-center gap-2 transition-all border-b-2 ${
               activeTab === 'accommodations'
                 ? 'border-primary text-primary bg-primary/5'
-                : 'border-transparent text-text-muted hover:text-text-main hover:bg-[#FAF9F5]'
+                : 'border-transparent text-text-muted hover:text-text-main hover:bg-page'
             }`,
           },
           h(Hotel, { className: 'w-4 h-4' }),

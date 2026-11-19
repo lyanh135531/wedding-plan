@@ -126,7 +126,7 @@ export const AddEditSupportMemberModal: React.FC<AddEditSupportMemberModalProps>
       'div',
       {
         className:
-          'bg-white rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
+          'bg-surface rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
       },
       // Header
       h(

@@ -29,7 +29,7 @@ export const PrintView: React.FC<PrintViewProps> = ({
     'div',
     {
       className: cn(
-        'w-full bg-white text-black p-8 print:p-0 print:m-0 max-w-4xl mx-auto',
+        'w-full bg-surface text-black p-8 print:p-0 print:m-0 max-w-4xl mx-auto',
         'print:[&_.no-print]:hidden',
         className
       ),

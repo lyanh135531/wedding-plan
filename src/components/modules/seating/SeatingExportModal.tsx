@@ -130,7 +130,7 @@ export const SeatingExportModal: React.FC<SeatingExportModalProps> = ({
       // Summary KPIs
       h(
         'div',
-        { className: 'grid grid-cols-3 gap-2 bg-[#FAF9F5] p-3 rounded-control text-center text-xs' },
+        { className: 'grid grid-cols-3 gap-2 bg-page p-3 rounded-control text-center text-xs' },
         h(
           'div',
           null,
@@ -156,7 +156,7 @@ export const SeatingExportModal: React.FC<SeatingExportModalProps> = ({
         'div',
         {
           id: 'printable-seating-chart',
-          className: 'border border-border-subtle p-4 rounded-card bg-white space-y-4 text-xs',
+          className: 'border border-border-subtle p-4 rounded-card bg-surface space-y-4 text-xs',
         },
         h(
           'div',
@@ -222,7 +222,7 @@ export const SeatingExportModal: React.FC<SeatingExportModalProps> = ({
                       {
                         key: g.id,
                         className:
-                          'p-1.5 bg-white border border-border-subtle rounded flex items-center justify-between',
+                          'p-1.5 bg-surface border border-border-subtle rounded flex items-center justify-between',
                       },
                       h(
                         'span',

@@ -154,7 +154,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 setSide(e.target.value as any),
               className:
-                'w-full h-10 px-3 text-sm bg-white border border-[#7A8881] rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+                'w-full h-10 px-3 text-sm bg-surface border border-border-control rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
             },
             h('option', { value: 'groom' }, 'Nhà trai'),
             h('option', { value: 'bride' }, 'Nhà gái'),
@@ -192,7 +192,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
                 'div',
                 {
                   key: member.id,
-                  className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control space-y-2',
+                  className: 'p-3 bg-page border border-border-subtle rounded-control space-y-2',
                 },
                 h(
                   'div',
@@ -204,7 +204,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
                       handleMemberChange(member.id, 'name', e.target.value),
                     placeholder: `Tên người thứ ${index + 1}...`,
                     className:
-                      'flex-1 h-9 px-2.5 text-sm bg-white border border-[#7A8881] rounded focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+                      'flex-1 h-9 px-2.5 text-sm bg-surface border border-border-control rounded focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
                     required: true,
                   }),
 
@@ -214,7 +214,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
                       value: member.ageTier,
                       onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleMemberChange(member.id, 'ageTier', e.target.value),
-                      className: 'h-9 px-2 text-xs bg-white border border-[#7A8881] rounded',
+                      className: 'h-9 px-2 text-xs bg-surface border border-border-control rounded',
                     },
                     h('option', { value: 'adult' }, 'Người lớn'),
                     h('option', { value: 'child' }, 'Trẻ em'),
@@ -250,7 +250,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
                       onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                         handleMemberChange(member.id, 'phone', e.target.value),
                       placeholder: 'Số ĐT liên hệ...',
-                      className: 'h-7 px-2 text-xs border border-[#7A8881] rounded w-36 bg-white',
+                      className: 'h-7 px-2 text-xs border border-border-control rounded w-36 bg-surface',
                     })
                 )
               )

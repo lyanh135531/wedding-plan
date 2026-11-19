@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import crypto from "node:crypto";
+import { headers as nextHeaders } from "next/headers";
 import { pool, db } from "@/db/client";
 import { auth, validateLoginEligibility } from "@/lib/auth/auth";
 import {
   getCurrentSession,
+  SessionStoreUnavailableError,
   revokeFamilyMemberAccess,
   requireAuthenticatedSession,
   requireOwnerSession,
@@ -17,6 +19,13 @@ import {
   InviteError,
 } from "@/lib/auth/invites";
 import { seedOwners } from "../../scripts/seed-owners";
+
+vi.mock("next/headers", () => ({ headers: vi.fn() }));
+
+function signedSessionCookie(token: string, secret = auth.options.secret!) {
+  const signature = crypto.createHmac("sha256", secret).update(token).digest("base64");
+  return encodeURIComponent(`${token}.${signature}`);
+}
 
 // ==============================================================================
 // High-Fidelity Stateful In-Memory Database Simulator for Auth & Permissions
@@ -640,7 +649,7 @@ describe("Milestone 3 Auth & Security Acceptance Tests (AT02, AT04, AT49, AT50)"
       expect(revokeAudit).toBeDefined();
     });
 
-    it("extracts session token from cookies when Bearer header is absent", async () => {
+    it.each(["session_token", "better-auth.session_token", "__Secure-session_token", "__Secure-better-auth.session_token"])("validates signed %s cookies in routes and Server Components", async (cookieName) => {
       const familyUserId = crypto.randomUUID();
       mockDb.users.set(familyUserId, {
         id: familyUserId,
@@ -667,11 +676,32 @@ describe("Milestone 3 Auth & Security Acceptance Tests (AT02, AT04, AT49, AT50)"
       });
 
       const reqHeaders = new Headers();
-      reqHeaders.set("cookie", `session_token=${sessionToken}; Path=/; HttpOnly`);
+      reqHeaders.set("cookie", `other=value; ${cookieName}=${signedSessionCookie(sessionToken)}`);
 
       const session = await getCurrentSession(reqHeaders);
       expect(session).not.toBeNull();
       expect(session?.user.id).toBe(familyUserId);
+
+      // The dashboard layout reads Next.js request headers without an explicit Request.
+      vi.mocked(nextHeaders).mockResolvedValue(reqHeaders as Awaited<ReturnType<typeof nextHeaders>>);
+      expect((await getCurrentSession())?.user.id).toBe(familyUserId);
+
+      for (const value of [
+        sessionToken, // Unsigned cookie
+        signedSessionCookie(sessionToken, "wrong-secret"),
+        signedSessionCookie(`${sessionToken}-tampered`),
+        "%invalid-encoding",
+      ]) {
+        reqHeaders.set("cookie", `${cookieName}=${value}`);
+        expect(await getCurrentSession(reqHeaders)).toBeNull();
+      }
+
+      reqHeaders.set("cookie", `${cookieName}=${signedSessionCookie(sessionToken)}`);
+      mockDb.sessions.get(sessionId)!.expiresAt = new Date(Date.now() - 1000);
+      expect(await getCurrentSession(reqHeaders)).toBeNull();
+      mockDb.sessions.get(sessionId)!.expiresAt = new Date(Date.now() + 86400000);
+      mockDb.sessions.delete(sessionId);
+      expect(await getCurrentSession(reqHeaders)).toBeNull();
     });
 
     it("returns null when session token is expired", async () => {
@@ -711,6 +741,16 @@ describe("Milestone 3 Auth & Security Acceptance Tests (AT02, AT04, AT49, AT50)"
       await expect(
         requireAuthenticatedSession(emptyHeaders)
       ).rejects.toThrow("UNAUTHORIZED: Active session required.");
+    });
+
+    it("does not mistake a database failure for an unauthenticated user", async () => {
+      const logger = vi.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        vi.mocked(pool.query).mockRejectedValueOnce(new Error('Connection timeout'));
+        const request = new Headers({ authorization: 'Bearer existing-session' });
+        await expect(getCurrentSession(request)).rejects.toBeInstanceOf(SessionStoreUnavailableError);
+        expect(logger.mock.calls.flat().join(' ')).not.toContain('existing-session');
+      } finally { logger.mockRestore(); }
     });
 
     it("throws forbidden error via requireOwnerSession when caller is family_view", async () => {

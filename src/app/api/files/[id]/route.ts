@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import { Readable } from 'node:stream';
-import { db } from '@/db/client';
+import { db, withTransactionScopedContext } from '@/db/client';
 import { attachments, attachmentVariants } from '@/db/schema/files';
 import { eq, and } from 'drizzle-orm';
 import { getCurrentSession } from '@/lib/auth/session';
@@ -14,10 +14,8 @@ export const runtime = 'nodejs';
 
 const uuidParamSchema = z.string().uuid();
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // 1. Kiểm tra UUID hợp lệ
   const parseResult = uuidParamSchema.safeParse(params.id);
   if (!parseResult.success) {
@@ -40,16 +38,18 @@ export async function GET(
 
   const authUserId = session.user.id;
   const authUserRole = session.role;
+  const scoped = <T>(operation: (scopedDb: Omit<typeof db, '$client'>) => PromiseLike<T>) =>
+    withTransactionScopedContext(authUserId, authUserRole, async (_client, scopedDb) => await operation(scopedDb));
 
   // 3. Phân giải query parameter variant (?variant=thumbnail | ?variant=preview)
   const variantParam = req.nextUrl.searchParams.get('variant');
 
   // 4. Truy vấn metadata tệp từ Database
-  const [attachment] = await db
+  const [attachment] = await scoped((db) => db
     .select()
     .from(attachments)
     .where(eq(attachments.id, attachmentId))
-    .limit(1);
+    .limit(1));
 
   if (!attachment) {
     return NextResponse.json(
@@ -110,7 +110,7 @@ export async function GET(
   let responseMimeType = attachment.mimeType;
 
   if (variantParam === 'thumbnail') {
-    const [variant] = await db
+    const [variant] = await scoped((db) => db
       .select()
       .from(attachmentVariants)
       .where(
@@ -119,7 +119,7 @@ export async function GET(
           eq(attachmentVariants.variantType, 'thumbnail_320')
         )
       )
-      .limit(1);
+      .limit(1));
 
     if (!variant) {
       return NextResponse.json(
@@ -130,7 +130,7 @@ export async function GET(
     targetStorageKey = variant.storageKey;
     responseMimeType = variant.mimeType;
   } else if (variantParam === 'preview') {
-    const [variant] = await db
+    const [variant] = await scoped((db) => db
       .select()
       .from(attachmentVariants)
       .where(
@@ -139,7 +139,7 @@ export async function GET(
           eq(attachmentVariants.variantType, 'preview_1600')
         )
       )
-      .limit(1);
+      .limit(1));
 
     if (!variant) {
       return NextResponse.json(

@@ -43,7 +43,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       'div',
       {
         className:
-          'w-16 h-16 rounded-full bg-[#FAF9F5] border border-border-subtle flex items-center justify-center mb-4',
+          'w-16 h-16 rounded-full bg-page border border-border-subtle flex items-center justify-center mb-4',
       },
       icon || defaultIcon
     ),

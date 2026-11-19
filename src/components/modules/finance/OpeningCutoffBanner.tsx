@@ -26,7 +26,7 @@ export const OpeningCutoffBanner: React.FC<OpeningCutoffBannerProps> = ({
     'div',
     {
       className:
-        'p-4 bg-[#FAF9F5] border border-border-control/60 rounded-card mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-sm text-text-main',
+        'p-4 bg-page border border-border-control/60 rounded-card mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-sm text-text-main',
       role: 'region',
       'aria-label': 'Mốc mở sổ quỹ và tiền đặt cọc trước mốc',
     },
@@ -53,7 +53,7 @@ export const OpeningCutoffBanner: React.FC<OpeningCutoffBannerProps> = ({
     ),
     h(
       'div',
-      { className: 'shrink-0 px-2.5 py-1 bg-white border border-border-subtle rounded text-xs text-primary font-medium' },
+      { className: 'shrink-0 px-2.5 py-1 bg-surface border border-border-subtle rounded text-xs text-primary font-medium' },
       'FX03: Khớp sổ quỹ'
     )
   );

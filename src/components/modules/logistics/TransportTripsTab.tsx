@@ -240,7 +240,7 @@ export const TransportTripsTab: React.FC<TransportTripsTabProps> = ({
                       key: p.id,
                       'data-testid': `trip-passenger-${p.id}`,
                       className:
-                        'p-2 bg-[#FAF9F5] border border-border-subtle rounded-control flex items-center justify-between gap-2 text-xs',
+                        'p-2 bg-page border border-border-subtle rounded-control flex items-center justify-between gap-2 text-xs',
                     },
                     h(
                       'div',

@@ -46,7 +46,7 @@ export const CompareSimulationBar: React.FC<CompareSimulationBarProps> = ({
         'span',
         {
           className:
-            'text-xs text-text-muted bg-[#FAF9F5] px-2.5 py-1 rounded border border-border-subtle font-medium',
+            'text-xs text-text-muted bg-page px-2.5 py-1 rounded border border-border-subtle font-medium',
         },
         'Tự động chuẩn hóa trên cùng kịch bản (PLAN §11.2)'
       )
@@ -87,7 +87,7 @@ export const CompareSimulationBar: React.FC<CompareSimulationBarProps> = ({
             onGuestCountChange(val * 10);
           },
           className:
-            'w-full h-2 bg-[#FAF9F5] rounded-lg appearance-none cursor-pointer accent-primary focus:outline-2 focus:outline-focus',
+            'w-full h-2 bg-page rounded-lg appearance-none cursor-pointer accent-primary focus:outline-2 focus:outline-focus',
           'aria-valuemin': 5,
           'aria-valuemax': 100,
           'aria-valuenow': tableCount,
@@ -120,7 +120,7 @@ export const CompareSimulationBar: React.FC<CompareSimulationBarProps> = ({
           value: guestCount,
           onChange: (e) => onGuestCountChange(Number(e.target.value) || 0),
           className:
-            'w-full py-2 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base font-semibold text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
+            'w-full py-2 px-3 bg-page border border-border-control rounded-control text-base font-semibold text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
           'aria-label': 'Số lượng khách giả định',
         }),
         React.createElement(
@@ -133,7 +133,7 @@ export const CompareSimulationBar: React.FC<CompareSimulationBarProps> = ({
       // 3. VAT & Service Charge Toggle
       React.createElement(
         'div',
-        { className: 'p-3 bg-[#FAF9F5] rounded border border-border-subtle space-y-1.5' },
+        { className: 'p-3 bg-page rounded border border-border-subtle space-y-1.5' },
         React.createElement(Checkbox, {
           label: React.createElement(
             'span',

@@ -91,7 +91,7 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({
           'w-full p-8 border-2 border-dashed rounded-card flex flex-col items-center justify-center text-center cursor-pointer transition-colors',
           isDragOver
             ? 'border-primary bg-primary/5'
-            : 'border-border-control/60 hover:border-text-main/60 bg-[#FAF9F5]',
+            : 'border-border-control/60 hover:border-text-main/60 bg-page',
           disabled && 'opacity-50 cursor-not-allowed'
         ),
       },

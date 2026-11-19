@@ -116,7 +116,7 @@ export const MusicPlaylistTab: React.FC<MusicPlaylistTabProps> = ({
       'div',
       {
         className:
-          'flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-2xs',
+          'flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-surface rounded-xl border border-gray-200 shadow-2xs',
       },
       h(
         'div',
@@ -133,7 +133,7 @@ export const MusicPlaylistTab: React.FC<MusicPlaylistTabProps> = ({
             onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
               setSelectedMoment(e.target.value),
             className:
-              'px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white text-gray-700',
+              'px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface text-gray-700',
           },
           h('option', { value: 'all' }, 'Tất cả 7 khoảnh khắc'),
           CEREMONY_MOMENTS.map((m) =>
@@ -189,7 +189,7 @@ export const MusicPlaylistTab: React.FC<MusicPlaylistTabProps> = ({
                 className: `p-4 rounded-xl border transition flex flex-col md:flex-row md:items-center justify-between gap-4 ${
                   track.isBlacklisted
                     ? 'bg-red-50/70 border-red-200'
-                    : 'bg-white border-gray-200 hover:border-gray-300 shadow-2xs'
+                    : 'bg-surface border-gray-200 hover:border-gray-300 shadow-2xs'
                 }`,
                 'data-testid': `music-track-${track.id}`,
               },

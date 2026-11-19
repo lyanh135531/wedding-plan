@@ -91,7 +91,7 @@ export function DataTable<T>({
         { className: 'w-full text-left border-collapse' },
         h(
           'thead',
-          { className: 'bg-[#FAF9F5] border-b border-border-subtle sticky top-0 z-10' },
+          { className: 'bg-page border-b border-border-subtle sticky top-0 z-10' },
           h(
             'tr',
             null,

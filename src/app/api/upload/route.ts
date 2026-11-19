@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { db } from '@/db/client';
+import { db, withTransactionScopedContext } from '@/db/client';
 import { attachments, attachmentVariants } from '@/db/schema/files';
 import { eq } from 'drizzle-orm';
 import { getCurrentSession } from '@/lib/auth/session';
@@ -61,6 +61,8 @@ export async function POST(req: NextRequest) {
 
   const authUserId = session.user.id;
   const authUserRole = session.role;
+  const scoped = <T>(operation: (scopedDb: Omit<typeof db, '$client'>) => PromiseLike<T>) =>
+    withTransactionScopedContext(authUserId, authUserRole, async (_client, scopedDb) => await operation(scopedDb));
 
   // Người nhà chỉ xem TUYỆT ĐỐI không được phép upload (PLAN §5.1, §17.1, AT41)
   if (authUserRole !== 'owner') {
@@ -196,7 +198,7 @@ export async function POST(req: NextRequest) {
   const leaseExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 phút lease
 
   try {
-    await db.insert(attachments).values({
+    await scoped((db) => db.insert(attachments).values({
       id: attachmentUuid,
       storageKey: canonicalStorageKey,
       originalName: file.name || `file_${attachmentUuid}${detectedType.ext}`,
@@ -212,7 +214,7 @@ export async function POST(req: NextRequest) {
       leaseExpiresAt: leaseExpiresAt,
       createdAt: now,
       updatedAt: now,
-    });
+    }));
   } catch (dbErr: unknown) {
     const errMessage = dbErr instanceof Error ? dbErr.message : String(dbErr);
     return NextResponse.json(
@@ -266,10 +268,10 @@ export async function POST(req: NextRequest) {
 
     // 9.3. Hoàn tất cập nhật DB: Thêm variants và cập nhật status = 'ready'
     if (variantsToInsert.length > 0) {
-      await db.insert(attachmentVariants).values(variantsToInsert);
+      await scoped((db) => db.insert(attachmentVariants).values(variantsToInsert));
     }
 
-    await db
+    await scoped((db) => db
       .update(attachments)
       .set({
         width: originalWidth,
@@ -278,7 +280,7 @@ export async function POST(req: NextRequest) {
         leaseExpiresAt: null,
         updatedAt: new Date(),
       })
-      .where(eq(attachments.id, attachmentUuid));
+      .where(eq(attachments.id, attachmentUuid)));
 
     // 10. Trả về DTO Owner thành công (HTTP 201)
     return NextResponse.json(
@@ -315,7 +317,7 @@ export async function POST(req: NextRequest) {
 
     // Cập nhật DB sang trạng thái failed để phục vụ đối soát, không để ready mồ côi
     try {
-      await db
+      await scoped((db) => db
         .update(attachments)
         .set({
           processingStatus: 'failed',
@@ -323,7 +325,7 @@ export async function POST(req: NextRequest) {
           leaseExpiresAt: null,
           updatedAt: new Date(),
         })
-        .where(eq(attachments.id, attachmentUuid));
+        .where(eq(attachments.id, attachmentUuid)));
     } catch {
       // Bỏ qua lỗi cập nhật DB failed
     }

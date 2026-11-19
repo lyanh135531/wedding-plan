@@ -6,10 +6,8 @@ import { updateTaskSchema } from '@/schemas/tasks';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
@@ -35,10 +33,8 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
@@ -79,10 +75,8 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });

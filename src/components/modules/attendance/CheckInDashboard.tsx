@@ -275,7 +275,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
         placeholder: 'Tìm nhanh theo tên khách (không dấu) hoặc số điện thoại...',
         value: searchQuery,
         onChange: (e) => setSearchQuery(e.target.value),
-        className: 'w-full pl-11 pr-4 py-2.5 rounded-control border border-border-control bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary',
+        className: 'w-full pl-11 pr-4 py-2.5 rounded-control border border-border-control bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary',
       })
     ),
 

@@ -105,7 +105,7 @@ describe('Gate G9 API Route Handlers Integration Tests (M9.1, AT03, AT26)', () =
 
       // GET [id]/preview
       const prevReq = new NextRequest(`http://localhost:3000/api/v1/preparation/ideas/${ideaId}/preview`);
-      const prevRes = await ideaPreviewRoute.GET(prevReq, { params: { id: ideaId } });
+      const prevRes = await ideaPreviewRoute.GET(prevReq, { params: Promise.resolve({ id: ideaId }) });
       expect(prevRes.status).toBe(200);
       const prevJson = await prevRes.json();
       expect(prevJson.data.proposedTask.title).toContain('Ý tưởng trang trí sảnh');
@@ -116,14 +116,14 @@ describe('Gate G9 API Route Handlers Integration Tests (M9.1, AT03, AT26)', () =
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'decided', version: 1 }),
       });
-      const patchRes = await ideaDetailRoute.PATCH(patchReq, { params: { id: ideaId } });
+      const patchRes = await ideaDetailRoute.PATCH(patchReq, { params: Promise.resolve({ id: ideaId }) });
       expect(patchRes.status).toBe(200);
 
       // DELETE [id]
       const delReq = new NextRequest(`http://localhost:3000/api/v1/preparation/ideas/${ideaId}?version=2`, {
         method: 'DELETE',
       });
-      const delRes = await ideaDetailRoute.DELETE(delReq, { params: { id: ideaId } });
+      const delRes = await ideaDetailRoute.DELETE(delReq, { params: Promise.resolve({ id: ideaId }) });
       expect(delRes.status).toBe(200);
     });
 
@@ -179,7 +179,7 @@ describe('Gate G9 API Route Handlers Integration Tests (M9.1, AT03, AT26)', () =
 
       // GET detail
       const detailReq = new NextRequest(`http://localhost:3000/api/v1/preparation/items/${itemId}`);
-      const detailRes = await itemDetailRoute.GET(detailReq, { params: { id: itemId } });
+      const detailRes = await itemDetailRoute.GET(detailReq, { params: Promise.resolve({ id: itemId }) });
       expect(detailRes.status).toBe(200);
 
       // PATCH status to packed
@@ -188,7 +188,7 @@ describe('Gate G9 API Route Handlers Integration Tests (M9.1, AT03, AT26)', () =
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'packed', version: 1 }),
       });
-      const patchRes = await itemDetailRoute.PATCH(patchReq, { params: { id: itemId } });
+      const patchRes = await itemDetailRoute.PATCH(patchReq, { params: Promise.resolve({ id: itemId }) });
       expect(patchRes.status).toBe(200);
       const patchJson = await patchRes.json();
       expect(patchJson.data.status).toBe('packed');
@@ -269,13 +269,13 @@ describe('Gate G9 API Route Handlers Integration Tests (M9.1, AT03, AT26)', () =
           channel: 'direct_handover',
         }),
       });
-      const handoverRes = await shotHandoverRoute.POST(handoverReq, { params: { id: shotId } });
+      const handoverRes = await shotHandoverRoute.POST(handoverReq, { params: Promise.resolve({ id: shotId }) });
       expect(handoverRes.status).toBe(200);
       const handoverJson = await handoverRes.json();
       expect(handoverJson.data.success).toBe(true);
 
       // Subsequent handover attempt fails (Immutable invariant)
-      const repeatHandoverRes = await shotHandoverRoute.POST(handoverReq, { params: { id: shotId } });
+      const repeatHandoverRes = await shotHandoverRoute.POST(handoverReq, { params: Promise.resolve({ id: shotId }) });
       expect(repeatHandoverRes.status).toBe(400);
     });
   });

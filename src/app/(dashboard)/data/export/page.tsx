@@ -18,6 +18,6 @@ export default function DataExportPage() {
       showScopeSelector: false,
       maxWidth: 'standard',
     },
-    h(DataExportView, null)
+    h(DataExportView, { live: true })
   );
 }

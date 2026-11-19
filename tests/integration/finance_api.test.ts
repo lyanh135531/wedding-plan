@@ -189,7 +189,7 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
       });
 
       const res = await costCancelRoute.POST(req, {
-        params: { id: 'c0000000-0000-4000-8000-000000000002' },
+        params: Promise.resolve({ id: 'c0000000-0000-4000-8000-000000000002' }),
       });
 
       expect(res.status).toBe(200);
@@ -348,7 +348,7 @@ describe('Gate G4 Financial API Integration Test Suite', () => {
       });
 
       const res = await voidPaymentRoute.POST(req, {
-        params: { id: 'p0000000-0000-4000-8000-000000000001' },
+        params: Promise.resolve({ id: 'p0000000-0000-4000-8000-000000000001' }),
       });
 
       expect(res.status).toBe(200);

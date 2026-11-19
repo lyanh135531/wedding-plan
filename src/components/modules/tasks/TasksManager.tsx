@@ -217,7 +217,7 @@ export const TasksManager: React.FC<TasksManagerProps> = ({
               className: `px-3 py-1.5 rounded-full transition-colors ${
                 filterMode === 'all'
                   ? 'bg-primary text-white'
-                  : 'bg-[#FAF9F5] text-text-muted hover:text-text-main'
+                  : 'bg-page text-text-muted hover:text-text-main'
               }`,
             },
             `Tất cả (${tasks.length})`
@@ -229,7 +229,7 @@ export const TasksManager: React.FC<TasksManagerProps> = ({
               className: `px-3 py-1.5 rounded-full transition-colors ${
                 filterMode === 'family'
                   ? 'bg-primary text-white'
-                  : 'bg-[#FAF9F5] text-text-muted hover:text-text-main'
+                  : 'bg-page text-text-muted hover:text-text-main'
               }`,
             },
             `Chia sẻ người nhà (${tasks.filter((t) => t.isSharedWithFamily).length})`

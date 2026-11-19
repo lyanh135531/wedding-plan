@@ -327,7 +327,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(ownerSession as any);
 
       const req = new NextRequest('http://localhost:3000/api/v1/vendors/not-a-uuid');
-      const res = await vendorDetailRoute.GET(req, { params: { id: 'not-a-uuid' } });
+      const res = await vendorDetailRoute.GET(req, { params: Promise.resolve({ id: 'not-a-uuid' }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -338,7 +338,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(null);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`);
-      const res = await vendorDetailRoute.GET(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(401);
       const body = await res.json();
@@ -351,7 +351,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(vendorsRepo, 'getVendorById').mockResolvedValue(null);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`);
-      const res = await vendorDetailRoute.GET(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(404);
       const body = await res.json();
@@ -364,7 +364,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(vendorsRepo, 'getVendorById').mockResolvedValue(mockVendorDto);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`);
-      const res = await vendorDetailRoute.GET(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -382,7 +382,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       });
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`);
-      const res = await vendorDetailRoute.GET(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.GET(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -403,7 +403,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
         method: 'PATCH',
         body: JSON.stringify({ version: 1, name: 'Updated' }),
       });
-      const res = await vendorDetailRoute.PATCH(req, { params: { id: 'bad-id' } });
+      const res = await vendorDetailRoute.PATCH(req, { params: Promise.resolve({ id: 'bad-id' }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -418,7 +418,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
         method: 'PATCH',
         body: JSON.stringify({ version: 1, name: 'Hacked Vendor' }),
       });
-      const res = await vendorDetailRoute.PATCH(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.PATCH(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(403);
       const body = await res.json();
@@ -433,7 +433,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
         method: 'PATCH',
         body: JSON.stringify({ name: 'Updated Name Without Version' }),
       });
-      const res = await vendorDetailRoute.PATCH(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.PATCH(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -449,7 +449,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
         method: 'PATCH',
         body: JSON.stringify({ version: 1, name: 'Stale Update' }),
       });
-      const res = await vendorDetailRoute.PATCH(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.PATCH(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(409);
       const body = await res.json();
@@ -466,7 +466,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
         method: 'PATCH',
         body: JSON.stringify({ version: 1, name: 'Missing Vendor' }),
       });
-      const res = await vendorDetailRoute.PATCH(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.PATCH(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(404);
       const body = await res.json();
@@ -483,7 +483,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
         method: 'PATCH',
         body: JSON.stringify({ version: 1, name: 'Riverside Palace New Name' }),
       });
-      const res = await vendorDetailRoute.PATCH(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.PATCH(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -501,7 +501,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(ownerSession as any);
 
       const req = new NextRequest('http://localhost:3000/api/v1/vendors/not-uuid', { method: 'DELETE' });
-      const res = await vendorDetailRoute.DELETE(req, { params: { id: 'not-uuid' } });
+      const res = await vendorDetailRoute.DELETE(req, { params: Promise.resolve({ id: 'not-uuid' }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -513,7 +513,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(sessionModule, 'getCurrentSession').mockResolvedValue(familySession as any);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`, { method: 'DELETE' });
-      const res = await vendorDetailRoute.DELETE(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.DELETE(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(403);
       const body = await res.json();
@@ -526,7 +526,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(vendorsRepo, 'deleteVendor').mockRejectedValue(new VendorHasActiveCostItemsError());
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`, { method: 'DELETE' });
-      const res = await vendorDetailRoute.DELETE(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.DELETE(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -540,7 +540,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(vendorsRepo, 'deleteVendor').mockRejectedValue(new VendorNotFoundError());
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`, { method: 'DELETE' });
-      const res = await vendorDetailRoute.DELETE(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.DELETE(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(404);
       const body = await res.json();
@@ -553,7 +553,7 @@ describe('Vendors API Route Handlers Integration Tests (M8.3, AT03, AT30)', () =
       vi.spyOn(vendorsRepo, 'deleteVendor').mockResolvedValue(undefined);
 
       const req = new NextRequest(`http://localhost:3000/api/v1/vendors/${validVendorId}`, { method: 'DELETE' });
-      const res = await vendorDetailRoute.DELETE(req, { params: { id: validVendorId } });
+      const res = await vendorDetailRoute.DELETE(req, { params: Promise.resolve({ id: validVendorId }) });
 
       expect(res.status).toBe(200);
       const body = await res.json();

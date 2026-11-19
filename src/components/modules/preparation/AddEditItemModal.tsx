@@ -98,7 +98,7 @@ export const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
       'div',
       {
         className:
-          'bg-white rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
+          'bg-surface rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
       },
       // Header
       h(
@@ -178,7 +178,7 @@ export const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
                 onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                   setStatus(e.target.value as ItemStatus),
                 className:
-                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white',
+                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface',
               },
               h('option', { value: 'not_prepared' }, 'Chưa chuẩn bị'),
               h('option', { value: 'packed' }, 'Đã đóng gói'),
@@ -266,7 +266,7 @@ export const AddEditItemModal: React.FC<AddEditItemModalProps> = ({
                 value: returnDueDate,
                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReturnDueDate(e.target.value),
                 className:
-                  'w-full px-3 py-1.5 text-xs border border-amber-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-amber-500 bg-white',
+                  'w-full px-3 py-1.5 text-xs border border-amber-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-amber-500 bg-surface',
               })
             )
         ),

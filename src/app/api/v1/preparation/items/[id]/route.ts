@@ -13,10 +13,11 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function GET(req: NextRequest, { params }: RouteContext) {
+export async function GET(req: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const session = await getCurrentSession(req);
     if (!session?.user?.id) {
@@ -40,7 +41,8 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: RouteContext) {
+export async function PATCH(req: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const session = await getCurrentSession(req);
     const authError = enforceOwnerRole(session);
@@ -85,7 +87,8 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: RouteContext) {
+export async function DELETE(req: NextRequest, props: RouteContext) {
+  const params = await props.params;
   try {
     const session = await getCurrentSession(req);
     const authError = enforceOwnerRole(session);

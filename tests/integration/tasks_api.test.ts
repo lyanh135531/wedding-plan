@@ -132,7 +132,7 @@ describe('Gate G5 Tasks API Endpoints Integration Test Suite', () => {
       });
 
       const res = await taskStatusRoute.PATCH(req, {
-        params: { id: 't0000000-0000-4000-8000-000000000001' },
+        params: Promise.resolve({ id: 't0000000-0000-4000-8000-000000000001' }),
       });
 
       expect(res.status).toBe(200);
@@ -160,7 +160,7 @@ describe('Gate G5 Tasks API Endpoints Integration Test Suite', () => {
       });
 
       const res = await taskDepRoute.POST(req, {
-        params: { id: 'a0000000-0000-4000-8000-000000000001' },
+        params: Promise.resolve({ id: 'a0000000-0000-4000-8000-000000000001' }),
       });
 
       expect(res.status).toBe(400);

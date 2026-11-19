@@ -84,7 +84,7 @@ export const DataImportWizard: React.FC<DataImportWizardProps> = ({
       // Step indicator
       h(
         'div',
-        { className: 'flex items-center justify-between text-xs font-semibold text-text-muted bg-[#FAF9F5] p-3 rounded-control border border-border-subtle' },
+        { className: 'flex items-center justify-between text-xs font-semibold text-text-muted bg-page p-3 rounded-control border border-border-subtle' },
         h('span', { className: step === 1 ? 'text-primary font-bold' : '' }, '1. Chọn tệp'),
         h(ArrowRight, { className: 'w-3 h-3 text-text-muted' }),
         h('span', { className: step === 2 ? 'text-primary font-bold' : '' }, '2. Khớp cột'),
@@ -132,7 +132,7 @@ export const DataImportWizard: React.FC<DataImportWizardProps> = ({
               { className: 'w-full text-left border-collapse', 'aria-label': 'Bảng chi tiết dòng lỗi' },
               h(
                 'thead',
-                { className: 'bg-[#FAF9F5] font-semibold text-text-muted uppercase border-b border-border-subtle' },
+                { className: 'bg-page font-semibold text-text-muted uppercase border-b border-border-subtle' },
                 h(
                   'tr',
                   null,
@@ -162,7 +162,7 @@ export const DataImportWizard: React.FC<DataImportWizardProps> = ({
           // Checkbox Skip Invalid Rows (UXT23)
           h(
             'div',
-            { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control' },
+            { className: 'p-3 bg-page border border-border-subtle rounded-control' },
             h(Checkbox, {
               checked: skipErrors,
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => setSkipErrors(e.target.checked),

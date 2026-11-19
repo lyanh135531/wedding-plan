@@ -14,7 +14,7 @@ describe('Task Deadlines & Effective Due Date Computation (AT18, AT20, UXT01)', 
 
       const metrics = computeEffectiveDueDate(task, new Map(), currentDate);
 
-      expect(metrics.effectiveDueDateString).toBe('2026-11-15T23:59:59.999Z');
+      expect(metrics.effectiveDueDateString).toBe('2026-11-15T16:59:59.999Z');
       expect(metrics.isWaitingOfficialDate).toBe(false);
       expect(metrics.isOverdue).toBe(false);
     });
@@ -99,7 +99,7 @@ describe('Task Deadlines & Effective Due Date Computation (AT18, AT20, UXT01)', 
 
       expect(metrics.isWaitingOfficialDate).toBe(false);
       // 2028-03-15 minus 30 days = 2028-02-14 (2028 is a leap year!)
-      expect(metrics.effectiveDueDateString).toBe('2028-02-14T23:59:59.999Z');
+      expect(metrics.effectiveDueDateString).toBe('2028-02-14T16:59:59.999Z');
       expect(metrics.isOverdue).toBe(false);
     });
 

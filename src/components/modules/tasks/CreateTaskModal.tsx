@@ -130,7 +130,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 className: `h-8 rounded border font-medium transition-colors ${
                   deadlineMode === 'relative'
                     ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-text-main border-[#7A8881]'
+                    : 'bg-surface text-text-main border-border-control'
                 }`,
               },
               'Hạn tương đối'
@@ -143,7 +143,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 className: `h-8 rounded border font-medium transition-colors ${
                   deadlineMode === 'fixed'
                     ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-text-main border-[#7A8881]'
+                    : 'bg-surface text-text-main border-border-control'
                 }`,
               },
               'Ngày cố định'
@@ -156,7 +156,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 className: `h-8 rounded border font-medium transition-colors ${
                   deadlineMode === 'none'
                     ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-text-main border-[#7A8881]'
+                    : 'bg-surface text-text-main border-border-control'
                 }`,
               },
               'Không đặt hạn'
@@ -168,7 +168,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         deadlineMode === 'relative' &&
           h(
             'div',
-            { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control space-y-2.5 text-xs' },
+            { className: 'p-3 bg-page border border-border-subtle rounded-control space-y-2.5 text-xs' },
             h(
               'div',
               { className: 'flex items-center gap-2' },
@@ -179,7 +179,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 value: relativeDays,
                 onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                   setRelativeDays(Number(e.target.value)),
-                className: 'w-16 h-8 px-2 text-center border border-[#7A8881] rounded bg-white',
+                className: 'w-16 h-8 px-2 text-center border border-border-control rounded bg-surface',
               }),
               h('span', null, 'ngày'),
               h(
@@ -188,7 +188,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                   value: relativeDirection,
                   onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                     setRelativeDirection(e.target.value as any),
-                  className: 'h-8 px-2 border border-[#7A8881] rounded bg-white',
+                  className: 'h-8 px-2 border border-border-control rounded bg-surface',
                 },
                 h('option', { value: 'before' }, 'Trước'),
                 h('option', { value: 'after' }, 'Sau')
@@ -205,7 +205,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                   value: targetEvent,
                   onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                     setTargetEvent(e.target.value as any),
-                  className: 'w-full h-8 px-2 border border-[#7A8881] rounded bg-white',
+                  className: 'w-full h-8 px-2 border border-border-control rounded bg-surface',
                 },
                 h('option', { value: 'tiec_chinh_unconfirmed' }, 'Tiệc Cưới Chính (Chưa chốt ngày chính thức)'),
                 h('option', { value: 'vu_quy_confirmed' }, 'Lễ Vu Quy (Đã chốt ngày 15/12/2026)')

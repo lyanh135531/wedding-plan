@@ -103,7 +103,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         'http://localhost:3000/api/v1/vendors/bad-vendor/quotes/bad-quote/create-cost-item'
       );
       const res = await quoteToCostRoute.GET(req, {
-        params: { id: 'bad-vendor', quoteId: 'bad-quote' },
+        params: Promise.resolve({ id: 'bad-vendor', quoteId: 'bad-quote' }),
       });
 
       expect(res.status).toBe(400);
@@ -118,7 +118,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         `http://localhost:3000/api/v1/vendors/${validVendorId}/quotes/${validQuoteId}/create-cost-item`
       );
       const res = await quoteToCostRoute.GET(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(401);
@@ -134,7 +134,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         `http://localhost:3000/api/v1/vendors/${validVendorId}/quotes/${validQuoteId}/create-cost-item`
       );
       const res = await quoteToCostRoute.GET(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(403);
@@ -151,7 +151,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         `http://localhost:3000/api/v1/vendors/${validVendorId}/quotes/${validQuoteId}/create-cost-item`
       );
       const res = await quoteToCostRoute.GET(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(404);
@@ -168,7 +168,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         `http://localhost:3000/api/v1/vendors/${validVendorId}/quotes/${validQuoteId}/create-cost-item`
       );
       const res = await quoteToCostRoute.GET(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(200);
@@ -199,7 +199,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         `http://localhost:3000/api/v1/vendors/${validVendorId}/quotes/${validQuoteId}/create-cost-item`
       );
       const res = await quoteToCostRoute.GET(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(200);
@@ -225,7 +225,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         }
       );
       const res = await quoteToCostRoute.POST(req, {
-        params: { id: 'bad', quoteId: 'bad' },
+        params: Promise.resolve({ id: 'bad', quoteId: 'bad' }),
       });
 
       expect(res.status).toBe(400);
@@ -245,7 +245,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         }
       );
       const res = await quoteToCostRoute.POST(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(403);
@@ -265,7 +265,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         }
       );
       const res = await quoteToCostRoute.POST(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(400);
@@ -292,7 +292,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         }
       );
       const res = await quoteToCostRoute.POST(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(201);
@@ -324,7 +324,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         }
       );
       const res = await quoteToCostRoute.POST(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(res.status).toBe(200);
@@ -355,7 +355,7 @@ describe('Quote-to-Cost API Route Handlers Integration Tests (M8.3, AT03, AT23)'
         }
       );
       await quoteToCostRoute.POST(req, {
-        params: { id: validVendorId, quoteId: validQuoteId },
+        params: Promise.resolve({ id: validVendorId, quoteId: validQuoteId }),
       });
 
       expect(convertSpy).toHaveBeenCalledWith(

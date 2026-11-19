@@ -83,7 +83,7 @@ export const ReadinessMatrix: React.FC<ReadinessMatrixProps> = ({
           {
             key: domain.id,
             className:
-              'bg-white rounded-xl border border-gray-200 p-4 shadow-2xs hover:shadow-xs transition flex flex-col justify-between space-y-3.5',
+              'bg-surface rounded-xl border border-gray-200 p-4 shadow-2xs hover:shadow-xs transition flex flex-col justify-between space-y-3.5',
             'data-testid': `readiness-domain-${domain.id}`,
           },
           // Header

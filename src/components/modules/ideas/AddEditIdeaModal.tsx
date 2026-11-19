@@ -99,7 +99,7 @@ export const AddEditIdeaModal: React.FC<AddEditIdeaModalProps> = ({
       'div',
       {
         className:
-          'bg-white rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
+          'bg-surface rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
       },
       // Header
       h(
@@ -173,7 +173,7 @@ export const AddEditIdeaModal: React.FC<AddEditIdeaModalProps> = ({
                 onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                   setFormData({ ...formData, category: e.target.value as IdeaCategory }),
                 className:
-                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white',
+                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface',
               },
               h('option', { value: 'style' }, 'Phong cách'),
               h('option', { value: 'decor' }, 'Trang trí'),
@@ -192,7 +192,7 @@ export const AddEditIdeaModal: React.FC<AddEditIdeaModalProps> = ({
                 onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                   setFormData({ ...formData, status: e.target.value as IdeaStatus }),
                 className:
-                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white',
+                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface',
               },
               h('option', { value: 'reference' }, 'Tham khảo'),
               h('option', { value: 'considering' }, 'Cân nhắc'),

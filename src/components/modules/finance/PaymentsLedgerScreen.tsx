@@ -205,7 +205,7 @@ export const PaymentsLedgerScreen: React.FC<PaymentsLedgerScreenProps> = ({
           { className: 'w-full text-left border-collapse text-sm', 'aria-label': 'Sổ nhật ký thanh toán chi tiết' },
           h(
             'thead',
-            { className: 'bg-[#FAF9F5] border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
+            { className: 'bg-page border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
             h(
               'tr',
               null,
@@ -229,7 +229,7 @@ export const PaymentsLedgerScreen: React.FC<PaymentsLedgerScreenProps> = ({
                 'tr',
                 {
                   key: tx.id,
-                  className: `hover:bg-[#FAF9F5]/70 transition-colors ${
+                  className: `hover:bg-page/70 transition-colors ${
                     isVoided ? 'opacity-50 line-through bg-black/[0.02]' : ''
                   }`,
                 },

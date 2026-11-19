@@ -27,7 +27,7 @@ const createItemBodySchema = z.object({
 });
 
 type RouteContext = {
-  params: { id: string } | Promise<{ id: string }>;
+  params: Promise<{ id: string }>;
 };
 
 /**
@@ -36,7 +36,7 @@ type RouteContext = {
  */
 export async function GET(req: NextRequest, context: RouteContext) {
   try {
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await context.params;
     const parseId = uuidParamSchema.safeParse(id);
     if (!parseId.success) {
       return NextResponse.json(
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
  */
 export async function POST(req: NextRequest, context: RouteContext) {
   try {
-    const { id } = await Promise.resolve(context.params);
+    const { id } = await context.params;
     const parseId = uuidParamSchema.safeParse(id);
     if (!parseId.success) {
       return NextResponse.json(

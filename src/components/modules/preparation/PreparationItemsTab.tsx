@@ -119,7 +119,7 @@ export const PreparationItemsTab: React.FC<PreparationItemsTabProps> = ({
       'div',
       {
         className:
-          'flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-2xs',
+          'flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-surface rounded-xl border border-gray-200 shadow-2xs',
       },
       h(
         'div',
@@ -214,7 +214,7 @@ export const PreparationItemsTab: React.FC<PreparationItemsTabProps> = ({
                     {
                       key: item.id,
                       className:
-                        'bg-white rounded-lg border border-gray-200 p-3 shadow-2xs hover:shadow-xs transition space-y-2.5',
+                        'bg-surface rounded-lg border border-gray-200 p-3 shadow-2xs hover:shadow-xs transition space-y-2.5',
                       'data-testid': `item-card-${item.id}`,
                     },
                     // Item Title & Badges

@@ -1,8 +1,15 @@
 import { db, pool, withTransactionScopedContext } from "@/db/client";
 import { users, sessions, memberEventAccess } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
+import { constantTimeEqual, makeSignature } from "better-auth/crypto";
+import { auth } from "./auth";
 
 export type UserRole = "owner" | "family_view";
+
+export class SessionStoreUnavailableError extends Error {
+  readonly statusCode = 503;
+  constructor() { super('Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại sau.'); }
+}
 
 export interface UserSession {
   user: {
@@ -23,15 +30,29 @@ export interface UserSession {
 }
 
 /**
- * Extracts a session token from a cookie header string.
+ * Verifies Better Auth's signed cookie and returns only the database token.
  * Supports both standard 'session_token' and Better Auth 'better-auth.session_token'.
  */
-function extractTokenFromCookieHeader(cookieHeader: string | null): string | null {
+async function extractTokenFromCookieHeader(cookieHeader: string | null): Promise<string | null> {
   if (!cookieHeader) return null;
   const match = cookieHeader.match(
-    /(?:^|;\s*)(?:session_token|better-auth\.session_token)=([^;]+)/
+    /(?:^|;\s*)(?:__Secure-)?(?:session_token|better-auth\.session_token)=([^;]+)/
   );
-  return match ? decodeURIComponent(match[1].trim()) : null;
+  if (!match) return null;
+
+  try {
+    const value = decodeURIComponent(match[1].trim());
+    const separator = value.lastIndexOf(".");
+    if (separator < 1) return null;
+    const token = value.slice(0, separator);
+    const signature = value.slice(separator + 1);
+    const { secret } = await auth.$context;
+    const expectedSignature = await makeSignature(token, secret);
+    return constantTimeEqual(signature, expectedSignature) ? token : null;
+  } catch {
+    // Malformed or invalid cookies must never authenticate a request.
+    return null;
+  }
 }
 
 /**
@@ -48,39 +69,24 @@ export async function getCurrentSession(req?: Request | Headers): Promise<UserSe
   try {
     let token: string | null = null;
 
-    if (req) {
-      const headersObj = req instanceof Request ? req.headers : req;
-
-      // 1. Check Authorization Bearer header
-      const authHeader = headersObj.get("authorization");
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.substring(7).trim();
-      }
-
-      // 2. Check Cookie header if no Bearer token
-      if (!token) {
-        token = extractTokenFromCookieHeader(headersObj.get("cookie"));
-      }
-    } else {
-      // 3. Fallback to Next.js dynamic headers and cookies in Server Component context
+    let headersObj = req instanceof Request ? req.headers : req;
+    if (!headersObj) {
+      // Use the same cookie verification in Server Components and route handlers.
       try {
-        const { headers, cookies } = await import("next/headers");
-        const h = await headers();
-        const authHeader = h.get("authorization");
-        if (authHeader && authHeader.startsWith("Bearer ")) {
-          token = authHeader.substring(7).trim();
-        }
-
-        if (!token) {
-          const cookieStore = await cookies();
-          token =
-            cookieStore.get("session_token")?.value ||
-            cookieStore.get("better-auth.session_token")?.value ||
-            null;
-        }
+        const { headers } = await import("next/headers");
+        headersObj = await headers();
       } catch {
         // Outside Next.js request context (e.g. CLI or headless test)
       }
+    }
+
+    // Bearer tokens are raw credentials; browser cookies are signed by Better Auth.
+    const authHeader = headersObj?.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      token = authHeader.substring(7).trim();
+    }
+    if (!token) {
+      token = await extractTokenFromCookieHeader(headersObj?.get("cookie") ?? null);
     }
 
     if (!token) {
@@ -148,8 +154,10 @@ export async function getCurrentSession(req?: Request | Headers): Promise<UserSe
       allowedEventIds,
     };
   } catch (error) {
-    console.error("[getCurrentSession Error]:", error);
-    return null;
+    // A database outage is not an invalid session. Do not redirect a logged-in
+    // user to login, or put session tokens from failed SQL queries into logs.
+    console.error("[getCurrentSession Error]: Session storage unavailable.");
+    throw new SessionStoreUnavailableError();
   }
 }
 

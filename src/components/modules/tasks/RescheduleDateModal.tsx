@@ -72,7 +72,7 @@ export const RescheduleDateModal: React.FC<RescheduleDateModalProps> = ({
         { className: 'space-y-4' },
         h(
           'div',
-          { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded flex items-center justify-between text-xs' },
+          { className: 'p-3 bg-page border border-border-subtle rounded flex items-center justify-between text-xs' },
           h('span', null, `Ngày hiện tại: `, h('span', { className: 'font-semibold' }, currentDate)),
           h('span', { className: 'text-primary font-medium' }, '→ Đang chọn ngày mới')
         ),
@@ -106,7 +106,7 @@ export const RescheduleDateModal: React.FC<RescheduleDateModalProps> = ({
           // Group 2: Fixed date tasks
           h(
             'div',
-            { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded-control flex items-start gap-2.5 text-xs text-text-main' },
+            { className: 'p-3 bg-page border border-border-subtle rounded-control flex items-start gap-2.5 text-xs text-text-main' },
             h(CheckCircle2, { className: 'w-4 h-4 text-text-muted shrink-0 mt-0.5' }),
             h(
               'div',

@@ -38,6 +38,9 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
 
       const timer = setTimeout(() => {
         if (dialogRef.current) {
+          // The user may already be typing by the time the opening timer fires.
+          // Never steal focus from an input inside this dialog.
+          if (dialogRef.current.contains(document.activeElement)) return;
           const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
           );
@@ -102,7 +105,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
     {
       role: 'presentation',
       className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-150',
+        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#15362D]/45 backdrop-blur-sm animate-in fade-in duration-150',
       onClick: onClose,
     },
     h(
@@ -128,7 +131,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
         'div',
         {
           className:
-            'px-6 py-4 border-b border-border-subtle flex items-start justify-between gap-4',
+            'px-6 py-5 border-b border-border-subtle flex items-start justify-between gap-4',
         },
         h(
           'div',

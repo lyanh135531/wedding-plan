@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
 import { MenusScreen } from '@/components/modules/menus';
+import { FeaturePreview } from '@/components/common/FeaturePreview';
 import { usePrototype } from '@/components/testing/PrototypeToolbar';
 
 const h = React.createElement;
@@ -21,8 +22,8 @@ export default function MenusPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(MenusScreen, {
+    h(FeaturePreview, null, h(MenusScreen, {
       initialState: state,
-    })
+    }))
   );
 }

@@ -44,8 +44,8 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
         },
         React.createElement(
           'h2',
-          { className: 'text-lg font-bold text-text-main flex items-center gap-2' },
-          React.createElement(Building, { className: 'w-5 h-5 text-primary', 'aria-hidden': 'true' }),
+          { className: 'text-lg font-serif font-semibold text-primary-luxury flex items-center gap-2' },
+          React.createElement(Building, { className: 'w-5 h-5 text-accent', 'aria-hidden': 'true' }),
           'Thông Tin Liên Hệ & Trụ Sở'
         ),
         React.createElement(
@@ -73,7 +73,7 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
                   {
                     href: `tel:${vendor.phone}`,
                     className:
-                      'font-semibold text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-focus rounded',
+                      'font-semibold text-accent hover:underline flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-focus rounded',
                   },
                   React.createElement(Phone, { className: 'w-4 h-4', 'aria-hidden': 'true' }),
                   vendor.phone
@@ -91,7 +91,7 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
                   {
                     href: `mailto:${vendor.email}`,
                     className:
-                      'font-semibold text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-focus rounded',
+                      'font-semibold text-accent hover:underline flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-focus rounded',
                   },
                   React.createElement(Mail, { className: 'w-4 h-4', 'aria-hidden': 'true' }),
                   vendor.email
@@ -111,7 +111,7 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
                     target: '_blank',
                     rel: 'noopener noreferrer',
                     className:
-                      'font-semibold text-primary hover:underline flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-focus rounded line-clamp-1',
+                      'font-semibold text-accent hover:underline flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-focus rounded line-clamp-1',
                   },
                   React.createElement(Globe, { className: 'w-4 h-4 shrink-0', 'aria-hidden': 'true' }),
                   vendor.website
@@ -127,7 +127,7 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
             React.createElement(
               'span',
               { className: 'text-text-muted flex items-center gap-1.5' },
-              React.createElement(MapPin, { className: 'w-4 h-4 text-primary shrink-0', 'aria-hidden': 'true' }),
+              React.createElement(MapPin, { className: 'w-4 h-4 text-accent shrink-0', 'aria-hidden': 'true' }),
               vendor.address || 'Xem bản đồ vị trí'
             ),
             React.createElement(
@@ -137,7 +137,7 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
                 target: '_blank',
                 rel: 'noopener noreferrer',
                 className:
-                  'text-primary font-semibold hover:underline px-2 py-1 bg-primary/10 rounded',
+                  'text-accent font-semibold hover:underline px-2 py-1 bg-accent/10 rounded',
               },
               'Mở Google Maps'
             )
@@ -154,8 +154,8 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
           },
           React.createElement(
             'h2',
-            { className: 'text-lg font-bold text-text-main flex items-center gap-2' },
-            React.createElement(Users, { className: 'w-5 h-5 text-primary', 'aria-hidden': 'true' }),
+            { className: 'text-lg font-serif font-semibold text-primary-luxury flex items-center gap-2' },
+            React.createElement(Users, { className: 'w-5 h-5 text-accent', 'aria-hidden': 'true' }),
             'Thông Số Sảnh Tiệc & Quy Định Địa Điểm'
           ),
           React.createElement(
@@ -245,7 +245,7 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
           (vendor.rain_plan || vendor.decor_audio_rules || vendor.parking_notes) &&
             React.createElement(
               'div',
-              { className: 'space-y-2 pt-2 text-xs text-text-muted bg-[#FAF9F5] p-3 rounded' },
+              { className: 'space-y-2 pt-2 text-xs text-text-muted bg-page p-3 rounded' },
               vendor.rain_plan &&
                 React.createElement(
                   'p',
@@ -280,7 +280,7 @@ export const VendorInfoCards: React.FC<VendorInfoCardsProps> = ({
           'div',
           {
             className:
-              'bg-[#FAF9F5] rounded-card p-6 border border-border-control/60 shadow-sm space-y-4',
+              'bg-page rounded-card p-6 border border-border-control/60 shadow-sm space-y-4',
           },
           React.createElement(
             'div',

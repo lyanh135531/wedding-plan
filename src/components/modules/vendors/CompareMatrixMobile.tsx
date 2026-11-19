@@ -46,7 +46,7 @@ export const CompareMatrixMobile: React.FC<CompareMatrixMobileProps> = ({
     // Tabs selector
     React.createElement(
       'div',
-      { className: 'flex items-center justify-between gap-1 bg-[#FAF9F5] p-1.5 rounded-control border border-border-subtle' },
+      { className: 'flex items-center justify-between gap-1 bg-page p-1.5 rounded-control border border-border-subtle' },
       packages.map((pkg, idx) =>
         React.createElement(
           'button',
@@ -131,7 +131,7 @@ export const CompareMatrixMobile: React.FC<CompareMatrixMobileProps> = ({
       // Pricing & Simulation
       React.createElement(
         'div',
-        { className: 'p-3.5 bg-[#FAF9F5] rounded border border-border-control/60 space-y-2 text-xs' },
+        { className: 'p-3.5 bg-page rounded border border-border-control/60 space-y-2 text-xs' },
         React.createElement(
           'div',
           { className: 'flex justify-between items-center' },
@@ -246,7 +246,7 @@ export const CompareMatrixMobile: React.FC<CompareMatrixMobileProps> = ({
       (currentPkg.deposit_conditions || currentPkg.terms) &&
         React.createElement(
           'div',
-          { className: 'p-2.5 bg-[#FAF9F5] rounded border border-border-subtle text-xs space-y-1 text-text-muted' },
+          { className: 'p-2.5 bg-page rounded border border-border-subtle text-xs space-y-1 text-text-muted' },
           currentPkg.deposit_conditions &&
             React.createElement(
               'p',

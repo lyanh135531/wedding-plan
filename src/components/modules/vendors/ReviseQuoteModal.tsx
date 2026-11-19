@@ -244,7 +244,7 @@ export const ReviseQuoteModal: React.FC<ReviseQuoteModalProps> = ({
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setIncludesText(e.target.value),
             rows: 3,
             className:
-              'w-full p-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2.5 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         ),
         React.createElement(
@@ -260,7 +260,7 @@ export const ReviseQuoteModal: React.FC<ReviseQuoteModalProps> = ({
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setExcludesText(e.target.value),
             rows: 3,
             className:
-              'w-full p-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2.5 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         )
       ),
@@ -282,7 +282,7 @@ export const ReviseQuoteModal: React.FC<ReviseQuoteModalProps> = ({
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setDepositConditions(e.target.value),
             rows: 2,
             className:
-              'w-full p-2 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         ),
         React.createElement(
@@ -298,7 +298,7 @@ export const ReviseQuoteModal: React.FC<ReviseQuoteModalProps> = ({
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setTerms(e.target.value),
             rows: 2,
             className:
-              'w-full p-2 bg-[#FAF9F5] border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
           })
         )
       ),

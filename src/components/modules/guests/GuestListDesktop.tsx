@@ -49,7 +49,7 @@ export const GuestListDesktop: React.FC<GuestListDesktopProps> = ({
       { className: 'w-full text-left border-collapse text-sm', 'aria-label': 'Danh sách khách mời chi tiết' },
       h(
         'thead',
-        { className: 'bg-[#FAF9F5] border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
+        { className: 'bg-page border-b border-border-subtle text-xs font-semibold uppercase text-text-muted select-none' },
         h(
           'tr',
           null,
@@ -63,7 +63,7 @@ export const GuestListDesktop: React.FC<GuestListDesktopProps> = ({
                 type: 'button',
                 onClick: onToggleSelectAll,
                 className:
-                  'w-5 h-5 rounded border border-[#7A8881] flex items-center justify-center bg-white hover:border-primary focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+                  'w-5 h-5 rounded border border-border-control flex items-center justify-center bg-surface hover:border-primary focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
                 'aria-label': allSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả',
               },
               allSelected && h(Check, { className: 'w-3.5 h-3.5 stroke-[3] text-primary' })
@@ -90,7 +90,7 @@ export const GuestListDesktop: React.FC<GuestListDesktopProps> = ({
             'tr',
             {
               key: guest.id,
-              className: `hover:bg-[#FAF9F5]/70 transition-colors ${
+              className: `hover:bg-page/70 transition-colors ${
                 isSelected ? 'bg-primary/5' : ''
               }`,
             },
@@ -107,7 +107,7 @@ export const GuestListDesktop: React.FC<GuestListDesktopProps> = ({
                     onToggleSelect(guest.id);
                   },
                   className: `w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-primary border-primary text-white' : 'border-[#7A8881] bg-white'
+                    isSelected ? 'bg-primary border-primary text-white' : 'border-border-control bg-surface'
                   }`,
                   'aria-label': `Chọn khách ${guest.displayName}`,
                 },
@@ -157,7 +157,7 @@ export const GuestListDesktop: React.FC<GuestListDesktopProps> = ({
               { className: 'px-4 py-3 text-text-muted' },
               h(
                 'span',
-                { className: 'px-2 py-0.5 rounded text-xs bg-[#FAF9F5] border border-border-subtle font-medium text-text-main' },
+                { className: 'px-2 py-0.5 rounded text-xs bg-page border border-border-subtle font-medium text-text-main' },
                 sideLabelMap[guest.side]
               )
             ),

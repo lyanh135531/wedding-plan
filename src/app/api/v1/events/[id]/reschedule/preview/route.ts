@@ -11,10 +11,8 @@ const reschedulePreviewBodySchema = z.object({
   new_date: dateStringSchema,
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentSession(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });

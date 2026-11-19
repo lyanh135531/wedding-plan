@@ -57,7 +57,7 @@ export const DirtyFormGuardModal: React.FC<DirtyFormGuardModalProps> = ({
       'div',
       {
         className:
-          'relative bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-[#E2E8E4] z-10',
+          'relative bg-surface rounded-xl max-w-md w-full p-6 shadow-xl border border-border-subtle z-10',
       },
       h(
         'div',
@@ -73,8 +73,8 @@ export const DirtyFormGuardModal: React.FC<DirtyFormGuardModalProps> = ({
         h(
           'div',
           { className: 'flex-1' },
-          h('h3', { id: 'dirty-guard-title', className: 'text-lg font-semibold text-[#1F2933] mb-2' }, title),
-          h('p', { id: 'dirty-guard-desc', className: 'text-sm text-[#52616B] leading-relaxed mb-6' }, message)
+          h('h3', { id: 'dirty-guard-title', className: 'text-lg font-semibold text-text-main mb-2' }, title),
+          h('p', { id: 'dirty-guard-desc', className: 'text-sm text-text-muted leading-relaxed mb-6' }, message)
         )
       ),
       // Action Buttons
@@ -87,7 +87,7 @@ export const DirtyFormGuardModal: React.FC<DirtyFormGuardModalProps> = ({
             type: 'button',
             onClick: onCancel,
             className:
-              'px-4 py-2 border border-[#7A8881] text-[#1F2933] text-sm font-medium rounded-lg hover:bg-[#F7F5F0] min-h-[44px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:ring-offset-2',
+              'px-4 py-2 border border-border-control text-text-main text-sm font-medium rounded-lg hover:bg-page min-h-[44px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:ring-offset-2',
           },
           'Ở lại biểu mẫu'
         ),

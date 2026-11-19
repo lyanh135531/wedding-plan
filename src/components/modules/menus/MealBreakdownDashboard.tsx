@@ -149,7 +149,7 @@ export const MealBreakdownDashboard: React.FC<MealBreakdownDashboardProps> = ({
       // 6. Total Confirmed Guests
       h(
         'div',
-        { className: 'p-3 bg-[#FAF9F5] border border-primary/30 rounded-card' },
+        { className: 'p-3 bg-page border border-primary/30 rounded-card' },
         h(
           'div',
           { className: 'flex items-center justify-between text-primary text-xs font-semibold' },

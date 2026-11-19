@@ -2,13 +2,11 @@
 
 import * as React from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { TasksManager } from '@/components/modules/tasks/TasksManager';
-import { usePrototype } from '@/components/testing/PrototypeToolbar';
+import { LiveTasksManager } from '@/components/modules/tasks/LiveTasksManager';
 
 const h = React.createElement;
 
 export default function TasksPage() {
-  const { state } = usePrototype();
 
   return h(
     PageShell,
@@ -21,8 +19,6 @@ export default function TasksPage() {
       showScopeSelector: true,
       maxWidth: 'standard',
     },
-    h(TasksManager, {
-      initialState: state,
-    })
+    h(LiveTasksManager)
   );
 }

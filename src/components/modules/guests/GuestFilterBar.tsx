@@ -46,7 +46,7 @@ export const GuestFilterBar: React.FC<GuestFilterBarProps> = ({
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value),
         placeholder: 'Tìm theo tên, nhóm, số điện thoại (không dấu)...',
         className:
-          'w-full h-10 pl-9 pr-8 text-sm bg-white border border-[#7A8881] rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+          'w-full h-10 pl-9 pr-8 text-sm bg-surface border border-border-control rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
       }),
       searchQuery &&
         h(
@@ -71,7 +71,7 @@ export const GuestFilterBar: React.FC<GuestFilterBarProps> = ({
           value: selectedSide,
           onChange: (e: React.ChangeEvent<HTMLSelectElement>) => onSideChange(e.target.value),
           className:
-            'h-10 px-3 text-sm bg-white border border-[#7A8881] rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+            'h-10 px-3 text-sm bg-surface border border-border-control rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
           'aria-label': 'Lọc theo bên gia đình',
         },
         h('option', { value: 'all' }, 'Tất cả bên mời'),
@@ -87,7 +87,7 @@ export const GuestFilterBar: React.FC<GuestFilterBarProps> = ({
           value: selectedRsvp,
           onChange: (e: React.ChangeEvent<HTMLSelectElement>) => onRsvpChange(e.target.value),
           className:
-            'h-10 px-3 text-sm bg-white border border-[#7A8881] rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+            'h-10 px-3 text-sm bg-surface border border-border-control rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
           'aria-label': 'Lọc theo trạng thái phản hồi',
         },
         h('option', { value: 'all' }, 'Tất cả phản hồi'),

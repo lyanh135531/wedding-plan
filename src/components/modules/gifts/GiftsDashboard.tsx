@@ -510,7 +510,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
                       ? g.contributors.map((c, idx) =>
                           h(
                             'span',
-                            { key: c.id, className: 'bg-white border border-border-control px-2 py-0.5 rounded text-text-main' },
+                            { key: c.id, className: 'bg-surface border border-border-control px-2 py-0.5 rounded text-text-main' },
                             `${c.contributorName}${c.relationship ? ` (${c.relationship})` : ''}`
                           )
                         )

@@ -1,8 +1,8 @@
 # Wedding Management Platform
 
-Ứng dụng quản lý đám cưới tự host, dùng Next.js 14.2.15, React 18, TypeScript, Drizzle và PostgreSQL. Phạm vi gồm khách mời, thiệp/RSVP, ngân sách, nhà cung cấp, công việc, xếp bàn, chuẩn bị và vận hành ngày cưới.
+Ứng dụng quản lý đám cưới tự host, dùng Next.js 15.5.29, React 18, TypeScript, Drizzle và PostgreSQL. Phạm vi gồm khách mời, thiệp/RSVP, ngân sách, nhà cung cấp, công việc, xếp bàn, chuẩn bị và vận hành ngày cưới.
 
-**Trạng thái: đang kiểm định Gate G11 / Milestone R3; chưa được nghiệm thu production.** Xem [biên bản kiểm định](docs/MILESTONE_R3_SIGNOFF.md) để biết bằng chứng và các phần còn thiếu.
+**Trạng thái: các luồng chính đã được kiểm thử; chưa nghiệm thu toàn bộ tính năng production.** Xem [rà soát độ ổn định ngày 19/11/2026](docs/STABILITY_AUDIT_2026-11-19.md) để biết các lỗi đã sửa và những màn hình còn là bản xem trước. Các tuyên bố nghiệm thu trong tài liệu cũ không thay thế bằng chứng của đợt rà soát này.
 
 ## Chạy cục bộ
 
@@ -21,6 +21,8 @@ pnpm exec tsx scripts/seed-owners.ts groom@example.com bride@example.com
 
 ## Kiểm tra
 
+Nếu cần cấu hình riêng khi chạy test, sao chép `.env.test.example` thành `.env.test` và điền giá trị dành riêng cho môi trường test. Chỉ commit file mẫu; `.env.test`, `.env.local` và các file môi trường thật được bỏ qua bởi Git và Docker.
+
 ```sh
 pnpm exec tsc --noEmit
 pnpm exec vitest run --maxWorkers=4
@@ -38,6 +40,8 @@ pnpm build
 - `src/components/`, `src/context/`: giao diện và trạng thái phía trình duyệt.
 - `tests/`: unit, integration, adversarial và browser component tests.
 - `scripts/`: seed owner, backup, restore và kiểm định sandbox.
+
+Quy tắc chọn file để commit, các file sinh tự động và checklist trước khi push: [quản lý repository](docs/REPOSITORY_HYGIENE.md). Thiết kế/font hiện tại: [cập nhật giao diện](docs/UI_REFRESH_2026-11-19.md).
 
 Dashboard yêu cầu session phía server và lấy role/phạm vi sự kiện từ database. Layout ứng dụng không gắn thanh prototype; nút đổi role thử nghiệm không được xuất trong production. Danh sách/hồ sơ nhà cung cấp không tự thay dữ liệu API lỗi bằng fixtures.
 

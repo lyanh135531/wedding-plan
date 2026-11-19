@@ -751,7 +751,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const resRaw = await fileRoute.GET(reqRaw, { params: { id } });
+      const resRaw = await fileRoute.GET(reqRaw, { params: Promise.resolve({ id }) });
       expect(resRaw.status).toBe(403);
 
       // 3. Family attempts thumbnail variant access
@@ -759,7 +759,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const resThumb = await fileRoute.GET(reqThumb, { params: { id } });
+      const resThumb = await fileRoute.GET(reqThumb, { params: Promise.resolve({ id }) });
       expect(resThumb.status).toBe(403);
 
       // 4. Family attempts preview variant access
@@ -767,7 +767,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const resPrev = await fileRoute.GET(reqPrev, { params: { id } });
+      const resPrev = await fileRoute.GET(reqPrev, { params: Promise.resolve({ id }) });
       expect(resPrev.status).toBe(403);
     });
 
@@ -800,7 +800,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const rawRes = await fileRoute.GET(rawReq, { params: { id } });
+      const rawRes = await fileRoute.GET(rawReq, { params: Promise.resolve({ id }) });
       expect(rawRes.status).toBe(403);
 
       // 2. Family requests preview -> 200 OK (WebP, security headers)
@@ -808,7 +808,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const prevRes = await fileRoute.GET(prevReq, { params: { id } });
+      const prevRes = await fileRoute.GET(prevReq, { params: Promise.resolve({ id }) });
       expect(prevRes.status).toBe(200);
       expect(prevRes.headers.get('content-type')).toBe('image/webp');
       expect(prevRes.headers.get('x-content-type-options')).toBe('nosniff');
@@ -819,7 +819,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const thumbRes = await fileRoute.GET(thumbReq, { params: { id } });
+      const thumbRes = await fileRoute.GET(thumbReq, { params: Promise.resolve({ id }) });
       expect(thumbRes.status).toBe(200);
       expect(thumbRes.headers.get('content-type')).toBe('image/webp');
     });
@@ -853,7 +853,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { authorization: 'Bearer owner-token' },
       });
-      const res = await fileRoute.GET(req, { params: { id: attId } });
+      const res = await fileRoute.GET(req, { params: Promise.resolve({ id: attId }) });
       expect(res.status).toBe(410);
       const data = await res.json();
       expect(data.error).toBe('FILE_FAILED');
@@ -886,7 +886,7 @@ describe('Empirical Adversarial Challenge Suite (Storage, Sharp, Path Traversal,
         method: 'GET',
         headers: { 'x-user-id': ownerUserId, 'x-user-role': 'owner' },
       });
-      const getRes = await fileRoute.GET(getReq, { params: { id: crypto.randomUUID() } });
+      const getRes = await fileRoute.GET(getReq, { params: Promise.resolve({ id: crypto.randomUUID() }) });
       expect(getRes.status).toBe(401);
       const getData = await getRes.json();
       expect(getData.error).toBe('UNAUTHORIZED');

@@ -67,14 +67,14 @@ export const PageShell: React.FC<PageShellProps> = ({
 
   return h(
     'div',
-    { className: 'min-h-screen bg-[#F7F5F0] text-[#1F2933]' },
+      { className: 'app-shell min-h-screen bg-page text-text-main' },
     // Skip to Main Content Link (Chuẩn tiếp cận WCAG)
     h(
       'a',
       {
         href: '#main-content',
         className:
-          'sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#23483E] focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+          'sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
       },
       'Chuyển thẳng đến nội dung chính'
     ),
@@ -109,17 +109,17 @@ export const PageShell: React.FC<PageShellProps> = ({
             'div',
             {
               className:
-                'relative flex flex-col w-[280px] max-w-[80%] h-full bg-white shadow-xl z-10',
+                'relative flex flex-col w-[280px] max-w-[80%] h-full bg-surface shadow-xl z-10',
             },
             h(
               'div',
               {
                 className:
-                  'flex items-center justify-between p-4 border-b border-[#E2E8E4]',
+                  'flex items-center justify-between p-4 border-b border-border-subtle',
               },
               h(
                 'span',
-                { className: 'font-semibold text-base text-[#1F2933]' },
+                { className: 'font-semibold text-base text-text-main' },
                 'Danh mục điều hướng'
               ),
               h(
@@ -128,10 +128,10 @@ export const PageShell: React.FC<PageShellProps> = ({
                   type: 'button',
                   onClick: () => setMobileDrawerOpen(false),
                   className:
-                    'p-2 text-[#52616B] hover:text-[#1F2933] min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+                    'p-2 text-text-muted hover:text-text-main min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
                   'aria-label': 'Đóng thanh điều hướng',
                 },
-                h(X, { className: 'w-5 h-5 text-[#52616B]', 'aria-hidden': 'true' })
+                h(X, { className: 'w-5 h-5 text-text-muted', 'aria-hidden': 'true' })
               )
             ),
             h(
@@ -160,7 +160,7 @@ export const PageShell: React.FC<PageShellProps> = ({
       h(
         'div',
         {
-          className: `flex-1 w-full mx-auto p-4 sm:p-6 lg:p-8 ${maxWidthClass}`,
+          className: `workspace-content flex-1 w-full mx-auto p-4 sm:p-6 lg:px-9 lg:py-8 ${maxWidthClass}`,
         },
         // Breadcrumbs (nếu có)
         breadcrumbs && breadcrumbs.length > 0
@@ -168,7 +168,7 @@ export const PageShell: React.FC<PageShellProps> = ({
               'nav',
               {
                 className:
-                  'flex items-center gap-1.5 text-sm text-[#52616B] mb-4',
+                  'flex flex-wrap items-center gap-1.5 text-[11px] text-text-muted mb-6',
                 'aria-label': 'Breadcrumb',
               },
               breadcrumbs.map((crumb, idx) => {
@@ -177,13 +177,13 @@ export const PageShell: React.FC<PageShellProps> = ({
                   React.Fragment,
                   { key: `${crumb.label}-${idx}` },
                   idx > 0
-                    ? h('span', { className: 'text-[#7A8881]' }, '/')
+                    ? h('span', { className: 'text-border-control' }, '/')
                     : null,
                   isLast || !crumb.href
                     ? h(
                         'span',
                         {
-                          className: 'font-medium text-[#1F2933]',
+                          className: 'font-medium text-text-main',
                           'aria-current': 'page',
                         },
                         crumb.label
@@ -192,8 +192,9 @@ export const PageShell: React.FC<PageShellProps> = ({
                         Link,
                         {
                           href: crumb.href,
+                          prefetch: false,
                           className:
-                            'hover:text-[#23483E] transition-colors',
+                            'hover:text-primary transition-colors',
                         },
                         crumb.label
                       )
@@ -211,7 +212,7 @@ export const PageShell: React.FC<PageShellProps> = ({
                 'label',
                 {
                   htmlFor: 'mobile-event-scope',
-                  className: 'block text-xs font-medium text-[#52616B] mb-1',
+                  className: 'block text-xs font-medium text-text-muted mb-1',
                 },
                 'Phạm vi buổi lễ đang xem:'
               ),
@@ -223,7 +224,7 @@ export const PageShell: React.FC<PageShellProps> = ({
                   onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                     setScope(e.target.value),
                   className:
-                    'w-full h-11 px-3 text-sm bg-white text-[#1F2933] border border-[#7A8881] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] transition-colors',
+                    'w-full h-11 px-3 text-sm bg-surface text-text-main border border-border-control rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] transition-colors',
                 },
                 h('option', { value: 'all' }, 'Tất cả buổi (Tổng hợp)'),
                 !isFamily

@@ -1,6 +1,8 @@
 import { test, expect, type BrowserContext } from '@playwright/test';
 import { Client } from 'pg';
 import crypto from 'node:crypto';
+import sharp from 'sharp';
+import fs from 'node:fs/promises';
 
 // Only the verification harness may select this disposable database.
 if (!process.env.G11_DB_URL || new URL(process.env.G11_DB_URL).pathname !== '/wedding_g11_source') {
@@ -16,7 +18,8 @@ test.afterAll(async () => { await db.end(); });
 async function useSession(context: BrowserContext, role: 'owner' | 'family') {
   const token = crypto.randomUUID();
   await db.query('INSERT INTO sessions(id,token,user_id,expires_at) VALUES($1,$1,$2,now()+interval \'1 hour\')', [token, role === 'owner' ? 'g11-owner-1' : 'g11-family']);
-  await context.addCookies([{ name: 'session_token', value: token, url: process.env.PLAYWRIGHT_BASE_URL!, httpOnly: true }]);
+  const signature = crypto.createHmac('sha256', process.env.BETTER_AUTH_SECRET!).update(token).digest('base64');
+  await context.addCookies([{ name: 'session_token', value: encodeURIComponent(`${token}.${signature}`), url: process.env.PLAYWRIGHT_BASE_URL!, httpOnly: true }]);
   return token;
 }
 
@@ -24,6 +27,152 @@ test('anonymous dashboard navigation requires authentication', async ({ page }) 
   await page.goto('/vendors');
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('button', { name: /Thêm nhà cung cấp/i })).toHaveCount(0);
+});
+
+test('setup persists without example data, retries failures and prevents duplicate initialization', async ({ page, context, browser }) => {
+  await db.query('DELETE FROM wedding_settings');
+  await useSession(context, 'owner');
+  await page.goto('/setup');
+  await expect(page.getByLabel('Họ và tên Chú rể', { exact: false })).toHaveValue('');
+  await page.getByLabel('Họ và tên Chú rể', { exact: false }).fill('Chú rể kiểm thử');
+  await page.getByLabel('Họ và tên Cô dâu', { exact: false }).fill('Cô dâu kiểm thử');
+  await page.getByRole('button', { name: 'Tiếp tục', exact: true }).click();
+  await page.getByLabel('Ghi chú thời gian dự kiến').fill('Chưa chốt ngày kiểm thử');
+  await page.getByRole('button', { name: 'Tiếp tục', exact: true }).click();
+  await page.route('**/api/v1/settings', async (route) => {
+    if (route.request().method() === 'POST') await route.fulfill({ status: 500, json: { error: 'Lỗi thử nghiệm lưu thiết lập' } });
+    else await route.continue();
+  });
+  await page.getByRole('button', { name: 'Hoàn tất thiết lập', exact: true }).click();
+  await expect(page.getByText('Lỗi thử nghiệm lưu thiết lập')).toBeVisible();
+  await expect(page).toHaveURL(/\/setup$/);
+  await page.unroute('**/api/v1/settings');
+  await page.getByRole('button', { name: 'Hoàn tất thiết lập', exact: true }).click();
+  await expect(page).toHaveURL(/\/overview$/);
+  await expect(page.getByRole('heading', { name: 'Chú rể kiểm thử & Cô dâu kiểm thử', exact: true })).toBeVisible();
+  const settings = (await db.query('SELECT * FROM wedding_settings')).rows;
+  expect(settings).toHaveLength(1);
+  expect(settings[0].is_date_confirmed).toBe(false);
+  const event = (await db.query('SELECT start_time FROM events WHERE id=$1', [settings[0].representative_event_id])).rows[0];
+  expect(event.start_time).toBeNull();
+  const before = (await db.query('SELECT count(*)::int AS count FROM events')).rows[0].count;
+  const duplicatePayload = { groomName: 'Duplicate', brideName: 'Duplicate', weddingDate: null, isUnconfirmedDate: true, estimatedDateNote: 'Later', categories: [] };
+  const duplicates = await Promise.all([1, 2].map(() => context.request.post('/api/v1/settings', { data: duplicatePayload })));
+  expect(duplicates.map((response) => response.status())).toEqual([200, 200]);
+  expect((await db.query('SELECT count(*)::int AS count FROM events')).rows[0].count).toBe(before);
+  await page.goto('/setup');
+  await expect(page).toHaveURL(/\/overview$/);
+  await page.goto('/settings');
+  const title = `Tên cưới ${crypto.randomUUID().slice(0, 8)}`;
+  await page.getByLabel('Tên hiển thị đám cưới').fill(title);
+  await page.getByRole('button', { name: 'Lưu thay đổi' }).click();
+  await expect(page.getByText('Đã lưu cài đặt.', { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('Tên hiển thị đám cưới')).toHaveValue(title);
+  const stale = await context.request.patch('/api/v1/settings', { data: { shortTitle: 'Stale', version: settings[0].version } });
+  expect(stale.status()).toBe(409);
+  const family = await browser.newContext();
+  try {
+    await useSession(family, 'family');
+    expect((await family.request.patch('/api/v1/settings', { data: { shortTitle: 'Forbidden', version: 2 } })).status()).toBe(403);
+    const publicData = (await (await family.request.get('/api/v1/settings')).json()).data;
+    expect(publicData).not.toHaveProperty('budgetTarget');
+  } finally { await family.close(); }
+});
+
+test('tasks, event filters, family DTOs, documents and CSV exports use persistent data', async ({ page, context, browser }) => {
+  test.setTimeout(90_000);
+  await useSession(context, 'owner');
+  const title = `Việc thật ${crypto.randomUUID().slice(0, 8)}`;
+  await page.goto('/tasks');
+  await page.getByRole('button', { name: 'Thêm công việc', exact: true }).click();
+  await page.getByLabel('Tiêu đề công việc', { exact: false }).fill(title);
+  await page.getByLabel('Buổi lễ liên quan').selectOption('00000000-0000-4000-8000-000000000011');
+  await page.getByLabel('Tính hạn theo ngày buổi lễ').check();
+  await page.getByLabel('Chia sẻ công việc này với người nhà').check();
+  await page.getByRole('button', { name: 'Lưu công việc', exact: true }).click();
+  await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+  const select = page.locator('select:visible').filter({ has: page.locator('option[value="common"]') }).first();
+  await select.selectOption('common');
+  await expect(page.getByRole('heading', { name: title, exact: true })).toHaveCount(0);
+  await select.selectOption('all');
+  await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+  await page.getByLabel(`Trạng thái ${title}`).selectOption('completed');
+  await expect.poll(async () => (await db.query('SELECT status FROM tasks WHERE title=$1', [title])).rows[0]?.status).toBe('completed');
+  await page.reload();
+  await expect(page.getByLabel(`Trạng thái ${title}`)).toHaveValue('completed');
+
+  const family = await browser.newContext({ baseURL: process.env.PLAYWRIGHT_BASE_URL });
+  let fileId: string;
+  try {
+    await useSession(family, 'family');
+    const tasks = await family.request.get('/api/v1/tasks');
+    expect(tasks.status()).toBe(200);
+    const publicTask = (await tasks.json()).data.find((task: { title: string }) => task.title === title);
+    expect(publicTask).toBeTruthy();
+    expect(publicTask).not.toHaveProperty('privateNotes');
+    expect(publicTask).not.toHaveProperty('inChargeUserId');
+    const detail = await family.request.get(`/api/v1/tasks/${publicTask.id}`);
+    expect(detail.status()).toBe(200);
+
+    await page.goto('/documents');
+    const name = `Ảnh kiểm thử ${crypto.randomUUID().slice(0, 8)}.png`;
+    const image = await sharp({ create: { width: 16, height: 16, channels: 3, background: '#aa7755' } }).png().toBuffer();
+    const upload = page.waitForResponse((response) => response.url().endsWith('/api/upload') && response.request().method() === 'POST');
+    await page.getByLabel('Tải tài liệu hoặc ảnh lên').setInputFiles({ name, mimeType: 'image/png', buffer: image });
+    const uploaded = await upload;
+    expect(uploaded.status()).toBe(201);
+    fileId = (await uploaded.json()).id;
+    await expect(page.getByRole('link', { name, exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('link', { name, exact: true })).toBeVisible();
+    expect((await context.request.get(`/api/files/${fileId}`)).status()).toBe(200);
+    expect((await family.request.get(`/api/files/${fileId}?variant=preview`)).status()).toBe(404);
+    const documents = (await (await family.request.get('/api/v1/documents')).json()).data;
+    expect(documents.some((file: { id: string }) => file.id === fileId)).toBe(false);
+    expect((await family.request.get('/api/v1/history')).status()).toBe(403);
+  } finally { await family.close(); }
+  await page.goto('/history');
+  await expect(page.getByRole('heading', { name: 'Nhật ký hoạt động', exact: true })).toBeVisible();
+  await expect(page.locator('main').getByText('CREATE • tasks', { exact: true }).first()).toBeVisible();
+  await page.goto('/data/export');
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Tải CSV an toàn', exact: true }).click();
+  const csv = await download;
+  expect(csv.suggestedFilename()).toBe('danh-sach-khach-moi.csv');
+  const csvContent = await fs.readFile((await csv.path())!, 'utf8');
+  expect(csvContent).toContain('Họ và tên');
+  await page.goto('/calendar');
+  await expect(page.getByLabel('Từ ngày')).toHaveValue(/\d{4}-\d{2}-\d{2}/);
+  await expect(page.getByRole('status')).toHaveCount(0);
+  await page.goto('/fund');
+  await page.getByLabel('Số dư ban đầu (VND)', { exact: false }).fill('0');
+  await page.getByLabel('Thời điểm mở sổ (giờ Việt Nam)', { exact: false }).fill('2026-11-19T08:00');
+  await page.getByLabel('Đã đối chiếu số dư và phạm vi quỹ').check();
+  const saveFund = page.waitForResponse((response) => response.url().endsWith('/api/v1/finance/fund-settings') && response.request().method() === 'PUT');
+  await page.getByRole('button', { name: 'Lưu mốc mở sổ' }).click();
+  expect((await saveFund).status()).toBe(200);
+  await page.reload();
+  await expect(page.getByLabel('Số dư ban đầu (VND)', { exact: false })).toHaveValue('0');
+  const fund = (await (await context.request.get('/api/v1/finance/fund-settings')).json()).data;
+  const updateFund = { initial_balance: '0', opening_as_of: fund.openingAsOf, fund_scope_confirmed: true, version: fund.version };
+  expect((await context.request.put('/api/v1/finance/fund-settings', { data: updateFund })).status()).toBe(200);
+  expect((await context.request.put('/api/v1/finance/fund-settings', { data: updateFund })).status()).toBe(409);
+});
+
+test('unfinished screens clearly identify previews and cannot claim successful writes', async ({ page, context }) => {
+  await useSession(context, 'owner');
+  const runtimeErrors: string[] = [];
+  page.on('pageerror', (error) => runtimeErrors.push(error.message));
+  for (const route of ['/menus', '/logistics', '/ideas', '/support', '/preparation', '/timeline', '/after-wedding', '/data/import']) {
+    await page.goto(route);
+    await expect(page.getByText('Tính năng đang hoàn thiện', { exact: true })).toBeVisible();
+    const preview = page.getByRole('group', { name: 'Bản xem trước, chưa hỗ trợ lưu dữ liệu' });
+    expect(await preview.locator(':scope > div').evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+  }
+  expect(runtimeErrors).toEqual([]);
 });
 
 test('offline form retains input, sends no writes, then persists exactly once after reconnect', async ({ page, context }) => {
@@ -63,6 +212,7 @@ test('offline form retains input, sends no writes, then persists exactly once af
 test('family role hides owner actions, forbids writes and revokes sessions immediately', async ({ page, context }) => {
   const token = await useSession(context, 'family');
   await page.goto('/overview');
+  await page.goto('/guests');
   await expect(page.locator('select option[value="00000000-0000-4000-8000-000000000011"]').first()).toHaveCount(1);
   await expect(page.getByTitle('Chuyển vai trò giả lập (Dev Test)')).toHaveCount(0);
   await page.goto('/vendors');

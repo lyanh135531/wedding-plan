@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
+import fs from 'node:fs';
+import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { RoleProvider } from '@/context/RoleContext';
 import {
@@ -14,6 +16,11 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)', () => {
+  it('links only to existing application pages', () => {
+    for (const item of SIDEBAR_NAV_GROUPS.flatMap((group) => group.items)) {
+      expect(fs.existsSync(path.join(process.cwd(), 'src/app/(dashboard)', item.href, 'page.tsx')), item.href).toBe(true);
+    }
+  });
   beforeEach(() => {
     currentPathname = '/overview';
   });
@@ -49,8 +56,8 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
     expect(html).toContain('Quyền: Chủ sở hữu');
 
     // Thông tin múi giờ và tiền tệ chuẩn
-    expect(html).toContain('Múi giờ: Asia/Ho_Chi_Minh');
-    expect(html).toContain('Tiền tệ: VND (bigint)');
+    expect(html).toContain('Giờ Việt Nam · VND');
+    expect(html).toContain('Không gian riêng của gia đình');
   });
 
   it('renders all 5 groups and financial links for Owner role', () => {
@@ -79,8 +86,7 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
     expect(html).toContain('href="/history"');
     expect(html).toContain('href="/data/import"');
     expect(html).toContain('href="/data/export"');
-    expect(html).toContain('href="/sharing"');
-    expect(html).toContain('Chia sẻ quyền');
+    expect(html).toContain('href="/settings"');
   });
 
   it('BẢO MẬT: Ẩn 100% nhóm Tài chính và các route cấm khi ở vai trò Người nhà (Family View)', () => {
@@ -129,10 +135,10 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
     // Active item '/guests' has aria-current="page" and primary dark green #23483E
     expect(html).toContain('href="/guests"');
     expect(html).toContain('aria-current="page"');
-    expect(html).toContain('bg-[#23483E]');
+    expect(html).toContain('nav-link--active');
   });
 
-  it('renders milestone badges (R2, R3) for future features', () => {
+  it('keeps internal milestone labels out of navigation', () => {
     const tree = React.createElement(
       RoleProvider,
       { initialRole: 'owner' },
@@ -141,8 +147,8 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
 
     const html = renderToStaticMarkup(tree);
 
-    expect(html).toContain('>R2<');
-    expect(html).toContain('>R3<');
+    expect(html).not.toContain('>R2<');
+    expect(html).not.toContain('>R3<');
   });
 
   it('supports drawer mode without desktop hidden classes', () => {

@@ -291,7 +291,7 @@ export const MenusScreen: React.FC<MenusScreenProps> = ({
                 className: `px-3.5 py-2 rounded-t-control text-xs font-semibold whitespace-nowrap transition-all border-b-2 ${
                   isActive
                     ? 'border-primary text-primary bg-primary/5'
-                    : 'border-transparent text-text-muted hover:text-text-main hover:bg-[#FAF9F5]'
+                    : 'border-transparent text-text-muted hover:text-text-main hover:bg-page'
                 }`,
               },
               m.name

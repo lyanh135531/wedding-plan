@@ -29,17 +29,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium rounded-control transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-50 disabled:cursor-not-allowed select-none min-h-[44px] min-w-[44px]';
+      'inline-flex items-center justify-center gap-0.5 font-medium rounded-control transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-50 disabled:cursor-not-allowed select-none min-h-[44px] min-w-[44px] tracking-[-0.01em]';
 
     const variants = {
-      primary: 'bg-primary text-white hover:bg-primary-hover active:bg-[#122822]',
-      secondary: 'bg-surface text-text-main border border-border-control hover:bg-[#F0EEE6] active:bg-[#E2DFD6]',
+      primary: 'bg-primary text-white border border-primary hover:bg-primary-hover hover:border-primary-hover active:bg-primary-hover shadow-[0_2px_5px_rgba(23,60,51,0.08)]',
+      secondary: 'bg-surface text-primary border border-border-subtle hover:bg-page hover:border-border-control active:bg-page',
       ghost: 'text-text-main hover:bg-black/5 active:bg-black/10',
       danger: 'bg-danger text-white hover:bg-[#911C13] active:bg-[#72150E]',
     };
 
     const sizes = {
-      default: 'h-11 px-4 py-2 text-base',
+      default: 'h-11 px-4 py-2 text-sm',
       sm: 'h-11 px-3 py-1.5 text-sm',
       lg: 'h-12 px-6 py-3 text-base',
       icon: 'h-11 w-11 p-2',

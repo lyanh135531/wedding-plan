@@ -697,7 +697,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const familyRes = await fileRoute.GET(familyReq, { params: { id } });
+      const familyRes = await fileRoute.GET(familyReq, { params: Promise.resolve({ id }) });
       expect(familyRes.status).toBe(403);
       const err = await familyRes.json();
       expect(err.error).toBe('FORBIDDEN');
@@ -707,7 +707,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { authorization: 'Bearer owner-token' },
       });
-      const ownerRes = await fileRoute.GET(ownerReq, { params: { id } });
+      const ownerRes = await fileRoute.GET(ownerReq, { params: Promise.resolve({ id }) });
       expect(ownerRes.status).toBe(200);
       expect(ownerRes.headers.get('content-type')).toBe('application/pdf');
     });
@@ -741,7 +741,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const rawRes = await fileRoute.GET(rawReq, { params: { id } });
+      const rawRes = await fileRoute.GET(rawReq, { params: Promise.resolve({ id }) });
       expect(rawRes.status).toBe(403);
       const rawErr = await rawRes.json();
       expect(rawErr.message).toContain('biến thể hiển thị đã loại bỏ siêu dữ liệu');
@@ -751,7 +751,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const thumbRes = await fileRoute.GET(thumbReq, { params: { id } });
+      const thumbRes = await fileRoute.GET(thumbReq, { params: Promise.resolve({ id }) });
       expect(thumbRes.status).toBe(200);
       expect(thumbRes.headers.get('content-type')).toBe('image/webp');
       expect(thumbRes.headers.get('cache-control')).toContain('private, no-cache');
@@ -762,7 +762,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { authorization: 'Bearer family-token' },
       });
-      const previewRes = await fileRoute.GET(previewReq, { params: { id } });
+      const previewRes = await fileRoute.GET(previewReq, { params: Promise.resolve({ id }) });
       expect(previewRes.status).toBe(200);
       expect(previewRes.headers.get('content-type')).toBe('image/webp');
     });
@@ -773,7 +773,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { authorization: 'Bearer owner-token' },
       });
-      const invalidRes = await fileRoute.GET(invalidReq, { params: { id: 'not-a-valid-uuid' } });
+      const invalidRes = await fileRoute.GET(invalidReq, { params: Promise.resolve({ id: 'not-a-valid-uuid' }) });
       expect(invalidRes.status).toBe(400);
 
       // Non-existent UUID
@@ -782,7 +782,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { authorization: 'Bearer owner-token' },
       });
-      const notFoundRes = await fileRoute.GET(notFoundReq, { params: { id: randomUuid } });
+      const notFoundRes = await fileRoute.GET(notFoundReq, { params: Promise.resolve({ id: randomUuid }) });
       expect(notFoundRes.status).toBe(404);
     });
 
@@ -813,7 +813,7 @@ describe('Milestone 3 Media Storage, Sharp & Route Handlers Integration Test Sui
         method: 'GET',
         headers: { 'x-user-id': ownerUserId, 'x-user-role': 'owner' },
       });
-      const getRes = await fileRoute.GET(getReq, { params: { id: crypto.randomUUID() } });
+      const getRes = await fileRoute.GET(getReq, { params: Promise.resolve({ id: crypto.randomUUID() }) });
       expect(getRes.status).toBe(401);
       const getData = await getRes.json();
       expect(getData.error).toBe('UNAUTHORIZED');

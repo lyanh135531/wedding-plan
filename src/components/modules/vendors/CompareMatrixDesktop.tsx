@@ -40,7 +40,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
       React.createElement(
         'colgroup',
         null,
-        React.createElement('col', { className: 'w-48 bg-[#FAF9F5]' }),
+        React.createElement('col', { className: 'w-48 bg-page' }),
         packages.map((pkg) =>
           React.createElement('col', { key: pkg.quote_id })
         )
@@ -118,7 +118,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
         // Row 1: Sức chứa & Đánh giá quy mô (Capacity Fit)
         React.createElement(
           'tr',
-          { className: 'hover:bg-[#FAF9F5]/40' },
+          { className: 'hover:bg-page/40' },
           React.createElement(
             'th',
             { scope: 'row', className: 'p-4 font-semibold text-text-muted text-xs' },
@@ -155,7 +155,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
         // Row 2: Bóc tách đơn giá bàn & Phí thuê sảnh
         React.createElement(
           'tr',
-          { className: 'hover:bg-[#FAF9F5]/40' },
+          { className: 'hover:bg-page/40' },
           React.createElement(
             'th',
             { scope: 'row', className: 'p-4 font-semibold text-text-muted text-xs' },
@@ -207,7 +207,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
         // Row 3: Chi phí mô phỏng theo số bàn giả định
         React.createElement(
           'tr',
-          { className: 'bg-[#FAF9F5]/60 hover:bg-[#FAF9F5]' },
+          { className: 'bg-page/60 hover:bg-page' },
           React.createElement(
             'th',
             { scope: 'row', className: 'p-4 font-bold text-primary text-xs' },
@@ -306,7 +306,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
         // Row 4: Hạng mục bao gồm (Includes)
         React.createElement(
           'tr',
-          { className: 'hover:bg-[#FAF9F5]/40' },
+          { className: 'hover:bg-page/40' },
           React.createElement(
             'th',
             { scope: 'row', className: 'p-4 font-semibold text-text-muted text-xs' },
@@ -344,7 +344,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
         // Row 5: Hạng mục loại trừ (Excludes)
         React.createElement(
           'tr',
-          { className: 'hover:bg-[#FAF9F5]/40' },
+          { className: 'hover:bg-page/40' },
           React.createElement(
             'th',
             { scope: 'row', className: 'p-4 font-semibold text-text-muted text-xs' },
@@ -382,7 +382,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
         // Row 6: Điều kiện cọc & Cam kết hợp đồng
         React.createElement(
           'tr',
-          { className: 'hover:bg-[#FAF9F5]/40' },
+          { className: 'hover:bg-page/40' },
           React.createElement(
             'th',
             { scope: 'row', className: 'p-4 font-semibold text-text-muted text-xs' },
@@ -413,7 +413,7 @@ export const CompareMatrixDesktop: React.FC<CompareMatrixDesktopProps> = ({
         // Row 7: CTA Actions (Chốt gói & Tạo khoản chi FL14, AT23)
         React.createElement(
           'tr',
-          { className: 'bg-[#FAF9F5]' },
+          { className: 'bg-page' },
           React.createElement(
             'th',
             { scope: 'row', className: 'p-4 font-bold text-text-main text-xs' },

@@ -9,6 +9,9 @@ import { TextInput } from '@/components/ui/input';
 import { ModalDialog } from '@/components/ui/dialog';
 import { useSaveAction } from '@/components/common/useSaveAction';
 import { formatVND } from '@/lib/utils';
+import { StatCard } from '@/components/ui/stat-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Wallet, Layers, Receipt, Plus } from 'lucide-react';
 
 interface Category { id: string; name: string; allocatedAmount: string | null }
 interface Cost { id: string; name: string; categoryId: string; eventId: string | null; contractedAmount: string | null; estimatedAmount: string | null; finalSettlementAmount: string | null; status: string }
@@ -119,21 +122,32 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
   const shownPayments = payments.filter((payment) => ids.has(payment.costItemId));
   const net = shownPayments.filter((payment) => !payment.isVoided).reduce((sum, payment) => sum + (payment.paymentType === 'outflow' ? 1n : -1n) * BigInt(payment.amount), 0n);
   return <section className="space-y-5">
-    <h1 className="text-2xl font-bold">{view === 'budget' ? 'Ngân Sách & Khoản Chi' : 'Sổ Chi Tiền & Nhật Ký Giao Dịch'}</h1>
+    <div className="flex flex-wrap justify-between items-center gap-5">
+      <div><p className="eyebrow mb-3">Tài chính cho ngày chung đôi</p><h1 className="text-[28px] sm:text-[32px] font-medium">{view === 'budget' ? 'Ngân sách & khoản chi' : 'Thanh toán & chi tiêu'}</h1></div>
+      <div className="flex gap-2 flex-wrap">
+        {view === 'budget' ? <><Button leftIcon={<Plus className="w-4 h-4" />} onClick={() => setEditor({ type: 'category' })}>Thêm danh mục</Button><Button variant="secondary" disabled={!categories.length} onClick={() => setEditor({ type: 'cost' })}>Thêm khoản chi</Button></> :
+          <Button leftIcon={<Plus className="w-4 h-4" />} disabled={!shownCosts.length} onClick={() => setEditor({ type: 'payment' })}>Ghi nhận chi tiền</Button>}
+      </div>
+    </div>
     {error && <p role="alert" className="text-danger">{error} <button className="underline min-h-11" onClick={() => void load()}>Tải lại</button></p>}
     {loading && <p role="status">Đang tải tài chính…</p>}
-    <p>Đã chi ròng trong phạm vi đang xem: <strong data-testid="net-paid">{formatVND(net)}</strong></p>
-    <div className="flex gap-2 flex-wrap">
-      {view === 'budget' ? <><Button onClick={() => setEditor({ type: 'category' })}>Thêm danh mục</Button><Button disabled={!categories.length} onClick={() => setEditor({ type: 'cost' })}>Thêm khoản chi</Button></> :
-        <Button disabled={!shownCosts.length} onClick={() => setEditor({ type: 'payment' })}>Ghi nhận chi tiền</Button>}
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div data-testid="net-paid"><StatCard label="Đã chi ròng" value={loading || error ? null : formatVND(net)} icon={<Wallet className="w-4 h-4" strokeWidth={1.5} />} scopeDescription="Trong phạm vi đang xem" /></div>
+      <StatCard label="Khoản chi" value={loading || error ? null : shownCosts.length} unit="khoản" icon={<Receipt className="w-4 h-4" strokeWidth={1.5} />} scopeDescription="Các khoản chi đã ghi nhận" />
+      <StatCard label="Danh mục" value={loading || error ? null : categories.length} unit="hạng mục" icon={<Layers className="w-4 h-4" strokeWidth={1.5} />} scopeDescription="Khung ngân sách của gia đình" />
     </div>
     {view === 'budget' && <>
-      <h2 className="font-bold">Danh mục ngân sách</h2>
-      <ul>{categories.map((category) => <li key={category.id}>{category.name} · {formatVND(BigInt(category.allocatedAmount || '0'))}</li>)}</ul>
+      <div className="surface-card p-5 sm:p-6">
+        <h2 className="text-sm font-semibold mb-4">Danh mục ngân sách</h2>
+        {categories.length ? <ul className="flex flex-wrap gap-3">{categories.map((category) => <li key={category.id} className="rounded-control bg-page border border-border-subtle px-4 py-3 text-xs"><span className="font-medium">{category.name}</span><span className="text-text-muted ml-3 tabular-nums">{formatVND(BigInt(category.allocatedAmount || '0'))}</span></li>)}</ul> : <p className="text-xs text-text-muted">Chưa có danh mục. Hãy bắt đầu với các hạng mục dành cho đám cưới của bạn.</p>}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{shownCosts.map((cost) => <article key={cost.id} className="rounded-card border border-border-subtle p-4 bg-surface">
         <h2 className="font-bold">{cost.name}</h2><p>{cost.contractedAmount === null ? 'Chưa có giá hợp đồng' : formatVND(BigInt(cost.contractedAmount))}</p>
       </article>)}</div>
-      {!loading && !shownCosts.length && <p>Chưa có khoản chi trong phạm vi này.</p>}
+      {!loading && !error && !shownCosts.length && <EmptyState title="Một kế hoạch rõ ràng cho từng khoản chi"
+        description="Ghi lại chi phí, theo dõi thanh toán và dành ngân sách cho những điều quan trọng với hai bạn."
+        icon={<Wallet className="w-7 h-7 text-accent" strokeWidth={1.4} />}
+        action={{ label: categories.length ? 'Tạo khoản chi đầu tiên' : 'Tạo danh mục đầu tiên', onClick: () => setEditor({ type: categories.length ? 'cost' : 'category' }) }} />}
     </>}
     {view === 'payments' && <div className="space-y-3">{shownPayments.map((payment) => <article key={payment.id} data-testid={`payment-${payment.id}`} className="rounded-card border border-border-subtle bg-surface p-4 space-y-2">
       <h2 className="font-semibold">{payment.costItemName}</h2>
@@ -143,7 +157,7 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
         {payment.paymentType === 'outflow' && <Button variant="secondary" onClick={() => setEditor({ type: 'refund', payment })}>Hoàn tiền</Button>}
         <Button variant="secondary" onClick={() => setEditor({ type: 'void', payment })}>Hủy giao dịch</Button>
       </div>}
-    </article>)}{!loading && !shownPayments.length && <p>Chưa có giao dịch trong phạm vi này.</p>}</div>}
+    </article>)}{!loading && !error && !shownPayments.length && <EmptyState title="Chưa có giao dịch trong sổ chi tiêu" description="Các khoản chi và tiền hoàn sẽ được lưu tại đây để gia đình dễ dàng cùng đối chiếu." icon={<Receipt className="w-7 h-7 text-accent" strokeWidth={1.4} />} />}</div>}
     {editor && <FinanceEditor editor={editor} categories={categories} costs={shownCosts} eventId={eventId} close={() => setEditor(null)} saved={load} />}
   </section>;
 }

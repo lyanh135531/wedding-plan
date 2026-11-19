@@ -67,7 +67,8 @@ export async function PUT(req: NextRequest) {
     const updated = await withTransactionScopedContext(
       session.user.id,
       session.role,
-      async (_client, txDb) => {
+      async (client, txDb) => {
+        await client.query("SELECT pg_advisory_xact_lock(hashtext('wedding-fund-settings'))");
         return updateFundSettings(txDb, parsed.data, session.user.id);
       }
     );

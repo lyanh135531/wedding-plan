@@ -86,7 +86,7 @@ export const GuestCardMobile: React.FC<GuestCardMobileProps> = ({
           'div',
           {
             className: `w-5 h-5 rounded border flex items-center justify-center ${
-              isSelected ? 'bg-primary border-primary text-white' : 'border-[#7A8881] bg-white'
+              isSelected ? 'bg-primary border-primary text-white' : 'border-border-control bg-surface'
             }`,
           },
           isSelected && h(Check, { className: 'w-3.5 h-3.5 stroke-[3]' })

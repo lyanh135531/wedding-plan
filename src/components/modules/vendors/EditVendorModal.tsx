@@ -248,7 +248,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
               value: serviceType,
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setServiceType(e.target.value as VendorServiceType),
               className:
-                'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
+                'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
               required: true,
             },
             (Object.keys(SERVICE_TYPE_LABELS) as VendorServiceType[]).map((st) =>
@@ -279,7 +279,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
               value: status,
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value as VendorStatus),
               className:
-                'w-full py-2.5 px-3 bg-[#FAF9F5] border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
+                'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
             },
             (Object.keys(STATUS_CONFIG) as VendorStatus[]).map((st) =>
               React.createElement(
@@ -339,7 +339,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
           'fieldset',
           {
             className:
-              'p-4 bg-[#FAF9F5] border border-border-control/60 rounded-control space-y-3.5',
+              'p-4 bg-page border border-border-control/60 rounded-control space-y-3.5',
           },
           React.createElement(
             'legend',
@@ -449,7 +449,7 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
           onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value),
           rows: 3,
           className:
-            'w-full p-2.5 bg-[#FAF9F5] border border-border-control rounded-control text-base focus:outline-2 focus:outline-focus',
+            'w-full p-2.5 bg-page border border-border-control rounded-control text-base focus:outline-2 focus:outline-focus',
         })
       ),
 

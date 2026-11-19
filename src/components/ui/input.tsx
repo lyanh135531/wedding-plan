@@ -75,7 +75,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
           'aria-describedby': describedBy,
           'aria-required': required,
           className: cn(
-            'w-full h-11 px-3 text-base text-text-main bg-surface border rounded-control transition-colors duration-150',
+            'w-full h-11 px-3.5 text-base md:text-sm text-text-main bg-surface border rounded-control transition-all duration-150 focus:border-primary focus:ring-4 focus:ring-primary/5',
             'placeholder:text-text-muted/60',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
             'disabled:bg-black/5 disabled:border-border-subtle disabled:cursor-not-allowed',

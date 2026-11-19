@@ -149,7 +149,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
               'div',
               {
                 key: member.guestId,
-                className: 'p-4 bg-[#FAF9F5] border border-border-subtle rounded-control text-sm space-y-3',
+                className: 'p-4 bg-page border border-border-subtle rounded-control text-sm space-y-3',
               },
               h(
                 'div',
@@ -179,7 +179,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
                     className: `h-9 text-xs rounded border font-medium flex items-center justify-center gap-1.5 transition-colors ${
                       member.rsvpStatus === 'accepted'
                         ? 'bg-[#2E7D32] text-white border-[#2E7D32]'
-                        : 'bg-white text-text-main border-[#7A8881] hover:bg-[#F7F5F0]'
+                        : 'bg-surface text-text-main border-border-control hover:bg-page'
                     }`,
                   },
                   h(UserCheck, { className: 'w-3.5 h-3.5' }),
@@ -194,7 +194,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
                     className: `h-9 text-xs rounded border font-medium flex items-center justify-center gap-1.5 transition-colors ${
                       member.rsvpStatus === 'pending_reply'
                         ? 'bg-[#D97706] text-white border-[#D97706]'
-                        : 'bg-white text-text-main border-[#7A8881] hover:bg-[#F7F5F0]'
+                        : 'bg-surface text-text-main border-border-control hover:bg-page'
                     }`,
                   },
                   h(HelpCircle, { className: 'w-3.5 h-3.5' }),
@@ -209,7 +209,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
                     className: `h-9 text-xs rounded border font-medium flex items-center justify-center gap-1.5 transition-colors ${
                       member.rsvpStatus === 'declined'
                         ? 'bg-danger text-white border-danger'
-                        : 'bg-white text-text-main border-[#7A8881] hover:bg-[#F7F5F0]'
+                        : 'bg-surface text-text-main border-border-control hover:bg-page'
                     }`,
                   },
                   h(UserX, { className: 'w-3.5 h-3.5' }),
@@ -234,7 +234,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
                       value: member.mealTier,
                       onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleMealTierChange(member.guestId, e.target.value as any),
-                      className: 'h-8 px-2 text-xs bg-white border border-[#7A8881] rounded',
+                      className: 'h-8 px-2 text-xs bg-surface border border-border-control rounded',
                     },
                     h('option', { value: 'regular' }, 'Khẩu phần chuẩn'),
                     h('option', { value: 'vegetarian' }, 'Ăn chay'),

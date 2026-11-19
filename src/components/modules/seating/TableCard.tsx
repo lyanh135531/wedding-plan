@@ -158,7 +158,7 @@ export const TableCard: React.FC<TableCardProps> = ({
         table.notes &&
         h(
           'div',
-          { className: 'text-[11px] text-text-muted bg-[#FAF9F5] p-1.5 rounded mb-2 border border-border-subtle flex items-start gap-1' },
+          { className: 'text-[11px] text-text-muted bg-page p-1.5 rounded mb-2 border border-border-subtle flex items-start gap-1' },
           h(FileText, { className: 'w-3 h-3 shrink-0 mt-0.5 text-text-muted' }),
           h('span', null, table.notes)
         ),
@@ -180,7 +180,7 @@ export const TableCard: React.FC<TableCardProps> = ({
                   key: g.id,
                   'data-testid': `seated-guest-${g.id}`,
                   className:
-                    'px-2.5 py-1.5 bg-[#FAF9F5] border border-border-subtle rounded text-xs text-text-main flex items-center justify-between gap-2',
+                    'px-2.5 py-1.5 bg-page border border-border-subtle rounded text-xs text-text-main flex items-center justify-between gap-2',
                 },
                 h(
                   'div',
@@ -258,7 +258,7 @@ export const TableCard: React.FC<TableCardProps> = ({
                 ? 'bg-border-subtle/50 text-text-muted cursor-not-allowed'
                 : selectedGuestId
                 ? 'bg-primary text-white hover:bg-primary/90 shadow-sm'
-                : 'bg-[#FAF9F5] border border-border-subtle text-text-muted hover:border-primary'
+                : 'bg-page border border-border-subtle text-text-muted hover:border-primary'
             }`,
           },
           cannotSeatSelection
@@ -281,7 +281,7 @@ export const TableCard: React.FC<TableCardProps> = ({
                 type: 'button',
                 onClick: () => onEditTable(table),
                 className:
-                  'flex items-center gap-1 text-text-muted hover:text-primary px-2 py-1 rounded hover:bg-[#FAF9F5]',
+                  'flex items-center gap-1 text-text-muted hover:text-primary px-2 py-1 rounded hover:bg-page',
               },
               h(Edit, { className: 'w-3 h-3' }),
               'Sửa bàn'

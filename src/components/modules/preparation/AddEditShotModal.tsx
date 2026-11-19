@@ -89,7 +89,7 @@ export const AddEditShotModal: React.FC<AddEditShotModalProps> = ({
       'div',
       {
         className:
-          'bg-white rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
+          'bg-surface rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
       },
       // Header
       h(
@@ -193,7 +193,7 @@ export const AddEditShotModal: React.FC<AddEditShotModalProps> = ({
                 onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                   setPriority(e.target.value as ShotPriority),
                 className:
-                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white',
+                  'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface',
               },
               h('option', { value: 'must_have' }, 'Bắt buộc (Must-have)'),
               h('option', { value: 'nice_to_have' }, 'Nên có (Nice-to-have)')

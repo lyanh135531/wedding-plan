@@ -79,7 +79,7 @@ export const RefundTransactionModal: React.FC<RefundTransactionModalProps> = ({
         { onSubmit: handleSubmit, className: 'space-y-4' },
         h(
           'div',
-          { className: 'p-3 bg-[#FAF9F5] border border-border-subtle rounded text-xs space-y-1' },
+          { className: 'p-3 bg-page border border-border-subtle rounded text-xs space-y-1' },
           h('p', null, `Nhà cung cấp: `, h('span', { className: 'font-semibold text-text-main' }, vendorName)),
           h('p', null, `Khoản đã chi trước đó: `, h('span', { className: 'font-mono font-semibold text-text-main' }, formatVND(originalOutflowAmount)))
         ),

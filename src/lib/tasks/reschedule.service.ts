@@ -10,6 +10,7 @@ import {
   FixedPaymentScheduleReview,
 } from './types';
 import { TxOrDb } from '@/lib/finance/costs.repository';
+import { weddingDateKey, endOfWeddingDay } from '@/lib/dates';
 
 export class EventNotFoundError extends Error {
   readonly statusCode = 404;
@@ -46,9 +47,9 @@ export async function generateRescheduleImpactPreview(
   }
 
   const oldDateStr = event.startTime
-    ? new Date(event.startTime).toISOString().slice(0, 10)
+    ? weddingDateKey(event.startTime)
     : null;
-  const newBaseDate = new Date(`${newDateStr}T23:59:59.999Z`);
+  const newBaseDate = endOfWeddingDay(newDateStr);
 
   // 2. Fetch all relative tasks tied to this event
   const relativeTasks = await txDb
@@ -87,7 +88,7 @@ export async function generateRescheduleImpactPreview(
     // Compute old due date if old event solar date was present
     let oldDueDateStr: string | null = null;
     if (oldDateStr) {
-      const oldBase = new Date(`${oldDateStr}T23:59:59.999Z`);
+      const oldBase = endOfWeddingDay(oldDateStr);
       const offsetMs = (t.relativeOffsetDays || 0) * 86400000;
       const oldDueEpoch =
         t.relativeDirection === 'after'

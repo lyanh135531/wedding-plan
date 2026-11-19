@@ -16,7 +16,7 @@ export const runtime = 'nodejs';
 const uuidParamSchema = z.string().uuid();
 
 type RouteContext = {
-  params: { id: string; itemId: string } | Promise<{ id: string; itemId: string }>;
+  params: Promise<{ id: string; itemId: string }>;
 };
 
 /**
@@ -26,7 +26,7 @@ type RouteContext = {
  */
 export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
-    const { itemId } = await Promise.resolve(context.params);
+    const { itemId } = await context.params;
     const parseItemId = uuidParamSchema.safeParse(itemId);
     if (!parseItemId.success) {
       return NextResponse.json(
@@ -85,7 +85,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
  */
 export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
-    const { itemId } = await Promise.resolve(context.params);
+    const { itemId } = await context.params;
     const parseItemId = uuidParamSchema.safeParse(itemId);
     if (!parseItemId.success) {
       return NextResponse.json(
