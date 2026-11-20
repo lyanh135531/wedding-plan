@@ -331,6 +331,44 @@
   .multi-select-panel[aria-invalid='true'] { border-color: #C96D5D; }
   .multi-select-panel[aria-disabled='true'] { background: #EEEFE8; }
   .multi-select-field > select.sr-only { appearance: auto; padding: 0; border: 0; }
+  .calendar-popover {
+    position: fixed;
+    inset: auto;
+    z-index: 100;
+    margin: 0 !important;
+    padding: 12px;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid #DCE2D6;
+    border-radius: 18px;
+    background: #FFFEFB;
+    color: var(--color-text-main);
+    box-shadow: 0 18px 54px -14px rgb(23 60 51 / .25), 0 4px 12px rgb(23 60 51 / .05);
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  }
+  .calendar-popover::backdrop { background: transparent; }
+  .calendar-heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-bottom: 10px; }
+  :root .calendar-heading select:not([multiple]):not([size]) { min-height: 36px; height: 36px; padding: 6px 26px 6px 8px; background-position: right 6px center; border-color: transparent; border-radius: 9px; background-color: transparent; box-shadow: none; font-size: 13px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .calendar-heading select:first-child { width: 104px; }
+  .calendar-heading select:last-child { width: 78px; }
+  .calendar-nav { width: 32px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; color: #6A756D; }
+  .calendar-nav:hover:not(:disabled) { background: #F0F2E9; color: #244C40; }
+  .calendar-nav:disabled { opacity: .3; cursor: not-allowed; }
+  .calendar-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+  .calendar-weekday { display: flex; height: 30px; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: #85917F; }
+  .calendar-day { position: relative; height: 38px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 10px; color: #344B3D; font-size: 13px; font-variant-numeric: tabular-nums; transition: background-color 120ms ease, color 120ms ease; }
+  .calendar-day--outside { color: #A5AEA1; }
+  .calendar-day:hover:not(:disabled) { background: #EEF2E7; color: #244C40; }
+  .calendar-day[aria-current='date'] { border-color: #B9C7AC; font-weight: 600; }
+  .calendar-day[aria-selected='true'], .calendar-day[aria-selected='true']:hover { background: #244C40; color: #FFFEFB; border-color: #244C40; box-shadow: 0 2px 5px rgb(23 60 51 / .15); }
+  .calendar-day:focus-visible { outline: 2px solid #967638; outline-offset: 1px; z-index: 1; }
+  .calendar-day:disabled { opacity: .3; cursor: not-allowed; }
+  .calendar-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; padding: 10px 4px 0; border-top: 1px solid #E4E7DD; }
+  .calendar-footer button { min-height: 32px; padding: 5px 8px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #466B4D; }
+  .calendar-footer button:hover:not(:disabled) { background: #EEF2E7; }
+  .calendar-footer button:disabled { color: #A5AEA1; cursor: not-allowed; }
+  @media (pointer: coarse) { .calendar-day { height: 44px; } .calendar-nav { min-height: 44px; } .calendar-footer button { min-height: 44px; } }
   @media (max-width: 767px) {
     :root :is(input, textarea, select, button[role='combobox']) { font-size: 16px; }
     :root .combobox-search { font-size: 16px; }

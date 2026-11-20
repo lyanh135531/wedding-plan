@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { Calendar, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CalendarInput } from './calendar-input';
 
 const h = React.createElement;
 
@@ -53,11 +54,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const errorId = `${inputId}-error`;
   const helperId = `${inputId}-helper`;
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    onChange(val ? val : null);
-  };
-
   const handleUnsetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (onToggleUnset) {
@@ -67,15 +63,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       onChange(null);
     }
   };
-
-  const formattedDisplay = React.useMemo(() => {
-    if (!value) return '';
-    const parts = value.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-    return value;
-  }, [value]);
 
   const describedBy = error ? errorId : helperText ? helperId : undefined;
 
@@ -145,28 +132,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           { className: 'flex flex-wrap items-center gap-2' },
           h(
             'div',
-            { className: 'relative flex-1 min-w-[160px] flex items-center' },
-            h(
-              'div',
-              {
-                className:
-                  'absolute left-3 flex items-center pointer-events-none text-text-muted',
-              },
-              h(Calendar, { className: 'w-4 h-4' })
-            ),
-            h('input', {
+            { className: 'relative flex-1 min-w-[160px]' },
+            h(CalendarInput, {
               id: inputId,
-              type: 'date',
+              label,
               value: value || '',
               min: minDate,
               max: maxDate,
-              onChange: handleDateChange,
+              onValueChange: (date) => onChange(date || null),
               disabled: disabled || isUnset,
               required: required && !isUnset,
               'aria-invalid': !!error,
               'aria-describedby': describedBy,
               className: cn(
-                'w-full h-11 pl-10 pr-3 text-base text-text-main bg-surface border rounded-control transition-colors duration-150',
+                'w-full h-11 pl-3.5 pr-12 text-base text-text-main bg-surface border rounded-control transition-colors duration-150',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
                 'disabled:bg-black/5 disabled:border-border-subtle disabled:cursor-not-allowed',
                 error
@@ -202,15 +181,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                   'border-border-control hover:border-text-main/70'
                 ),
               })
-            ),
-          formattedDisplay &&
-            h(
-              'span',
-              {
-                className:
-                  'text-xs text-text-muted select-none ml-1 hidden sm:inline-block',
-              },
-              `(${formattedDisplay})`
             )
         ),
     error

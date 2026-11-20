@@ -7,6 +7,7 @@ import { useEventScope } from '@/context/EventScopeContext';
 import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { CalendarInput } from '@/components/ui/calendar-input';
 import { removeVietnameseDiacritics } from '@/lib/utils';
 
 export type RecordData = { id: string; version?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
@@ -96,7 +97,7 @@ export function RecordEditor({ title, fields, record, save, close, draftScope }:
         <label className="font-medium" htmlFor={`${id}-${field.key}`}>{field.label}{field.required ? ' *' : ''}</label>
         {field.type === 'multi' ? <MultiSelect id={`${id}-${field.key}`} label={field.label} options={field.options || []} required={field.required} disabled={saving} value={values[field.key] as string[]} onChange={selected => setValues(v => ({ ...v, [field.key]: selected }))} /> : field.type === 'select' ? <select id={`${id}-${field.key}`} className={controlClass} required={field.required} disabled={saving} value={String(values[field.key] ?? '')} onChange={e => setValues(v => ({ ...v, [field.key]: e.target.value }))}>
           <option value="">Chọn {field.label.toLowerCase()}</option>{field.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select> : field.type === 'textarea' ? <textarea id={`${id}-${field.key}`} className={controlClass} rows={3} disabled={saving} required={field.required} value={String(values[field.key] ?? '')} onChange={e => setValues(v => ({ ...v, [field.key]: e.target.value }))} /> :
+        </select> : field.type === 'date' ? <CalendarInput id={`${id}-${field.key}`} label={field.label} className={controlClass} required={field.required} disabled={saving} value={String(values[field.key] ?? '')} onValueChange={date => setValues(v => ({ ...v, [field.key]: date }))} /> : field.type === 'textarea' ? <textarea id={`${id}-${field.key}`} className={controlClass} rows={3} disabled={saving} required={field.required} value={String(values[field.key] ?? '')} onChange={e => setValues(v => ({ ...v, [field.key]: e.target.value }))} /> :
           <input id={`${id}-${field.key}`} className={field.type === 'checkbox' ? 'block h-6 w-6' : controlClass} type={field.type === 'tags' ? 'text' : field.type || 'text'} required={field.required} disabled={saving}
             min={field.min} max={field.max} maxLength={5000} step={field.type === 'number' ? 1 : undefined}
             {...(field.type === 'checkbox' ? { checked: Boolean(values[field.key]), onChange: (e: React.ChangeEvent<HTMLInputElement>) => setValues(v => ({ ...v, [field.key]: e.target.checked })) } : { value: String(values[field.key] ?? ''), onChange: (e: React.ChangeEvent<HTMLInputElement>) => setValues(v => ({ ...v, [field.key]: e.target.value })) })} />}

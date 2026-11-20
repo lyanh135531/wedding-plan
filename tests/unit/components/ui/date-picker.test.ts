@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { DatePicker } from '@/components/ui/date-picker';
 
 describe('DatePicker Component (src/components/ui/date-picker.tsx)', () => {
-  it('renders standard date input with Vietnamese formatted preview (dd/mm/yyyy)', () => {
+  it('renders the custom calendar trigger with a Vietnamese date (dd/mm/yyyy)', () => {
     const html = renderToStaticMarkup(
       React.createElement(DatePicker, {
         label: 'Ngày tổ chức lễ cưới',
@@ -13,8 +13,9 @@ describe('DatePicker Component (src/components/ui/date-picker.tsx)', () => {
       })
     );
     expect(html).toContain('Ngày tổ chức lễ cưới');
-    expect(html).toContain('value="2028-03-15"');
-    expect(html).toContain('(15/03/2028)');
+    expect(html).toContain('value="15/03/2028"');
+    expect(html).toContain('aria-label="Mở lịch: Ngày tổ chức lễ cưới"');
+    expect(html).not.toContain('type="date"');
   });
 
   it('renders "Chưa chốt ngày" checkbox when onToggleUnset is provided', () => {

@@ -75,6 +75,7 @@ export function InputControlsPlayground() {
     <ModalDialog isOpen={modal} onClose={() => setModal(false)} title="Thêm thiệp mời" description="Một lời mời, dành cho những người thân yêu.">
       <div className="space-y-5">
         <TextInput label="Tên trên thiệp" defaultValue="Gia đình Minh Anh" required />
+        <DatePicker label="Ngày gửi thiệp" value={date} onChange={setDate} minDate="2027-04-01" maxDate="2027-04-30" />
         <Combobox label="Người đại diện" options={guests} value={members[0] || null} onChange={value => setMembers(value ? [value, ...members.filter(member => member !== value)] : [])} />
         <label className="flex flex-col gap-1.5 text-sm font-medium">Cách gửi<select className="px-3.5 py-2.5"><option>Thiệp giấy</option><option>Thiệp điện tử</option></select></label>
         <div className="space-y-2"><label htmlFor="modal-members" className="text-sm font-medium">Thành viên nhận chung thiệp</label><MultiSelect id="modal-members" label="Thành viên nhận chung thiệp" options={guests} value={members} onChange={setMembers} /></div>

@@ -5,6 +5,7 @@ export * from './textarea';
 export * from './currency-input';
 export * from './quantity-input';
 export * from './date-picker';
+export * from './calendar-input';
 export * from './combobox';
 export * from './multi-select';
 export * from './checkbox';
