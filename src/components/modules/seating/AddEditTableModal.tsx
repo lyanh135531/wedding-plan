@@ -142,6 +142,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
             className:
               'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
             value: tableNumber,
+            'aria-label': 'Số bàn / Ký hiệu',
             onChange: (e: any) => setTableNumber(e.target.value),
             placeholder: 'A1, 01, VIP1...',
           })
@@ -154,6 +155,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
             'select',
             {
               value: shape,
+              'aria-label': 'Kiểu dáng bàn',
               onChange: (e: any) => setShape(e.target.value as TableShape),
               className:
                 'w-full h-10 px-3 border border-border-control rounded-control text-xs bg-surface text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
@@ -185,6 +187,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
           type: 'number',
           min: 1,
           value: capacity,
+          'aria-label': 'Sức chứa ghế',
           onChange: (e: any) => setCapacity(parseInt(e.target.value, 10) || 0),
           required: true,
         })
@@ -201,6 +204,7 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
         ),
         h('textarea', {
           value: notes,
+          'aria-label': 'Ghi chú riêng của bàn',
           onChange: (e: any) => setNotes(e.target.value),
           rows: 2,
           placeholder: 'Ghi chú phục vụ, yêu cầu vị trí...',

@@ -36,6 +36,10 @@ export function LiveTasksManager() {
   const [relative, setRelative] = React.useState(false);
   const [offset, setOffset] = React.useState('7');
   const [shared, setShared] = React.useState(false);
+  const startCreating = () => {
+    setEventId(availableEvents.some(event => event.id === currentScope && !event.isCancelled) ? currentScope : '');
+    setCreating(true);
+  };
   React.useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -68,10 +72,10 @@ export function LiveTasksManager() {
   return h('div', { className: 'space-y-5' },
     h('div', { className: 'flex justify-between items-center gap-3' },
       h('div', null, h('p', { className: 'eyebrow mb-3' }, 'Từng bước, cùng nhau'), h('h1', { className: 'text-[28px] sm:text-[32px] font-medium' }, 'Danh sách công việc')),
-      isOwner && h(Button, { disabled: loading || saving, onClick: () => setCreating((value) => !value) }, creating ? 'Đóng biểu mẫu' : 'Thêm công việc'),
+      isOwner && h(Button, { disabled: loading || saving, onClick: () => creating ? setCreating(false) : startCreating() }, creating ? 'Đóng biểu mẫu' : 'Thêm công việc'),
     ),
     error && h(Alert, { variant: 'danger', action: { label: 'Tải lại', onClick: () => { setError(null); setRevision((value) => value + 1); } } }, error),
-    creating && isOwner && h('form', { onSubmit: create, className: 'bg-surface rounded-card border p-5 space-y-4' },
+    creating && isOwner && h('form', { onSubmit: create, 'aria-busy': saving, className: 'bg-surface rounded-card border p-5 space-y-4' },
       h(TextInput, { label: 'Tiêu đề công việc', required: true, value: title, maxLength: 200, disabled: saving, onChange: (event: React.ChangeEvent<HTMLInputElement>) => setTitle(event.target.value) }),
       h('label', { className: 'block space-y-1' }, 'Buổi lễ liên quan', h('select', { className: selectClass, value: eventId, required: relative, disabled: saving, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => setEventId(event.target.value) },
         h('option', { value: '' }, 'Công việc chung'), ...availableEvents.filter((item) => !item.isCancelled).map((item) => h('option', { key: item.id, value: item.id }, item.name)))),
@@ -88,6 +92,6 @@ export function LiveTasksManager() {
       isOwner ? h('select', { className: selectClass, 'aria-label': `Trạng thái ${task.title}`, value: task.status, disabled: saving, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => {
         void mutate(() => api(`/api/v1/tasks/${task.id}/status`, { method: 'PATCH', body: jsonBody({ status: event.target.value, version: task.version }) }));
       } }, Object.entries(statuses).map(([value, label]) => h('option', { key: value, value }, label))) : h('p', null, statuses[task.status as keyof typeof statuses] || task.status),
-    ))) : h(EmptyState, { title: 'Chăm chút từng việc, thong thả đón ngày vui', description: 'Tạo công việc, chọn hạn hoàn thành và cùng gia đình theo dõi từng bước chuẩn bị.', icon: h(CheckSquare, { className: 'w-7 h-7 text-accent', strokeWidth: 1.4 }), action: isOwner ? { label: 'Tạo công việc đầu tiên', onClick: () => setCreating(true) } : undefined }),
+    ))) : h(EmptyState, { title: 'Chăm chút từng việc, thong thả đón ngày vui', description: 'Tạo công việc, chọn hạn hoàn thành và cùng gia đình theo dõi từng bước chuẩn bị.', icon: h(CheckSquare, { className: 'w-7 h-7 text-accent', strokeWidth: 1.4 }), action: isOwner ? { label: 'Tạo công việc đầu tiên', onClick: startCreating } : undefined }),
   );
 }

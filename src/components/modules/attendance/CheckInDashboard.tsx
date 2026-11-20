@@ -3,6 +3,7 @@ import { useMutationFetch } from '@/components/common/useMutationFetch';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import { ModalDialog } from '@/components/ui/dialog';
 import { useRole } from '@/context/RoleContext';
 import {
   Users,
@@ -198,7 +199,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
 
   return h(
     'div',
-    { className: 'space-y-6 max-w-7xl mx-auto p-4 sm:p-6' },
+    { className: 'space-y-6 max-w-7xl mx-auto', 'aria-busy': loading },
     // Header & Controls
     h(
       'div',
@@ -400,7 +401,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
     declinedGuest &&
       h(
         'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay' },
         h(
           'div',
           { className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4' },
@@ -427,15 +428,14 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
     // Modal: Add Walk-in Guest
     isWalkInModalOpen &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Thêm Khách Phát Sinh Tại Buổi Cưới', onClose: () => setIsWalkInModalOpen(false) },
         h(
           'form',
           {
             onSubmit: handleCreateWalkIn,
-            className: 'bg-surface w-full max-w-md rounded-card border border-border-control p-6 space-y-4',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Thêm Khách Phát Sinh Tại Buổi Cưới'),
           h(
             'div',
             { className: 'space-y-3 text-xs' },

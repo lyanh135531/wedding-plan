@@ -157,7 +157,7 @@ export const MergeGuestsModal: React.FC<MergeGuestsModalProps> = ({
     'div',
     {
       className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto animate-in fade-in',
+        'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay overflow-y-auto animate-in fade-in',
       role: 'dialog',
       'aria-modal': 'true',
       'aria-labelledby': 'merge-guests-title',

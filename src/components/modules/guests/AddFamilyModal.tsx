@@ -5,7 +5,8 @@ import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Trash2, Users } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
+import { ModalDialog } from '@/components/ui/dialog';
 
 const h = React.createElement;
 
@@ -93,42 +94,9 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
   };
 
   return h(
-    'div',
-    {
-      className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'add-family-title',
-    },
-    h(
-      'div',
-      {
-        className:
-          'bg-surface w-full max-w-xl max-h-[90dvh] overflow-y-auto rounded-card border border-border-control shadow-2xl p-6 text-text-main my-8',
-      },
-      saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
-      // Header
-      h(
-        'div',
-        { className: 'flex items-center justify-between border-b border-border-subtle pb-4 mb-4' },
-        h(
-          'div',
-          { className: 'flex items-center gap-2.5' },
-          h(Users, { className: 'w-5 h-5 text-primary' }),
-          h('h2', { id: 'add-family-title', className: 'text-lg font-bold' }, 'Thêm gia đình / Nhóm nhận thiệp')
-        ),
-        h(
-          'button',
-          {
-            onClick: onClose,
-            className: 'text-text-muted hover:text-text-main p-1 rounded',
-            'aria-label': 'Đóng hộp thoại',
-          },
-          '✕'
-        )
-      ),
-
+    ModalDialog,
+    { isOpen, onClose, title: 'Thêm gia đình / Nhóm nhận thiệp', maxWidth: 'lg' },
+    saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
       // Form
       h(
         'form',
@@ -151,6 +119,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
             'select',
             {
               value: side,
+              'aria-label': 'Bên mời',
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 setSide(e.target.value as any),
               className:
@@ -186,7 +155,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
           // Member items
           h(
             'div',
-            { className: 'space-y-2.5 max-h-[220px] overflow-y-auto pr-1' },
+            { className: 'space-y-3' },
             members.map((member, index) =>
               h(
                 'div',
@@ -196,15 +165,16 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
                 },
                 h(
                   'div',
-                  { className: 'flex items-center gap-2' },
+                  { className: 'grid grid-cols-[minmax(0,1fr)_auto] gap-2' },
                   h('input', {
                     type: 'text',
                     value: member.name,
+                    'aria-label': `Họ và tên thành viên ${index + 1}`,
                     onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                       handleMemberChange(member.id, 'name', e.target.value),
                     placeholder: `Tên người thứ ${index + 1}...`,
                     className:
-                      'flex-1 h-9 px-2.5 text-sm bg-surface border border-border-control rounded focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
+                      'col-span-2 min-w-0 sm:col-span-1 h-9 px-2.5 text-sm bg-surface border border-border-control rounded focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
                     required: true,
                   }),
 
@@ -212,9 +182,10 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
                     'select',
                     {
                       value: member.ageTier,
+                      'aria-label': `Độ tuổi thành viên ${index + 1}`,
                       onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleMemberChange(member.id, 'ageTier', e.target.value),
-                      className: 'h-9 px-2 text-xs bg-surface border border-border-control rounded',
+                      className: 'min-w-0 h-9 px-2 text-xs bg-surface border border-border-control rounded',
                     },
                     h('option', { value: 'adult' }, 'Người lớn'),
                     h('option', { value: 'child' }, 'Trẻ em'),
@@ -236,7 +207,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
 
                 h(
                   'div',
-                  { className: 'flex items-center justify-between text-xs pt-1' },
+                  { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs pt-1' },
                   h(Checkbox, {
                     checked: member.isRepresentative,
                     onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -247,10 +218,11 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
                     h('input', {
                       type: 'tel',
                       value: member.phone || '',
+                      'aria-label': 'Số điện thoại đại diện',
                       onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                         handleMemberChange(member.id, 'phone', e.target.value),
                       placeholder: 'Số ĐT liên hệ...',
-                      className: 'h-7 px-2 text-xs border border-border-control rounded w-36 bg-surface',
+                      className: 'h-7 px-2 text-xs border border-border-control rounded w-full sm:w-40 bg-surface',
                     })
                 )
               )
@@ -261,7 +233,7 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
         // Summary banner (UXT02)
         h(
           'div',
-          { className: 'p-3 bg-primary/10 border border-primary/20 rounded-control text-xs text-text-main flex items-center justify-between' },
+          { className: 'p-3 bg-primary/10 border border-primary/20 rounded-control text-xs text-text-main flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1' },
           h('span', null, 'Tóm tắt tạo mới:'),
           h(
             'span',
@@ -294,6 +266,5 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
           )
         )
       )
-    )
   );
 };

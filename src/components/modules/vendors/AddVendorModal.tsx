@@ -187,6 +187,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
             'select',
             {
               value: serviceType,
+              'aria-label': 'Loại dịch vụ',
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setServiceType(e.target.value as VendorServiceType),
               className:
                 'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',
@@ -218,6 +219,7 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
             'select',
             {
               value: status,
+              'aria-label': 'Trạng thái',
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value as VendorStatus),
               className:
                 'w-full py-2.5 px-3 bg-page border border-border-control rounded-control text-base text-text-main focus:outline-2 focus:outline-focus min-h-[44px]',

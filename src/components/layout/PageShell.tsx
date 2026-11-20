@@ -117,7 +117,7 @@ export const PageShell: React.FC<PageShellProps> = ({
               'div',
               {
                 className:
-                  'flex items-center justify-between p-4 border-b border-border-subtle',
+                  'flex items-center justify-between shrink-0 p-4 border-b border-border-subtle',
               },
               h(
                 'span',
@@ -138,7 +138,7 @@ export const PageShell: React.FC<PageShellProps> = ({
             ),
             h(
               'div',
-              { className: 'flex-1 overflow-y-auto' },
+              { className: 'flex-1 min-h-0 overflow-hidden' },
               h(DesktopSidebar, {
                 isDrawer: true,
                 onNavigate: () => setMobileDrawerOpen(false),

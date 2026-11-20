@@ -39,8 +39,13 @@ export function LiveGuestsDirectory() {
   const [detail, setDetail] = useState<GuestDetailData | null>(null);
   const [busy, setBusy] = useState(false);
   const generation = useRef(0);
+  const currentFilters = useRef({ eventId, archived });
+  currentFilters.current = { eventId, archived };
 
   const load = useCallback(async () => {
+    // A mutation may finish after the user has changed the visible filter.
+    // Its old reload callback must not replace the current list.
+    if (currentFilters.current.eventId !== eventId || currentFilters.current.archived !== archived) return;
     const request = ++generation.current;
     setLoading(true);
     setError(null);

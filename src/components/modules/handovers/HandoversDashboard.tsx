@@ -4,6 +4,7 @@ import * as React from 'react';
 import { api } from '@/lib/api/request';
 import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
+import { ModalDialog } from '@/components/ui/dialog';
 import { useRole } from '@/context/RoleContext';
 import {
   FileText,
@@ -418,15 +419,14 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
     // Modal: Create Snapshot
     isSnapshotModalOpen &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Chốt bản bàn giao mới', onClose: () => setIsSnapshotModalOpen(false), maxWidth: 'sm' },
         h(
           'form',
           {
             onSubmit: handleCreateSnapshot,
-            className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Chốt Bản Bàn Giao Mới (Snapshot)'),
           saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
           h(
             'div',
@@ -459,15 +459,14 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
     // Modal: Deliver Handover
     isDeliverModalOpen &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Ghi nhận đã bàn giao', onClose: () => setIsDeliverModalOpen(false), maxWidth: 'sm' },
         h(
           'form',
           {
             onSubmit: handleDeliver,
-            className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Ghi Nhận Đã Bàn Giao'),
           saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
           h(
             'div',
@@ -493,6 +492,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
               h('input', {
                 type: 'text',
                 value: deliverChannel,
+                'aria-label': 'Kênh bàn giao',
                 onChange: (e) => setDeliverChannel(e.target.value),
                 className: 'w-full mt-1 p-2 border border-border-control rounded',
               })

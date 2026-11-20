@@ -24,12 +24,21 @@ const poolConfig: PoolConfig = {
     : 5000,
 };
 
-// Global pool singleton
-export const pool = new Pool(poolConfig);
-
-pool.on('error', (err) => {
-  console.error('[DB Pool Error] Unexpected error on idle client:', err);
-});
+// Next.js can evaluate this module separately for API routes and hot reloads.
+// Keep the pool on the process global so each evaluation shares its connections.
+const databaseGlobal = globalThis as typeof globalThis & {
+  weddingPostgresPool?: { key: string; pool: Pool };
+};
+const poolKey = JSON.stringify(poolConfig);
+const cachedPool = databaseGlobal.weddingPostgresPool;
+export const pool = cachedPool?.key === poolKey ? cachedPool.pool : new Pool(poolConfig);
+if (cachedPool?.pool !== pool) {
+  if (cachedPool) void cachedPool.pool.end().catch(() => {});
+  databaseGlobal.weddingPostgresPool = { key: poolKey, pool };
+  pool.on('error', (err) => {
+    console.error('[DB Pool Error] Unexpected error on idle client:', err);
+  });
+}
 
 // Default Drizzle instance wrapping the raw pool (for unauthenticated system migrations / health checks)
 export const db = drizzle(pool, { schema });

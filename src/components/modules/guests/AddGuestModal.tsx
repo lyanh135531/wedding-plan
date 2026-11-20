@@ -4,8 +4,8 @@ import * as React from 'react';
 import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
+import { ModalDialog } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { UserPlus, X } from 'lucide-react';
 
 const h = React.createElement;
 
@@ -79,40 +79,18 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
   };
 
   return h(
-    'div',
+    ModalDialog,
     {
-      className: 'fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'add-guest-modal-title',
+      isOpen,
+      onClose,
+      title: 'Thêm Khách Mời Đơn Lẻ',
     },
     h(
       'div',
       {
-        className: 'bg-surface rounded-card border border-border-subtle shadow-modal w-full max-w-lg max-h-[90dvh] overflow-y-auto p-6 space-y-5 animate-in fade-in zoom-in-95',
+        className: 'space-y-5',
       },
       saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
-      // Header
-      h(
-        'div',
-        { className: 'flex items-center justify-between pb-3 border-b border-border-subtle' },
-        h(
-          'div',
-          { className: 'flex items-center gap-2' },
-          h(UserPlus, { className: 'w-5 h-5 text-primary' }),
-          h('h2', { id: 'add-guest-modal-title', className: 'text-lg font-bold text-text-main' }, 'Thêm Khách Mời Đơn Lẻ')
-        ),
-        h(
-          'button',
-          {
-            type: 'button',
-            onClick: onClose,
-            className: 'text-text-muted hover:text-text-main p-1 rounded-control transition-colors',
-            'aria-label': 'Đóng',
-          },
-          h(X, { className: 'w-5 h-5' })
-        )
-      ),
 
       // Error message
       error &&
@@ -128,7 +106,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
         { onSubmit: handleSubmit, className: 'space-y-4' },
         // Display Name
         h(TextInput, {
-          label: 'Họ và tên khách mời *',
+          label: 'Họ và tên khách mời',
           placeholder: 'Ví dụ: Nguyễn Văn An',
           value: displayName,
           onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,7 +119,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
         // Side & Age Tier
         h(
           'div',
-          { className: 'grid grid-cols-2 gap-3' },
+          { className: 'grid grid-cols-1 sm:grid-cols-2 gap-3' },
           h(
             'div',
             { className: 'space-y-1.5' },
@@ -149,6 +127,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
             h(
               'select',
               {
+                'aria-label': 'Bên mời',
                 className: 'w-full h-10 px-3 rounded-control border border-border-subtle bg-surface-card text-text-main text-sm focus:outline-none focus:border-primary',
                 value: side,
                 onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setSide(e.target.value as any),
@@ -166,6 +145,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
             h(
               'select',
               {
+                'aria-label': 'Độ tuổi',
                 className: 'w-full h-10 px-3 rounded-control border border-border-subtle bg-surface-card text-text-main text-sm focus:outline-none focus:border-primary',
                 value: ageTier,
                 onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setAgeTier(e.target.value as any),
@@ -180,7 +160,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
         // Phone & Email
         h(
           'div',
-          { className: 'grid grid-cols-2 gap-3' },
+          { className: 'grid grid-cols-1 sm:grid-cols-2 gap-3' },
           h(TextInput, {
             label: 'Số điện thoại',
             placeholder: '0901234567',
@@ -237,6 +217,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
           { className: 'space-y-1.5' },
           h('label', { className: 'block text-sm font-medium text-text-main' }, 'Ghi chú riêng tư (Chỉ chủ sở hữu thấy)'),
           h('textarea', {
+            'aria-label': 'Ghi chú riêng tư',
             rows: 2,
             className: 'w-full px-3 py-2 rounded-control border border-border-subtle bg-surface-card text-text-main text-sm focus:outline-none focus:border-primary',
             placeholder: 'Lưu ý về sở thích, chỗ ngồi VIP, thói quen ăn uống...',

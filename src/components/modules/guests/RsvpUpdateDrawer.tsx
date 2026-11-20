@@ -97,7 +97,7 @@ export const RsvpUpdateDrawer: React.FC<RsvpUpdateDrawerProps> = ({
     'div',
     {
       className:
-        'fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm transition-opacity',
+        'fixed inset-0 z-50 flex justify-end app-overlay transition-opacity',
       role: 'dialog',
       'aria-modal': 'true',
       'aria-labelledby': 'rsvp-drawer-title',

@@ -21,6 +21,9 @@ export async function api<T>(url: string, init: RequestInit = {}): Promise<T> {
     throw new HttpError(response.status, 'Máy chủ trả về dữ liệu không hợp lệ. Vui lòng thử lại.');
   }
   if (!response.ok) {
+    if (response.status >= 500) {
+      throw new HttpError(response.status, 'Máy chủ chưa thể xử lý yêu cầu. Vui lòng thử lại; nếu lỗi tiếp diễn, hãy tải lại trang.');
+    }
     throw new HttpError(response.status, body?.message || body?.issues?.[0]?.message || body?.error || 'Không thể lưu dữ liệu. Hãy thử lại.');
   }
   if (writeIdentity) uncertainWrites.delete(writeIdentity);

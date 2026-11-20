@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode } from 'react';
+import Link from 'next/link';
 import { Menu, Bell } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
 import { useEventScope } from '@/context/EventScopeContext';
@@ -140,13 +141,12 @@ export const Header: React.FC<HeaderProps> = ({
 
       // Nút Chuông thông báo
       h(
-        'button',
+        Link,
         {
-          type: 'button',
+          href: '/notifications',
           className:
             'relative p-2 rounded-full border border-border-subtle text-text-muted hover:text-text-main hover:bg-page min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20',
           'aria-label': 'Thông báo',
-          onClick: () => window.location.assign('/notifications'),
         },
         h(Bell, { className: 'w-5 h-5 text-text-muted', 'aria-hidden': 'true' })
       ),

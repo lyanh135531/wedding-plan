@@ -386,7 +386,7 @@ export const ArchivalDashboard: React.FC = () => {
     isFreezeModalOpen &&
       h(
         'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay' },
         h(
           'form',
           {
@@ -434,7 +434,7 @@ export const ArchivalDashboard: React.FC = () => {
     isUnarchiveModalOpen &&
       h(
         'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay' },
         h(
           'form',
           {
@@ -482,7 +482,7 @@ export const ArchivalDashboard: React.FC = () => {
     isMediaModalOpen &&
       h(
         'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay' },
         h(
           'form',
           {

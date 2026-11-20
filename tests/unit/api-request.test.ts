@@ -20,4 +20,9 @@ describe('API response handling', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json(null, { status: 500 })));
     await expect(api('/api/resource')).rejects.toBeInstanceOf(HttpError);
   });
+  it('keeps database queries and parameters out of UI error messages', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ error: 'Failed query: insert into guests params: private@example.com' }, { status: 500 })));
+    await expect(api('/api/resource')).rejects.toMatchObject({ status: 500, message: expect.stringContaining('Vui lòng thử lại') });
+    await expect(api('/api/resource')).rejects.not.toThrow('private@example.com');
+  });
 });

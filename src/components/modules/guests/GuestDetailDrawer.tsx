@@ -137,7 +137,7 @@ export const GuestDetailDrawer: React.FC<GuestDetailDrawerProps> = ({
     'div',
     {
       className:
-        'fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm transition-opacity animate-in fade-in',
+        'fixed inset-0 z-50 flex justify-end app-overlay transition-opacity animate-in fade-in',
       role: 'dialog',
       'aria-modal': 'true',
       'aria-labelledby': 'guest-detail-title',

@@ -49,7 +49,7 @@ export const CreateCostModal: React.FC<CreateCostModalProps> = ({
     'div',
     {
       className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm',
+        'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay',
       role: 'dialog',
       'aria-modal': 'true',
       'aria-labelledby': 'create-cost-title',

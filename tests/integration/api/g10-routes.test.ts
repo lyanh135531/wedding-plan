@@ -299,6 +299,13 @@ describe('Gate G10 API Integration Routes Suite', () => {
       expect(postRes.status).toBe(201);
       const giftId = (await postRes.json()).data.id;
 
+      // Omitting giftType means all types, rather than filtering by null.
+      const listRes = await giftsRoute.GET(new NextRequest(`http://localhost:3000/api/v1/gifts?eventId=${eventId}`));
+      expect(listRes.status).toBe(200);
+      expect((await listRes.json()).data.map((gift: { id: string }) => gift.id)).toContain(giftId);
+      const invalidFilter = await giftsRoute.GET(new NextRequest(`http://localhost:3000/api/v1/gifts?eventId=${eventId}&giftType=invalid`));
+      expect(invalidFilter.status).toBe(400);
+
       // Record partial return
       const returnReq = new NextRequest(`http://localhost:3000/api/v1/gifts/${giftId}/returns`, {
         method: 'POST',

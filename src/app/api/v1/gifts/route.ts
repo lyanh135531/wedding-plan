@@ -28,7 +28,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const giftType = searchParams.get('giftType') as any;
+    const giftTypeParam = searchParams.get('giftType');
+    if (giftTypeParam && giftTypeParam !== 'cash' && giftTypeParam !== 'physical') {
+      return NextResponse.json({ message: 'Loại quà mừng không hợp lệ.' }, { status: 400 });
+    }
+    const giftType = giftTypeParam === 'cash' || giftTypeParam === 'physical' ? giftTypeParam : undefined;
     const isThankedParam = searchParams.get('isThanked');
     const isThanked = isThankedParam !== null ? isThankedParam === 'true' : undefined;
     const isSenderIdentifiedParam = searchParams.get('isSenderIdentified');

@@ -3,6 +3,7 @@ import { useMutationFetch } from '@/components/common/useMutationFetch';
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import { ModalDialog } from '@/components/ui/dialog';
 import { useRole } from '@/context/RoleContext';
 import { PermissionDeniedView } from '@/components/layout/PermissionDeniedView';
 import {
@@ -367,7 +368,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
 
   return h(
     'div',
-    { className: 'space-y-6 max-w-7xl mx-auto p-4 sm:p-6' },
+    { className: 'space-y-6 max-w-7xl mx-auto', 'aria-busy': loading },
     // Header
     h(
       'div',
@@ -376,7 +377,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
         'div',
         null,
         h('h1', { className: 'text-2xl font-bold text-text-main tracking-tight' }, 'Sổ Quà Mừng & Đối Soát Tài Chính'),
-        h('p', { className: 'text-sm text-text-muted mt-0.5' }, 'Ghi chép tiền mừng, phong bì chung (AT25), quản lý hoàn trả và đối soát két')
+        h('p', { className: 'text-sm text-text-muted mt-0.5' }, 'Ghi chép tiền mừng, phong bì chung, quản lý hoàn trả và đối soát két')
       ),
       h(
         'div',
@@ -455,7 +456,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
         { key: 'cash', label: 'Quà tiền mặt' },
         { key: 'physical', label: 'Hiện vật' },
         { key: 'unthanked', label: 'Chưa cảm ơn' },
-        { key: 'unidentified', label: 'Chưa rõ người gửi (Queue)' },
+        { key: 'unidentified', label: 'Chưa rõ người gửi' },
       ].map((t) =>
         h(
           'button',
@@ -604,15 +605,14 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     // Modal: Add Gift (with multi-contributor AT25)
     isAddModalOpen &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Ghi Nhận Quà Mừng Mới', onClose: () => setIsAddModalOpen(false) },
         h(
           'form',
           {
             onSubmit: handleCreateGift,
-            className: 'bg-surface w-full max-w-lg rounded-card border border-border-control p-6 space-y-4 max-h-[90vh] overflow-y-auto',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Ghi Nhận Quà Mừng Mới'),
           h('label', { className: 'block text-sm space-y-1' }, 'Thời điểm nhận (giờ Việt Nam, để trống = hiện tại)', h('input', { type: 'datetime-local', value: receivedAt, className: 'w-full min-h-11 border rounded p-2', onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReceivedAt(e.target.value) })),
           h(
             'div',
@@ -706,7 +706,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
               h(
                 'div',
                 { className: 'flex items-center justify-between' },
-                h('label', { className: 'font-semibold text-text-main' }, 'Người gửi (Phong bì chung - AT25)'),
+                h('label', { className: 'font-semibold text-text-main' }, 'Người gửi chung phong bì'),
                 h(
                   'button',
                   {
@@ -763,15 +763,14 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     isReturnModalOpen &&
       selectedGift &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Ghi Nhận Trả Lại Tiền Mừng', onClose: () => setIsReturnModalOpen(false), maxWidth: 'sm' },
         h(
           'form',
           {
             onSubmit: handleReturn,
-            className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Ghi Nhận Trả Lại Tiền Mừng'),
           h(
             'p',
             { className: 'text-xs text-text-muted' },
@@ -820,15 +819,14 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     isVoidModalOpen &&
       selectedGift &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Hủy Bỏ Quà Mừng', onClose: () => setIsVoidModalOpen(false), maxWidth: 'sm' },
         h(
           'form',
           {
             onSubmit: handleVoid,
-            className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Hủy Bỏ Quà Mừng'),
           h(
             'p',
             { className: 'text-xs text-text-muted' },
@@ -864,15 +862,14 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     isThankModalOpen &&
       selectedGift &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Ghi Nhận Lời Cảm Ơn', onClose: () => setIsThankModalOpen(false) },
         h(
           'form',
           {
             onSubmit: handleThank,
-            className: 'bg-surface w-full max-w-md rounded-card border border-border-control p-6 space-y-4',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Ghi Nhận Lời Cảm Ơn'),
           h(
             'div',
             { className: 'p-3 bg-gray-50 border border-border-control rounded text-xs space-y-2' },
@@ -924,15 +921,14 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     // Modal: Safe Cash Reconciliation
     isReconcileModalOpen &&
       h(
-        'div',
-        { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm' },
+        ModalDialog,
+        { isOpen: true, title: 'Đối Soát Két Tiền Thực Tế', onClose: () => setIsReconcileModalOpen(false), maxWidth: 'sm' },
         h(
           'form',
           {
             onSubmit: handleReconcile,
-            className: 'bg-surface w-full max-w-sm rounded-card border border-border-control p-6 space-y-4',
+            className: 'space-y-4',
           },
-          h('h3', { className: 'text-base font-bold text-text-main' }, 'Đối Soát Két Tiền Thực Tế'),
           h(
             'div',
             { className: 'space-y-3 text-xs' },
