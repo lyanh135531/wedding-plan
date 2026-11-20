@@ -70,7 +70,7 @@ export const DrawerSheet: React.FC<DrawerSheetProps> = ({
     {
       role: 'presentation',
       className:
-        'fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm animate-in fade-in duration-150',
+        'app-overlay fixed inset-0 z-50 flex justify-end animate-in fade-in duration-150',
       onClick: onClose,
     },
     h(

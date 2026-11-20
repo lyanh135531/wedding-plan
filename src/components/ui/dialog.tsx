@@ -105,7 +105,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
     {
       role: 'presentation',
       className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#15362D]/45 backdrop-blur-sm animate-in fade-in duration-150',
+        'app-overlay fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150',
       onClick: onClose,
     },
     h(
@@ -154,7 +154,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
           )
       ),
       // Content
-      h('div', { className: 'min-h-0 p-6 overflow-y-auto overscroll-contain' }, children)
+      h('div', { className: 'dialog-scroll min-h-0 p-6 overflow-y-auto overscroll-contain' }, children)
     )
   );
 };

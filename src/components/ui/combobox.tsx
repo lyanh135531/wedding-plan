@@ -57,6 +57,7 @@ export const Combobox: React.FC<ComboboxProps> = ({
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
 
   const selectedOption = React.useMemo(
     () => options.find((opt) => opt.value === value) || null,
@@ -95,15 +96,23 @@ export const Combobox: React.FC<ComboboxProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       setActiveIndex(-1);
-      setTimeout(() => searchInputRef.current?.focus(), 50);
+      const timer = setTimeout(() => searchInputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     } else {
       setQuery('');
     }
   }, [isOpen]);
 
+  React.useEffect(() => {
+    if (isOpen && activeIndex >= 0) {
+      document.getElementById(`${listboxId}-option-${activeIndex}`)?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [activeIndex, isOpen, listboxId]);
+
   const handleSelect = (val: string) => {
     onChange(val);
     setIsOpen(false);
+    triggerRef.current?.focus();
   };
 
   const handleClear = (e: React.MouseEvent) => {
@@ -124,10 +133,23 @@ export const Combobox: React.FC<ComboboxProps> = ({
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActiveIndex((prev) => (prev + 1 < totalItems ? prev + 1 : 0));
+      setActiveIndex((prev) => {
+        for (let offset = 1; offset <= totalItems; offset++) {
+          const next = (prev + offset + totalItems) % totalItems;
+          if (!filteredOptions[next]?.disabled) return next;
+        }
+        return -1;
+      });
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActiveIndex((prev) => (prev > 0 ? prev - 1 : totalItems - 1));
+      setActiveIndex((prev) => {
+        const start = prev < 0 ? 0 : prev;
+        for (let offset = 1; offset <= totalItems; offset++) {
+          const next = (start - offset + totalItems) % totalItems;
+          if (!filteredOptions[next]?.disabled) return next;
+        }
+        return -1;
+      });
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (activeIndex >= 0 && activeIndex < filteredOptions.length) {
@@ -139,7 +161,12 @@ export const Combobox: React.FC<ComboboxProps> = ({
       }
     } else if (e.key === 'Escape') {
       e.preventDefault();
+      e.stopPropagation();
       setIsOpen(false);
+      triggerRef.current?.focus();
+    } else if (e.key === 'Tab') {
+      setIsOpen(false);
+      triggerRef.current?.focus();
     }
   };
 
@@ -157,20 +184,25 @@ export const Combobox: React.FC<ComboboxProps> = ({
       h('span', null, label),
       required && h('span', { className: 'text-danger font-bold', 'aria-hidden': 'true' }, '*')
     ),
-    h(
+    h('div', { className: 'relative' }, h(
       'button',
       {
+        ref: triggerRef,
         id: inputId,
         type: 'button',
         role: 'combobox',
         'aria-expanded': isOpen,
         'aria-controls': listboxId,
         'aria-haspopup': 'listbox',
+        'aria-invalid': !!error,
+        'aria-required': required,
+        'aria-describedby': describedBy,
         disabled,
         onClick: () => !disabled && setIsOpen(!isOpen),
         onKeyDown: handleKeyDown,
         className: cn(
-          'w-full min-h-[44px] h-11 px-3 text-base text-left bg-surface border rounded-control transition-colors duration-150',
+          'w-full min-h-[44px] h-11 pl-3.5 pr-10 text-base md:text-sm text-left bg-surface border rounded-control transition-colors duration-150',
+          selectedOption && !disabled && 'pr-20',
           'flex items-center justify-between gap-2',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
           'disabled:bg-black/5 disabled:border-border-subtle disabled:cursor-not-allowed',
@@ -191,44 +223,36 @@ export const Combobox: React.FC<ComboboxProps> = ({
       ),
       h(
         'div',
-        { className: 'flex items-center gap-1 text-text-muted shrink-0' },
-        selectedOption &&
-          !disabled &&
-          h(
-            'span',
-            {
-              role: 'button',
-              tabIndex: 0,
-              'aria-label': 'Xóa lựa chọn',
-              onClick: handleClear,
-              onKeyDown: (e: React.KeyboardEvent) => e.key === 'Enter' && handleClear(e as any),
-              className:
-                'p-1 hover:text-danger rounded-full focus-visible:outline-2 focus-visible:outline-focus',
-            },
-            h(X, { className: 'w-4 h-4' })
-          ),
+        { className: 'absolute right-3.5 text-text-muted pointer-events-none' },
         h(ChevronDown, {
           className: cn('w-4 h-4 transition-transform duration-150', isOpen && 'rotate-180'),
         })
       )
-    ),
+    ), selectedOption && !disabled && h('button', {
+      type: 'button',
+      'aria-label': 'Xóa lựa chọn',
+      onClick: (event: React.MouseEvent) => { handleClear(event); triggerRef.current?.focus(); },
+      className: 'absolute right-9 top-1 bottom-1 w-9 flex items-center justify-center text-text-muted hover:text-primary hover:bg-page rounded-lg transition-colors',
+    }, h(X, { className: 'w-3.5 h-3.5', 'aria-hidden': true }))),
     isOpen &&
       h(
         'div',
         {
-          id: listboxId,
-          role: 'listbox',
-          'aria-label': label,
           className:
-            'absolute z-50 left-0 right-0 top-full mt-1 bg-surface border border-border-control rounded-control shadow-overlay overflow-hidden flex flex-col max-h-72',
+            'combobox-popover absolute z-50 left-0 right-0 top-full mt-2 bg-surface border border-border-control rounded-control shadow-overlay overflow-hidden flex flex-col max-h-80',
         },
         h(
           'div',
-          { className: 'p-2 border-b border-border-subtle flex items-center gap-2 bg-page' },
+          { className: 'combobox-search-row px-3 py-2 border-b border-border-subtle flex items-center gap-2 bg-page/60' },
           h(Search, { className: 'w-4 h-4 text-text-muted shrink-0' }),
           h('input', {
             ref: searchInputRef,
             type: 'text',
+            role: 'combobox',
+            'aria-label': `Tìm ${label.toLowerCase()}`,
+            'aria-expanded': true,
+            'aria-controls': listboxId,
+            'aria-activedescendant': activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined,
             value: query,
             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
               setQuery(e.target.value);
@@ -237,12 +261,12 @@ export const Combobox: React.FC<ComboboxProps> = ({
             onKeyDown: handleKeyDown,
             placeholder: 'Gõ để tìm kiếm...',
             className:
-              'w-full bg-transparent text-sm text-text-main placeholder:text-text-muted focus:outline-none',
+              'combobox-search w-full bg-transparent text-sm text-text-main placeholder:text-text-muted focus:outline-none',
           })
         ),
         h(
           'div',
-          { className: 'overflow-y-auto py-1' },
+          { id: listboxId, role: 'listbox', 'aria-label': label, className: 'min-h-0 overflow-y-auto py-1.5' },
           filteredOptions.length === 0 && !showCreateOption
             ? h(
                 'div',
@@ -257,8 +281,11 @@ export const Combobox: React.FC<ComboboxProps> = ({
                   'div',
                   {
                     key: opt.value,
+                    id: `${listboxId}-option-${index}`,
                     role: 'option',
                     'aria-selected': isSelected,
+                    'aria-disabled': !!opt.disabled,
+                    onMouseEnter: () => !opt.disabled && setActiveIndex(index),
                     onClick: () => !opt.disabled && handleSelect(opt.value),
                     className: cn(
                       'min-h-[44px] px-3 py-2 flex items-center justify-between gap-2 cursor-pointer text-sm select-none transition-colors',
@@ -295,6 +322,7 @@ export const Combobox: React.FC<ComboboxProps> = ({
               'div',
               {
                 role: 'option',
+                id: `${listboxId}-option-${filteredOptions.length}`,
                 'aria-selected': activeIndex === filteredOptions.length,
                 onClick: () => {
                   onCreateNew(query.trim());

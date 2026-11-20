@@ -84,7 +84,7 @@ export const QuantityInput: React.FC<QuantityInputProps> = ({
     ),
     h(
       'div',
-      { className: 'flex items-center gap-1' },
+      { className: 'quantity-stepper flex items-center gap-1' },
       h(
         'button',
         {

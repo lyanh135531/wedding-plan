@@ -98,6 +98,7 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
         defaultValue,
         onChange: handleChange,
         disabled,
+        required,
         'aria-invalid': !!error || isOverLimit,
         'aria-describedby': describedBy,
         'aria-required': required,

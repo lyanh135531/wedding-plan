@@ -5,6 +5,7 @@ import { RoleProvider } from '@/context/RoleContext';
 import { EventScopeProvider } from '@/context/EventScopeContext';
 import { withTransactionScopedContext } from '@/db/client';
 import { events } from '@/db/schema/events';
+import { DashboardNavigation } from '@/components/layout/DashboardNavigation';
 
 export default async function DashboardLayout({
   children,
@@ -21,5 +22,5 @@ export default async function DashboardLayout({
     initialAllowedEventIds: session.role === 'owner' ? null : session.allowedEventIds,
   }, React.createElement(EventScopeProvider, {
     initialEvents: eventList.map((event) => ({ id: event.id, name: event.title, isCancelled: event.status === 'cancelled' })),
-  }, children));
+  }, React.createElement(DashboardNavigation, null, children)));
 }

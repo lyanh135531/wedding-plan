@@ -85,7 +85,7 @@ export const Switch: React.FC<SwitchProps> = ({
           },
           onKeyDown: handleKeyDown,
           className: cn(
-            'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out',
+            'switch-control relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
             'disabled:cursor-not-allowed',
             checked ? 'bg-primary' : 'bg-border-control'

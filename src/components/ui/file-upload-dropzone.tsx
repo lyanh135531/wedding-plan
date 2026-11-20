@@ -80,6 +80,16 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({
     h(
       'div',
       {
+        role: 'button',
+        tabIndex: disabled ? -1 : 0,
+        'aria-label': 'Chọn hoặc kéo thả tệp để tải lên',
+        'aria-disabled': disabled,
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        },
         onDragOver: (e: React.DragEvent) => {
           e.preventDefault();
           if (!disabled) setIsDragOver(true);
@@ -88,7 +98,7 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({
         onDrop: handleDrop,
         onClick: () => !disabled && fileInputRef.current?.click(),
         className: cn(
-          'w-full p-8 border-2 border-dashed rounded-card flex flex-col items-center justify-center text-center cursor-pointer transition-colors',
+          'file-dropzone w-full p-8 border-2 border-dashed rounded-card flex flex-col items-center justify-center text-center cursor-pointer transition-colors',
           isDragOver
             ? 'border-primary bg-primary/5'
             : 'border-border-control/60 hover:border-text-main/60 bg-page',
@@ -98,6 +108,8 @@ export const FileUploadDropzone: React.FC<FileUploadDropzoneProps> = ({
       h('input', {
         ref: fileInputRef,
         type: 'file',
+        tabIndex: -1,
+        'aria-hidden': true,
         accept,
         multiple: true,
         disabled,

@@ -6,6 +6,7 @@ export * from './currency-input';
 export * from './quantity-input';
 export * from './date-picker';
 export * from './combobox';
+export * from './multi-select';
 export * from './checkbox';
 export * from './radio-group';
 export * from './switch';

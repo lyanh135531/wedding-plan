@@ -57,6 +57,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         value: searchQuery,
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value),
         placeholder: searchPlaceholder,
+        'aria-label': searchPlaceholder,
         className:
           'w-full h-11 pl-10 pr-9 text-base md:text-sm bg-page border border-border-control rounded-control focus-visible:outline-2 focus-visible:outline-focus placeholder:text-text-muted/60',
       }),

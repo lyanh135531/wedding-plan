@@ -5,6 +5,7 @@ import Link from 'next/link.js';
 import { usePathname } from 'next/navigation.js';
 import { X } from 'lucide-react';
 import { DesktopSidebar } from './DesktopSidebar';
+import { useDashboardNavigation } from './DashboardNavigation';
 import { MobileBottomNav } from './MobileBottomNav';
 import { Header } from './Header';
 import { DirtyFormGuardModal } from './DirtyFormGuardModal';
@@ -38,6 +39,7 @@ export const PageShell: React.FC<PageShellProps> = ({
   children,
 }) => {
   const pathname = usePathname() || '';
+  const hasDashboardNavigation = useDashboardNavigation();
   const { canAccessRoute, isFamily } = useRole();
   const {
     showDirtyGuardModal,
@@ -80,7 +82,7 @@ export const PageShell: React.FC<PageShellProps> = ({
     ),
 
     // Desktop Sidebar (≥ 1024px)
-    h(DesktopSidebar, null),
+    !hasDashboardNavigation && h(DesktopSidebar, null),
 
     // Header (64px fixed)
     h(Header, {
@@ -101,7 +103,7 @@ export const PageShell: React.FC<PageShellProps> = ({
             'aria-modal': 'true',
           },
           h('div', {
-            className: 'fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity',
+            className: 'app-overlay fixed inset-0 transition-opacity',
             onClick: () => setMobileDrawerOpen(false),
             'aria-hidden': 'true',
           }),

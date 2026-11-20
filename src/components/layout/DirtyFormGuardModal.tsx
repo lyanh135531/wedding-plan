@@ -48,7 +48,7 @@ export const DirtyFormGuardModal: React.FC<DirtyFormGuardModalProps> = ({
     },
     // Backdrop
     h('div', {
-      className: 'fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity',
+      className: 'app-overlay fixed inset-0 transition-opacity',
       onClick: onCancel,
       'aria-hidden': 'true',
     }),

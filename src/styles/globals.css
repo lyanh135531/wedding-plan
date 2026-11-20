@@ -30,6 +30,12 @@
     --header-height: 64px;
     --bottom-nav-height: 64px;
     --touch-target-min: 44px;
+    --scrollbar-thumb: #A2AFA4;
+    --scrollbar-thumb-hover: #708576;
+    --field-border: #CAD2C7;
+    --field-hover: #94A693;
+    --field-radius: 12px;
+    --field-shadow: 0 1px 2px rgb(24 48 34 / .035), inset 0 1px 0 rgb(255 255 255 / .7);
   }
 
   /* Self-hosted font declarations (Zero runtime CDN calls) */
@@ -78,6 +84,7 @@
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     scroll-padding-top: 84px;
+    scrollbar-gutter: stable;
   }
 
   h1 {
@@ -113,6 +120,29 @@
 
   input::file-selector-button { font-family: inherit; cursor: pointer; }
 
+  /* Quiet, rounded scrollbars for pages, dialogs and native list controls. */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    min-height: 36px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover); }
+  ::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+  ::-webkit-scrollbar-corner { background: transparent; }
+
+  @supports not selector(::-webkit-scrollbar) {
+    * { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) transparent; }
+  }
+
+  @media (forced-colors: active) {
+    * { scrollbar-color: auto; }
+    ::-webkit-scrollbar-thumb { background-color: ButtonText; }
+  }
+
   ::selection {
     color: #173C33;
     background: #E5D9BA;
@@ -143,7 +173,185 @@
 }
 
 @layer components {
-  .app-sidebar { background: #173C33; color: #F6F3E9; scrollbar-width: thin; scrollbar-color: #527064 transparent; }
+  /* Shared treatment also covers native controls in feature-specific forms.
+     Keep sizing/padding utilities intact for icons, units and compact toolbars. */
+  :root :is(input, textarea, select, button[role='combobox']):not(:where(
+    [type='checkbox'], [type='radio'], [type='range'], [type='color'],
+    [type='hidden'], [type='file'], [type='submit'], [type='reset'], [type='button'],
+    .sr-only, .combobox-search
+  )),
+  :root button[role='combobox'] {
+    min-height: 44px;
+    min-width: 0;
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
+    background-color: #FFFEFB;
+    color: var(--color-text-main);
+    box-shadow: var(--field-shadow);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+  :root :is(input, textarea)::placeholder { color: #8A958C; opacity: 1; font-weight: 400; }
+  :root :is(input, textarea, select, button[role='combobox']):not(:where(
+    [type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='hidden'], [type='file'], .sr-only, .combobox-search
+  )):hover:not(:disabled):not([readonly]):not(:focus-visible):not([aria-invalid='true']) { border-color: var(--field-hover); }
+  :root :is(input, textarea, select, button[role='combobox']):not(:where(
+    [type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='hidden'], [type='file'], .sr-only, .combobox-search
+  )):focus-visible,
+  :root button[role='combobox'][aria-expanded='true'] {
+    border-color: #53775F;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgb(70 107 77 / .12), var(--field-shadow);
+    background-color: #FFFFFF;
+  }
+  :root :is(input, textarea, select, button[role='combobox']):disabled:not(:where(.sr-only, [type='checkbox'], [type='radio'], [type='range'], [type='hidden'])) {
+    background-color: #EEEFE8;
+    border-color: #DDE1D7;
+    color: #798477;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: .75;
+  }
+  :root :is(input, textarea)[readonly] { background-color: #F3F4ED; color: #667365; }
+  :root :is(input, textarea, select, button[role='combobox'])[aria-invalid='true'] {
+    border-color: #C96D5D;
+    background-color: #FFFAF7;
+  }
+  :root :is(input, textarea, select, button[role='combobox'])[aria-invalid='true']:focus-visible {
+    box-shadow: 0 0 0 3px rgb(180 35 24 / .10);
+  }
+  :root textarea:not(.sr-only) { min-height: 112px; line-height: 1.75; resize: vertical; }
+  :root select:not([multiple]):not([size]) {
+    appearance: none;
+    padding-inline-end: 2.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23657766' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+    background-position: right 14px center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+  :root select[multiple], :root select[size] { padding: 6px; }
+  :root select option { padding: 10px 12px; color: var(--color-text-main); background-color: #FFFEFB; }
+  :root select[multiple] option { margin-block: 2px; border-radius: 7px; }
+  :root select[multiple] option:checked { background: linear-gradient(#E6EDE2, #E6EDE2); color: #244C40; }
+  @supports (appearance: base-select) {
+    :root select:not([multiple]):not([size]),
+    :root select:not([multiple]):not([size])::picker(select) { appearance: base-select; }
+    :root select:not([multiple]):not([size])::picker-icon { display: none; }
+    :root select:not([multiple]):not([size])::picker(select) {
+      max-height: min(340px, 60dvh);
+      margin-block: 6px;
+      padding: 6px;
+      border: 1px solid #DCE2D6;
+      border-radius: 14px;
+      background: #FFFEFB;
+      box-shadow: 0 16px 48px -12px rgb(23 60 51 / .22), 0 3px 8px rgb(23 60 51 / .04);
+      scrollbar-width: thin;
+    }
+    :root select:not([multiple]):not([size]) option {
+      min-height: 40px;
+      margin-block: 2px;
+      border-radius: 8px;
+      gap: 10px;
+      font-size: 14px;
+    }
+    :root select:not([multiple]):not([size]) option:is(:hover, :focus) { background: #F0F2E9; outline: none; }
+    :root select:not([multiple]):not([size]) option:checked { background: #E9EFE4; color: #244C40; font-weight: 500; }
+    :root select:not([multiple]):not([size]) option::checkmark { color: #52734F; }
+  }
+  :root input:is([type='date'], [type='datetime-local'], [type='time'], [type='month'], [type='week']) { font-variant-numeric: tabular-nums; }
+  input::-webkit-calendar-picker-indicator { opacity: .55; cursor: pointer; padding: 4px; border-radius: 6px; }
+  input::-webkit-calendar-picker-indicator:hover { opacity: .95; background-color: #EDF0E7; }
+  input[type='number']::-webkit-inner-spin-button { opacity: .6; margin-left: 8px; }
+  :root input:is([type='checkbox'], [type='radio']):not(.sr-only) {
+    appearance: none;
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+    vertical-align: middle;
+    border: 1px solid #A8B5A4;
+    border-radius: 6px;
+    background-color: #FFFEFB;
+    cursor: pointer;
+    transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  }
+  :root input[type='radio']:not(.sr-only) { border-radius: 50%; }
+  :root input:is([type='checkbox'], [type='radio']):not(.sr-only):hover:not(:disabled) { border-color: #53775F; }
+  :root input[type='checkbox']:not(.sr-only):checked {
+    border-color: #244C40;
+    background: #244C40 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23fffefb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 10 3.2 3.2L15 6.5'/%3E%3C/svg%3E") center / 17px no-repeat;
+  }
+  :root input[type='checkbox']:not(.sr-only):indeterminate { border-color: #244C40; background: linear-gradient(#FFFEFB, #FFFEFB) center / 9px 2px no-repeat #244C40; }
+  :root input[type='radio']:not(.sr-only):checked { border-color: #244C40; background: radial-gradient(circle, #244C40 0 4px, #FFFEFB 4.5px); }
+  :root input:is([type='checkbox'], [type='radio']):not(.sr-only):focus-visible { outline: 2px solid #967638; outline-offset: 3px; }
+  :root input:is([type='checkbox'], [type='radio']):disabled { cursor: not-allowed; opacity: .45; }
+  .choice-indicator { box-shadow: var(--field-shadow); }
+  .switch-control { box-shadow: inset 0 1px 3px rgb(23 60 51 / .12); }
+  .switch-control > span { box-shadow: 0 1px 3px rgb(23 60 51 / .2); }
+  .quantity-stepper { border: 1px solid var(--field-border); border-radius: var(--field-radius); background: #FFFEFB; box-shadow: var(--field-shadow); padding: 2px; }
+  .quantity-stepper:focus-within { border-color: #53775F; box-shadow: 0 0 0 3px rgb(70 107 77 / .12); }
+  :root .quantity-stepper input { border: 0; box-shadow: none; background: transparent; }
+  .quantity-stepper button { border: 0; background: #F3F4EC; border-radius: 9px; }
+  :root input[type='range'] { accent-color: #52734F; cursor: pointer; }
+  :root input[type='file']:not(:where(.sr-only, .hidden)) {
+    min-height: 48px;
+    padding: 6px;
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
+    background: #FFFEFB;
+    font-size: 13px;
+    color: #6A756D;
+  }
+  :root input[type='file']::file-selector-button {
+    margin-inline-end: 12px;
+    padding: 9px 14px;
+    border: 1px solid #D6DECF;
+    border-radius: 8px;
+    background: #EEF1E7;
+    color: #244C40;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  :root input[type='file']::file-selector-button:hover { background: #E2E9D9; }
+  .file-dropzone { background: linear-gradient(145deg, #FFFEFB, #F2F3E9); border-width: 1px; }
+  .file-dropzone:focus-visible, .file-dropzone:focus-within { outline: 2px solid #967638; outline-offset: 3px; }
+  :root :is([role='listbox'], [role='menu'], .combobox-popover) { border-color: #DCE2D6; border-radius: 14px; background: #FFFEFB; box-shadow: 0 16px 48px -12px rgb(23 60 51 / .22); }
+  .combobox-popover [role='listbox'] { border-radius: 0; box-shadow: none; }
+  .combobox-popover [role='option'], [role='menu'] [role='menuitem'] { margin: 2px 6px; border-radius: 8px; }
+  .combobox-popover [role='option']:not([aria-disabled='true']):hover, [role='menuitem']:hover { background-color: #F0F2E9; }
+  .combobox-popover [role='option'][aria-selected='true'] { background: #E9EFE4; }
+  :root .combobox-search { min-height: 36px; border: 0; border-radius: 6px; background: transparent; box-shadow: none; outline: none; padding: 4px; font-size: 14px; }
+  .combobox-search-row:focus-within { box-shadow: inset 0 -2px 0 #96AA86; }
+  .multi-select-panel { border-color: var(--field-border); box-shadow: var(--field-shadow); }
+  .multi-select-panel:focus-within { border-color: #53775F; }
+  .multi-select-panel:focus-visible { outline: 2px solid #967638; outline-offset: 2px; }
+  .multi-select-panel[aria-invalid='true'] { border-color: #C96D5D; }
+  .multi-select-panel[aria-disabled='true'] { background: #EEEFE8; }
+  .multi-select-field > select.sr-only { appearance: auto; padding: 0; border: 0; }
+  @media (max-width: 767px) {
+    :root :is(input, textarea, select, button[role='combobox']) { font-size: 16px; }
+    :root .combobox-search { font-size: 16px; }
+  }
+  @media (forced-colors: active) {
+    :root input:is([type='checkbox'], [type='radio']):not(.sr-only) { appearance: auto; }
+    :root :is(input, textarea, select, button[role='combobox']):focus-visible { outline: 2px solid Highlight; }
+    :root select:not([multiple]):not([size]) { appearance: auto; background-image: none; }
+  }
+  .app-overlay {
+    /* Parent space-y utilities must not offset a viewport overlay. */
+    margin: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: radial-gradient(ellipse at 50% 35%, rgb(19 32 26 / .24), rgb(10 22 17 / .46));
+    -webkit-backdrop-filter: blur(6px) saturate(.85);
+    backdrop-filter: blur(6px) saturate(.85);
+  }
+  .dialog-scroll { scrollbar-gutter: stable; scroll-padding-block: 24px; }
+  .app-sidebar { background: #173C33; color: #F6F3E9; --scrollbar-thumb: #527064; --scrollbar-thumb-hover: #8AA091; }
   .app-sidebar .nav-group-title { color: #B8C4B8; font-family: 'Be Vietnam Pro', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: .17em; }
   .app-sidebar .nav-link { color: #D3DDD4; border: 1px solid transparent; font-size: 12px; }
   .app-sidebar .nav-link:hover { color: #FFFEFB; background: #244B40; }
@@ -152,7 +360,6 @@
   .app-sidebar .nav-link svg { opacity: .75; }
   .app-sidebar .nav-link--active svg { opacity: 1; }
   .app-header { background: rgb(255 254 251 / .96); box-shadow: 0 1px 0 rgb(30 64 45 / .035); }
-  .workspace-content { animation: content-enter 260ms ease-out; }
   .workspace-content > section > h1, .workspace-content > div > h1 { font-weight: 500; }
   .surface-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 18px; box-shadow: 0 4px 24px -8px rgb(31 58 43 / .09); }
   .eyebrow { font-family: 'Be Vietnam Pro', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: #8C703C; }
@@ -172,7 +379,6 @@
   .mobile-navigation { padding-bottom: env(safe-area-inset-bottom); height: calc(64px + env(safe-area-inset-bottom)); background: rgb(255 254 251 / .98); box-shadow: 0 -5px 24px rgb(23 60 51 / .035); }
   .mobile-navigation [aria-current='page'] { position: relative; }
   .mobile-navigation [aria-current='page']::before { content: ''; position: absolute; top: -3px; width: 24px; height: 2px; border-radius: 2px; background: #967638; }
-  @keyframes content-enter { from { opacity: .6; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   @media (max-width: 767px) {
     .auth-page { padding: 16px; }
     .auth-panel { grid-template-columns: 1fr; min-height: calc(100svh - 32px); border-radius: 20px; }

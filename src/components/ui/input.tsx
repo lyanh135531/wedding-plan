@@ -71,6 +71,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
           ref: inputRef,
           id: inputId,
           disabled,
+          required,
           'aria-invalid': !!error,
           'aria-describedby': describedBy,
           'aria-required': required,

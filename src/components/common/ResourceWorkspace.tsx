@@ -6,6 +6,7 @@ import { useRole } from '@/context/RoleContext';
 import { useEventScope } from '@/context/EventScopeContext';
 import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { removeVietnameseDiacritics } from '@/lib/utils';
 
 export type RecordData = { id: string; version?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
@@ -13,7 +14,7 @@ export type Field = {
   key: string; label: string; type?: 'text' | 'textarea' | 'number' | 'date' | 'datetime-local' | 'checkbox' | 'url' | 'tel' | 'select' | 'tags' | 'multi';
   required?: boolean; min?: number; max?: number; default?: unknown; options?: { value: string; label: string }[]; editOnly?: boolean;
 };
-export const controlClass = 'w-full min-h-11 rounded-control border border-border-control bg-surface px-3 py-2 text-sm';
+export const controlClass = 'w-full min-h-11 rounded-control border border-border-control bg-surface px-3.5 py-2.5 text-sm';
 
 export function EventWorkspace({ children }: { children: (eventId: string) => React.ReactNode }) {
   const { currentScope, availableEvents, setScope } = useEventScope();
@@ -91,16 +92,16 @@ export function RecordEditor({ title, fields, record, save, close, draftScope }:
       {restored && <p role="status">Đã khôi phục bản nháp chưa lưu của tài khoản này. Kiểm tra nội dung trước khi lưu.</p>}
       {needsLogin&&<a className="underline text-primary" href={`/login?returnTo=${encodeURIComponent(typeof window!=='undefined'?window.location.pathname:'/overview')}`}>Đăng nhập lại để tiếp tục. Bản nháp được giữ tối đa 2 giờ.</a>}
       {staleDraft&&<details className="border p-3"><summary>Bản ghi đã có phiên bản mới. Xem bản nháp cũ trước khi quyết định.</summary>{visible.map(f=><p key={f.key}><strong>{f.label}:</strong> {String(staleDraft[f.key]??'')}</p>)}<Button type="button" variant="secondary" onClick={()=>{setValues(Object.fromEntries(visible.map(f=>[f.key,staleDraft[f.key]??values[f.key]])));setStaleDraft(null);setRestored(true);}}>Dùng bản nháp để tiếp tục chỉnh sửa</Button></details>}
-      {visible.map(field => <label className="block space-y-1 text-sm" key={field.key} htmlFor={`${id}-${field.key}`}>
-        <span>{field.label}{field.required ? ' *' : ''}</span>
-        {field.type === 'multi' ? <select multiple id={`${id}-${field.key}`} className={`${controlClass} min-h-32`} required={field.required} disabled={saving} value={values[field.key] as string[]} onChange={e => setValues(v => ({ ...v, [field.key]: Array.from(e.target.selectedOptions, o => o.value) }))}>{field.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select> : field.type === 'select' ? <select id={`${id}-${field.key}`} className={controlClass} required={field.required} disabled={saving} value={String(values[field.key] ?? '')} onChange={e => setValues(v => ({ ...v, [field.key]: e.target.value }))}>
+      {visible.map(field => <div className="block space-y-2 text-sm" key={field.key}>
+        <label className="font-medium" htmlFor={`${id}-${field.key}`}>{field.label}{field.required ? ' *' : ''}</label>
+        {field.type === 'multi' ? <MultiSelect id={`${id}-${field.key}`} label={field.label} options={field.options || []} required={field.required} disabled={saving} value={values[field.key] as string[]} onChange={selected => setValues(v => ({ ...v, [field.key]: selected }))} /> : field.type === 'select' ? <select id={`${id}-${field.key}`} className={controlClass} required={field.required} disabled={saving} value={String(values[field.key] ?? '')} onChange={e => setValues(v => ({ ...v, [field.key]: e.target.value }))}>
           <option value="">Chọn {field.label.toLowerCase()}</option>{field.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select> : field.type === 'textarea' ? <textarea id={`${id}-${field.key}`} className={controlClass} rows={3} disabled={saving} required={field.required} value={String(values[field.key] ?? '')} onChange={e => setValues(v => ({ ...v, [field.key]: e.target.value }))} /> :
           <input id={`${id}-${field.key}`} className={field.type === 'checkbox' ? 'block h-6 w-6' : controlClass} type={field.type === 'tags' ? 'text' : field.type || 'text'} required={field.required} disabled={saving}
             min={field.min} max={field.max} maxLength={5000} step={field.type === 'number' ? 1 : undefined}
             {...(field.type === 'checkbox' ? { checked: Boolean(values[field.key]), onChange: (e: React.ChangeEvent<HTMLInputElement>) => setValues(v => ({ ...v, [field.key]: e.target.checked })) } : { value: String(values[field.key] ?? ''), onChange: (e: React.ChangeEvent<HTMLInputElement>) => setValues(v => ({ ...v, [field.key]: e.target.value })) })} />}
         {field.type === 'tags' && <span className="text-xs text-text-muted">Phân cách bằng dấu phẩy.</span>}
-      </label>)}
+      </div>)}
       <div className="flex justify-end gap-3"><Button type="button" variant="secondary" disabled={saving} onClick={dismiss}>Đóng</Button><Button type="submit" loading={saving}>Lưu</Button></div>
     </form>
   </ModalDialog>;

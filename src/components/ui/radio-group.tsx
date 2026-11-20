@@ -105,7 +105,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
               'div',
               {
                 className: cn(
-                  'w-5 h-5 rounded-full border transition-colors flex items-center justify-center',
+                  'choice-indicator w-5 h-5 rounded-full border transition-colors flex items-center justify-center',
                   'group-focus-within:outline group-focus-within:outline-2 group-focus-within:outline-offset-2 group-focus-within:outline-focus',
                   error
                     ? 'border-danger'

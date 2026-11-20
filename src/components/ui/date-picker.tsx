@@ -162,6 +162,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               max: maxDate,
               onChange: handleDateChange,
               disabled: disabled || isUnset,
+              required: required && !isUnset,
               'aria-invalid': !!error,
               'aria-describedby': describedBy,
               className: cn(
