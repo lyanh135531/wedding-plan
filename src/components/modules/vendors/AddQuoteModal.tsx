@@ -116,10 +116,35 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
       title: 'Thêm Báo Giá Ban Đầu (v1)',
       description: `Tạo báo giá hoặc gói dịch vụ mới cho ${vendorName}`,
       maxWidth: 'lg',
+      footer: React.createElement(
+        'div',
+        { className: 'flex items-center justify-end gap-3 w-full' },
+        React.createElement(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            disabled: loading,
+          },
+          'Hủy'
+        ),
+        React.createElement(
+          Button,
+          {
+            type: 'submit',
+            form: 'add-quote-form',
+            variant: 'primary',
+            loading,
+            loadingText: 'Đang tạo báo giá...',
+          },
+          'Tạo báo giá v1'
+        )
+      ),
     },
     React.createElement(
       'form',
-      { onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
+      { id: 'add-quote-form', onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
       errorMsg &&
         React.createElement(
           'div',
@@ -272,34 +297,8 @@ export const AddQuoteModal: React.FC<AddQuoteModalProps> = ({
             rows: 2,
             placeholder: 'Thời hạn hủy không phạt cọc trước 30 ngày...',
             className:
-              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus resize-none',
           })
-        )
-      ),
-
-      // Actions
-      React.createElement(
-        'div',
-        { className: 'pt-4 flex items-center justify-end gap-3 border-t border-border-subtle' },
-        React.createElement(
-          Button,
-          {
-            type: 'button',
-            variant: 'secondary',
-            onClick: onClose,
-            disabled: loading,
-          },
-          'Hủy'
-        ),
-        React.createElement(
-          Button,
-          {
-            type: 'submit',
-            variant: 'primary',
-            loading,
-            loadingText: 'Đang tạo báo giá...',
-          },
-          'Tạo báo giá v1'
         )
       )
     )

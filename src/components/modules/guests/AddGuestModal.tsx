@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { ModalDialog } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -84,13 +85,32 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
       isOpen,
       onClose,
       title: 'Thêm Khách Mời Đơn Lẻ',
+      footer: h(
+        'div',
+        { className: 'flex items-center justify-end gap-3 w-full' },
+        h(
+          Button,
+          { type: 'button', variant: 'secondary', onClick: onClose },
+          'Hủy bỏ'
+        ),
+        h(
+          Button,
+          {
+            type: 'submit',
+            form: 'add-guest-form',
+            disabled: saving,
+            variant: 'primary',
+          },
+          'Thêm khách mời'
+        )
+      ),
     },
     h(
       'div',
       {
-        className: 'space-y-5',
+        className: 'space-y-3.5',
       },
-      saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
+      saveError && h('p', { role: 'alert', className: 'text-danger text-sm' }, saveError),
 
       // Error message
       error &&
@@ -103,7 +123,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
       // Form
       h(
         'form',
-        { onSubmit: handleSubmit, className: 'space-y-4' },
+        { id: 'add-guest-form', onSubmit: handleSubmit, className: 'space-y-3.5' },
         // Display Name
         h(TextInput, {
           label: 'Họ và tên khách mời',
@@ -119,42 +139,30 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
         // Side & Age Tier
         h(
           'div',
-          { className: 'grid grid-cols-1 sm:grid-cols-2 gap-3' },
-          h(
-            'div',
-            { className: 'space-y-1.5' },
-            h('label', { className: 'block text-sm font-medium text-text-main' }, 'Bên mời'),
-            h(
-              'select',
-              {
-                'aria-label': 'Bên mời',
-                className: 'w-full h-10 px-3 rounded-control border border-border-subtle bg-surface-card text-text-main text-sm focus:outline-none focus:border-primary',
-                value: side,
-                onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setSide(e.target.value as any),
-              },
-              h('option', { value: 'groom' }, 'Nhà trai'),
-              h('option', { value: 'bride' }, 'Nhà gái'),
-              h('option', { value: 'mutual' }, 'Bạn chung'),
-              h('option', { value: 'unassigned' }, 'Chưa phân chia')
-            )
-          ),
-          h(
-            'div',
-            { className: 'space-y-1.5' },
-            h('label', { className: 'block text-sm font-medium text-text-main' }, 'Độ tuổi'),
-            h(
-              'select',
-              {
-                'aria-label': 'Độ tuổi',
-                className: 'w-full h-10 px-3 rounded-control border border-border-subtle bg-surface-card text-text-main text-sm focus:outline-none focus:border-primary',
-                value: ageTier,
-                onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setAgeTier(e.target.value as any),
-              },
-              h('option', { value: 'adult' }, 'Người lớn (Mặc định cần ghế/suất)'),
-              h('option', { value: 'child' }, 'Trẻ em (Suất trẻ em)'),
-              h('option', { value: 'baby' }, 'Em bé (Không ghế/suất)')
-            )
-          )
+          { className: 'grid grid-cols-1 sm:grid-cols-2 gap-3.5' },
+          h(Select, {
+            label: 'Bên mời',
+            'aria-label': 'Bên mời',
+            value: side,
+            onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setSide(e.target.value as any),
+            options: [
+              { value: 'groom', label: 'Nhà trai' },
+              { value: 'bride', label: 'Nhà gái' },
+              { value: 'mutual', label: 'Bạn chung' },
+              { value: 'unassigned', label: 'Chưa phân chia' },
+            ],
+          }),
+          h(Select, {
+            label: 'Độ tuổi',
+            'aria-label': 'Độ tuổi',
+            value: ageTier,
+            onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setAgeTier(e.target.value as any),
+            options: [
+              { value: 'adult', label: 'Người lớn (Cần ghế)' },
+              { value: 'child', label: 'Trẻ em (Suất trẻ em)' },
+              { value: 'baby', label: 'Em bé (Không cần ghế)' },
+            ],
+          })
         ),
 
         // Phone & Email
@@ -195,7 +203,7 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
         // Placeholder toggle (Chưa rõ tên - PLAN §8.2)
         h(
           'div',
-          { className: 'p-3 bg-surface-hover rounded-control border border-border-subtle space-y-2' },
+          { className: 'py-1 space-y-2' },
           h(Checkbox, {
             id: 'is-placeholder-checkbox',
             checked: isPlaceholder,
@@ -219,28 +227,11 @@ export const AddGuestModal: React.FC<AddGuestModalProps> = ({
           h('textarea', {
             'aria-label': 'Ghi chú riêng tư',
             rows: 2,
-            className: 'w-full px-3 py-2 rounded-control border border-border-subtle bg-surface-card text-text-main text-sm focus:outline-none focus:border-primary',
+            className: 'w-full px-3 py-2 rounded-control border border-border-subtle bg-surface-card text-text-main text-sm focus:outline-none focus:border-primary resize-none',
             placeholder: 'Lưu ý về sở thích, chỗ ngồi VIP, thói quen ăn uống...',
             value: privateNotes,
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setPrivateNotes(e.target.value),
           })
-        ),
-
-        // Actions
-        h(
-          'div',
-          { className: 'flex items-center justify-end gap-3 pt-3 border-t border-border-subtle' },
-          h(
-            Button,
-            { type: 'button', variant: 'secondary', onClick: onClose },
-            'Hủy bỏ'
-          ),
-          h(
-            Button,
-            { type: 'submit',
-            disabled: saving, variant: 'primary' },
-            'Thêm khách mời'
-          )
         )
       )
     )

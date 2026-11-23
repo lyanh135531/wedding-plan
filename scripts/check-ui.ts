@@ -18,6 +18,7 @@ try {
   const { rows } = await pool.query("SELECT s.token FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.expires_at>now() AND u.role='owner' ORDER BY s.created_at DESC LIMIT 1");
   assert.ok(rows.length, 'Sign in with an owner account before running UI checks.');
   token = rows[0].token;
+  console.log('Using owner session token:', token);
 } finally { await pool.end(); }
 const signature = crypto.createHmac('sha256', process.env.BETTER_AUTH_SECRET || 'wedding_platform_auth_secret_minimum_32_chars_default').update(token).digest('base64');
 const routes = ['/overview', '/guests', '/budget', '/payments', '/tasks', '/calendar', '/seating', '/vendors', '/settings', '/documents', '/fund', '/history', '/invitations', '/gifts', '/handovers', '/menus', '/preparation', '/support', '/ideas', '/logistics', '/timeline', '/data/export', '/data/import', '/after-wedding'];
@@ -44,7 +45,10 @@ for (const [name, engine, width, height] of [
     });
     assert.ok(fonts.every((font) => font.loaded), `${name}: a declared font failed to load`);
     await page.screenshot({ path: path.join(out, `${name}-login.png`), fullPage: true });
-    await context.addCookies([{ name: 'session_token', value: encodeURIComponent(`${token}.${signature}`), url: baseURL, httpOnly: true }]);
+    await context.addCookies([
+      { name: 'session_token', value: encodeURIComponent(`${token}.${signature}`), url: baseURL, httpOnly: true },
+      { name: 'better-auth.session_token', value: encodeURIComponent(`${token}.${signature}`), url: baseURL, httpOnly: true },
+    ]);
     for (const route of routes) {
       const response = await page.goto(baseURL + route, { waitUntil: 'domcontentloaded' });
       assert.ok(response?.ok(), `${name} ${route}: HTTP ${response?.status()}`);

@@ -133,10 +133,35 @@ export const ReviseQuoteModal: React.FC<ReviseQuoteModalProps> = ({
       title: `Tạo Phiên Bản Mới (v${nextVersion})`,
       description: `Điều chỉnh báo giá kế thừa từ bản v${baseQuote.version_number}. Bản ghi cũ sẽ được bảo toàn nguyên vẹn trong lịch sử (AT24).`,
       maxWidth: 'lg',
+      footer: React.createElement(
+        'div',
+        { className: 'flex items-center justify-end gap-3 w-full' },
+        React.createElement(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            disabled: loading,
+          },
+          'Hủy'
+        ),
+        React.createElement(
+          Button,
+          {
+            type: 'submit',
+            form: 'revise-quote-form',
+            variant: 'primary',
+            loading,
+            loadingText: 'Đang lưu bản v mới...',
+          },
+          `Lưu phiên bản v${nextVersion}`
+        )
+      ),
     },
     React.createElement(
       'form',
-      { onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
+      { id: 'revise-quote-form', onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
       errorMsg &&
         React.createElement(
           'div',
@@ -297,35 +322,10 @@ export const ReviseQuoteModal: React.FC<ReviseQuoteModalProps> = ({
             value: terms,
             onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setTerms(e.target.value),
             rows: 2,
+            placeholder: 'Thời hạn hủy không phạt cọc trước 30 ngày...',
             className:
-              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus',
+              'w-full p-2 bg-page border border-border-control rounded-control text-sm focus:outline-2 focus:outline-focus resize-none',
           })
-        )
-      ),
-
-      // Actions
-      React.createElement(
-        'div',
-        { className: 'pt-4 flex items-center justify-end gap-3 border-t border-border-subtle' },
-        React.createElement(
-          Button,
-          {
-            type: 'button',
-            variant: 'secondary',
-            onClick: onClose,
-            disabled: loading,
-          },
-          'Hủy'
-        ),
-        React.createElement(
-          Button,
-          {
-            type: 'submit',
-            variant: 'primary',
-            loading,
-            loadingText: 'Đang lưu bản v mới...',
-          },
-          `Lưu phiên bản v${nextVersion}`
         )
       )
     )

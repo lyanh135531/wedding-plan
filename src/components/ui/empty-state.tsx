@@ -28,14 +28,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   const defaultIcon =
     type === 'no_filter_match'
-      ? h(SearchX, { className: 'w-10 h-10 text-text-muted/60' })
-      : h(FolderPlus, { className: 'w-10 h-10 text-primary/70' });
+      ? h(SearchX, { className: 'w-7 h-7 text-text-muted/70', strokeWidth: 1.5 })
+      : h(FolderPlus, { className: 'w-7 h-7 text-[#BFA16E]', strokeWidth: 1.5 });
 
   return h(
     'div',
     {
       className: cn(
-        'w-full py-12 px-6 flex flex-col items-center justify-center text-center rounded-card bg-surface border border-dashed border-border-control/60 shadow-sm',
+        'w-full py-12 px-6 flex flex-col items-center justify-center text-center rounded-card bg-gradient-to-b from-surface via-surface to-page/40 border border-dashed border-[#DCD9CE] shadow-card',
         className
       ),
     },
@@ -43,11 +43,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       'div',
       {
         className:
-          'w-16 h-16 rounded-full bg-page border border-border-subtle flex items-center justify-center mb-4',
+          'w-16 h-16 rounded-2xl bg-amber-50/70 border border-amber-200/50 flex items-center justify-center mb-4 shadow-xs',
       },
       icon || defaultIcon
     ),
-    h('h3', { className: 'text-lg font-semibold text-text-main mb-1.5' }, title),
+    h('h3', { className: 'text-lg font-serif font-medium text-primary-luxury mb-1.5 tracking-tight' }, title),
     h(
       'p',
       { className: 'text-sm text-text-muted max-w-md leading-relaxed mb-6' },

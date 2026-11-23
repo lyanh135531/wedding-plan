@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useSaveAction } from '@/components/common/useSaveAction';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Trash2 } from 'lucide-react';
 import { ModalDialog } from '@/components/ui/dialog';
@@ -95,41 +96,61 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
 
   return h(
     ModalDialog,
-    { isOpen, onClose, title: 'Thêm gia đình / Nhóm nhận thiệp', maxWidth: 'lg' },
+    {
+      isOpen,
+      onClose,
+      title: 'Thêm gia đình / Nhóm nhận thiệp',
+      maxWidth: 'lg',
+      footer: h(
+        'div',
+        { className: 'flex items-center justify-end gap-3 w-full' },
+        h(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+          },
+          'Hủy bỏ'
+        ),
+        h(
+          Button,
+          {
+            type: 'submit',
+            form: 'add-family-form',
+            disabled: saving,
+            variant: 'primary',
+          },
+          `Lưu gia đình (${members.length} khách)`
+        )
+      ),
+    },
     saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
-      // Form
-      h(
-        'form',
-        { onSubmit: handleSubmit, className: 'space-y-4' },
-        // Household Name
-        h(TextInput, {
-          label: 'Tên thiệp / Tên gia đình',
-          value: groupName,
-          onChange: (e: React.ChangeEvent<HTMLInputElement>) => setGroupName(e.target.value),
-          placeholder: 'Ví dụ: Gia đình Bác Thành',
-          required: true,
-        }),
+    // Form
+    h(
+      'form',
+      { id: 'add-family-form', onSubmit: handleSubmit, className: 'space-y-4' },
+      // Household Name
+      h(TextInput, {
+        label: 'Tên thiệp / Tên gia đình',
+        value: groupName,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => setGroupName(e.target.value),
+        placeholder: 'Ví dụ: Gia đình Bác Thành',
+        required: true,
+      }),
 
         // Side selector
-        h(
-          'div',
-          null,
-          h('label', { className: 'block text-xs font-medium text-text-muted mb-1' }, 'Bên mời:'),
-          h(
-            'select',
-            {
-              value: side,
-              'aria-label': 'Bên mời',
-              onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
-                setSide(e.target.value as any),
-              className:
-                'w-full h-10 px-3 text-sm bg-surface border border-border-control rounded-control focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]',
-            },
-            h('option', { value: 'groom' }, 'Nhà trai'),
-            h('option', { value: 'bride' }, 'Nhà gái'),
-            h('option', { value: 'mutual' }, 'Bạn chung')
-          )
-        ),
+        h(Select, {
+          label: 'Bên mời',
+          value: side,
+          'aria-label': 'Bên mời',
+          onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setSide(e.target.value as any),
+          options: [
+            { value: 'groom', label: 'Nhà trai' },
+            { value: 'bride', label: 'Nhà gái' },
+            { value: 'mutual', label: 'Bạn chung' },
+          ],
+        }),
 
         // Member list header
         h(
@@ -239,30 +260,6 @@ export const AddFamilyModal: React.FC<AddFamilyModalProps> = ({
             'span',
             { className: 'font-semibold text-primary' },
             `1 thiệp, ${members.length} người (${adultCount} người lớn, ${childCount} trẻ em, ${babyCount} em bé)`
-          )
-        ),
-
-        // Footer buttons
-        h(
-          'div',
-          { className: 'flex items-center justify-end gap-3 pt-3 border-t border-border-subtle' },
-          h(
-            Button,
-            {
-              type: 'button',
-              variant: 'secondary',
-              onClick: onClose,
-            },
-            'Hủy bỏ'
-          ),
-          h(
-            Button,
-            {
-              type: 'submit',
-            disabled: saving,
-              variant: 'primary',
-            },
-            `Lưu gia đình (${members.length} khách)`
           )
         )
       )

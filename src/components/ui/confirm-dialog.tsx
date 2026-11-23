@@ -55,26 +55,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       title,
       maxWidth: 'sm',
       showCloseButton: !isLoading,
-    },
-    h(
-      'div',
-      { className: 'flex flex-col gap-6' },
-      h(
+      footer: h(
         'div',
-        { className: 'flex items-start gap-4' },
-        icons[variant],
-        h(
-          'div',
-          { className: 'text-sm text-text-muted leading-relaxed flex-1' },
-          description
-        )
-      ),
-      h(
-        'div',
-        {
-          className:
-            'flex items-center justify-end gap-3 pt-2 border-t border-border-subtle',
-        },
+        { className: 'flex items-center justify-end gap-3 w-full' },
         h(
           Button,
           {
@@ -97,6 +80,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           },
           confirmLabel
         )
+      ),
+    },
+    h(
+      'div',
+      { className: 'flex items-start gap-4 py-1' },
+      icons[variant],
+      h(
+        'div',
+        { className: 'text-sm text-text-muted leading-relaxed flex-1' },
+        description
       )
     )
   );

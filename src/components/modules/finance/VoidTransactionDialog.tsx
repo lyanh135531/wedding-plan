@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
+import { ModalDialog } from '@/components/ui/dialog';
 import { formatVND } from '@/lib/utils';
 import { AlertOctagon } from 'lucide-react';
 
@@ -34,53 +35,19 @@ export const VoidTransactionDialog: React.FC<VoidTransactionDialogProps> = ({
   };
 
   return h(
-    'div',
+    ModalDialog,
     {
-      className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'void-title',
-    },
-    h(
-      'div',
-      {
-        className:
-          'bg-surface w-full max-w-md rounded-card border border-danger/40 shadow-2xl p-6 text-text-main',
-      },
-      h(
+      isOpen,
+      onClose,
+      title: 'Hủy ghi nhận giao dịch (Void)',
+      maxWidth: 'sm',
+      footer: h(
         'div',
-        { className: 'flex items-center gap-3 mb-3' },
-        h(
-          'div',
-          { className: 'w-10 h-10 rounded-full bg-danger-bg text-danger flex items-center justify-center shrink-0' },
-          h(AlertOctagon, { className: 'w-5 h-5' })
-        ),
-        h('h2', { id: 'void-title', className: 'text-base font-bold text-text-main' }, 'Hủy ghi nhận giao dịch (Void)')
-      ),
-
-      h(
-        'p',
-        { className: 'text-xs text-text-muted mb-4' },
-        `Bạn đang hủy ghi nhận giao dịch `,
-        h('span', { className: 'font-mono font-bold text-text-main' }, formatVND(transactionAmount)),
-        ` ngày ${transactionDate}. Giao dịch này sẽ bị loại khỏi các số liệu tính toán nhưng vẫn lưu vết kiểm toán.`
-      ),
-
-      h(TextInput, {
-        label: 'Lý do hủy ghi nhận (bắt buộc)',
-        value: reason,
-        onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value),
-        placeholder: 'Ví dụ: Nhập sai số tiền, sai tài khoản...',
-        required: true,
-      }),
-
-      h(
-        'div',
-        { className: 'flex items-center justify-end gap-3 pt-4 mt-4 border-t border-border-subtle' },
+        { className: 'flex items-center justify-end gap-3 w-full' },
         h(
           Button,
           {
+            type: 'button',
             variant: 'secondary',
             onClick: onClose,
           },
@@ -89,12 +56,36 @@ export const VoidTransactionDialog: React.FC<VoidTransactionDialogProps> = ({
         h(
           Button,
           {
+            type: 'button',
             variant: 'danger',
             onClick: handleConfirm,
           },
           'Xác nhận hủy giao dịch'
         )
-      )
+      ),
+    },
+    h(
+      'div',
+      { className: 'space-y-4' },
+      h(
+        'div',
+        { className: 'flex items-start gap-3 p-3 bg-danger-bg border border-danger/30 rounded-control text-xs text-danger leading-relaxed' },
+        h(AlertOctagon, { className: 'w-4 h-4 shrink-0 mt-0.5' }),
+        h(
+          'span',
+          null,
+          `Bạn đang hủy ghi nhận giao dịch `,
+          h('span', { className: 'font-mono font-bold' }, formatVND(transactionAmount)),
+          ` ngày ${transactionDate}. Giao dịch này sẽ bị loại khỏi các số liệu tính toán nhưng vẫn lưu vết kiểm toán.`
+        )
+      ),
+      h(TextInput, {
+        label: 'Lý do hủy ghi nhận (bắt buộc)',
+        value: reason,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value),
+        placeholder: 'Ví dụ: Nhập sai số tiền, sai tài khoản...',
+        required: true,
+      })
     )
   );
 };

@@ -102,10 +102,50 @@ export const SeatingExportModal: React.FC<SeatingExportModalProps> = ({
       isOpen,
       onClose,
       title: 'Xuất & In Sơ Đồ Xếp Bàn Tiệc (Chuẩn A4)',
+      footer: h(
+        'div',
+        { className: 'flex items-center justify-between w-full' },
+        h(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            className: 'text-xs',
+          },
+          'Đóng'
+        ),
+        h(
+          'div',
+          { className: 'flex items-center gap-2' },
+          h(
+            Button,
+            {
+              type: 'button',
+              variant: 'secondary',
+              onClick: handleDownloadCsv,
+              className: 'text-xs flex items-center gap-1.5',
+            },
+            h(FileSpreadsheet, { className: 'w-3.5 h-3.5' }),
+            'Tải CSV sanitized'
+          ),
+          h(
+            Button,
+            {
+              type: 'button',
+              variant: 'primary',
+              onClick: handlePrint,
+              className: 'text-xs flex items-center gap-1.5',
+            },
+            h(Printer, { className: 'w-3.5 h-3.5' }),
+            'In A4'
+          )
+        )
+      ),
     },
     h(
       'div',
-      { className: 'space-y-4 max-h-[75vh] overflow-y-auto pr-1' },
+      { className: 'space-y-4' },
 
       // Security banner
       h(
@@ -241,48 +281,6 @@ export const SeatingExportModal: React.FC<SeatingExportModalProps> = ({
                 )
           );
         })
-      ),
-
-      // Actions
-      h(
-        'div',
-        { className: 'flex items-center justify-between pt-3 border-t border-border-subtle' },
-        h(
-          Button,
-          {
-            type: 'button',
-            variant: 'secondary',
-            onClick: onClose,
-            className: 'text-xs',
-          },
-          'Đóng'
-        ),
-        h(
-          'div',
-          { className: 'flex items-center gap-2' },
-          h(
-            Button,
-            {
-              type: 'button',
-              variant: 'secondary',
-              onClick: handleDownloadCsv,
-              className: 'text-xs flex items-center gap-1.5',
-            },
-            h(FileSpreadsheet, { className: 'w-3.5 h-3.5' }),
-            'Tải CSV sanitized'
-          ),
-          h(
-            Button,
-            {
-              type: 'button',
-              variant: 'primary',
-              onClick: handlePrint,
-              className: 'text-xs flex items-center gap-1.5',
-            },
-            h(Printer, { className: 'w-3.5 h-3.5' }),
-            'In A4'
-          )
-        )
       )
     )
   );

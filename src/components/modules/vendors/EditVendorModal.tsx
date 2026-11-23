@@ -172,10 +172,36 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
       title: 'Chỉnh Sửa Hồ Sơ Nhà Cung Cấp',
       description: `Cập nhật thông tin chi tiết cho ${vendor.name} (Phiên bản ${vendor.version})`,
       maxWidth: 'lg',
+      footer: React.createElement(
+        'div',
+        { className: 'flex items-center justify-end gap-3 w-full' },
+        React.createElement(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            disabled: loading,
+          },
+          'Hủy bỏ'
+        ),
+        React.createElement(
+          Button,
+          {
+            type: 'submit',
+            form: 'edit-vendor-form',
+            variant: 'primary',
+            loading,
+            disabled: isVersionConflict,
+            loadingText: 'Đang lưu thay đổi...',
+          },
+          'Lưu thay đổi'
+        )
+      ),
     },
     React.createElement(
       'form',
-      { onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
+      { id: 'edit-vendor-form', onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
       // AT30: Optimistic locking conflict banner
       isVersionConflict &&
         React.createElement(
@@ -452,35 +478,8 @@ export const EditVendorModal: React.FC<EditVendorModalProps> = ({
           onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value),
           rows: 3,
           className:
-            'w-full p-2.5 bg-page border border-border-control rounded-control text-base focus:outline-2 focus:outline-focus',
+            'w-full p-2.5 bg-page border border-border-control rounded-control text-base focus:outline-2 focus:outline-focus resize-none',
         })
-      ),
-
-      // Footer Actions
-      React.createElement(
-        'div',
-        { className: 'pt-4 flex items-center justify-end gap-3 border-t border-border-subtle' },
-        React.createElement(
-          Button,
-          {
-            type: 'button',
-            variant: 'secondary',
-            onClick: onClose,
-            disabled: loading,
-          },
-          'Hủy bỏ'
-        ),
-        React.createElement(
-          Button,
-          {
-            type: 'submit',
-            variant: 'primary',
-            loading,
-            disabled: isVersionConflict,
-            loadingText: 'Đang lưu thay đổi...',
-          },
-          'Lưu thay đổi'
-        )
       )
     )
   );

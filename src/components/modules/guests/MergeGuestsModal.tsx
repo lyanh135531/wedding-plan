@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
+import { ModalDialog } from '@/components/ui/dialog';
 import {
   GitMerge,
   X,
@@ -154,58 +155,44 @@ export const MergeGuestsModal: React.FC<MergeGuestsModalProps> = ({
   };
 
   return h(
-    'div',
+    ModalDialog,
     {
-      className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay overflow-y-auto animate-in fade-in',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'merge-guests-title',
+      isOpen,
+      onClose,
+      title: 'So Sánh & Gộp Trùng Hồ Sơ Khách',
+      description: 'Chọn hồ sơ chính được giữ lại và chọn thông tin liên hệ ưu tiên.',
+      maxWidth: 'xl',
+      footer: h(
+        'div',
+        { className: 'flex items-center justify-end gap-3 w-full' },
+        h(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            disabled: isSubmitting,
+          },
+          'Hủy'
+        ),
+        h(
+          Button,
+          {
+            type: 'button',
+            variant: 'primary',
+            loading: isSubmitting,
+            loadingText: 'Đang gộp...',
+            onClick: handleExecuteMerge,
+          },
+          `Xác nhận gộp vào ${retainedGuest.displayName}`
+        )
+      ),
     },
     h(
       'div',
       {
-        className:
-          'bg-surface w-full max-w-3xl rounded-card border border-border-control shadow-2xl p-6 text-text-main my-8 space-y-5 animate-in zoom-in-95',
+        className: 'space-y-5',
       },
-      // Header
-      h(
-        'div',
-        { className: 'flex items-start justify-between pb-3 border-b border-border-subtle' },
-        h(
-          'div',
-          { className: 'flex items-center gap-2.5' },
-          h(
-            'div',
-            { className: 'p-2 rounded-full bg-primary/10 text-primary' },
-            h(GitMerge, { className: 'w-5 h-5' })
-          ),
-          h(
-            'div',
-            null,
-            h(
-              'h2',
-              { id: 'merge-guests-title', className: 'text-lg font-bold text-text-main' },
-              'So Sánh & Gộp Trùng Hồ Sơ Khách'
-            ),
-            h(
-              'p',
-              { className: 'text-xs text-text-muted mt-0.5' },
-              'Chọn hồ sơ chính được giữ lại và chọn thông tin liên hệ ưu tiên.'
-            )
-          )
-        ),
-        h(
-          'button',
-          {
-            onClick: onClose,
-            'aria-label': 'Đóng cửa sổ gộp',
-            className:
-              'p-2 rounded-control text-text-muted hover:text-text-main hover:bg-surface-hover transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center',
-          },
-          h(X, { className: 'w-5 h-5' })
-        )
-      ),
 
       // Reasons & Match alert
       candidatePair.match_reasons && candidatePair.match_reasons.length > 0 &&
@@ -470,32 +457,6 @@ export const MergeGuestsModal: React.FC<MergeGuestsModalProps> = ({
           errorMessage
         ),
 
-      // Footer
-      h(
-        'div',
-        { className: 'flex items-center justify-end gap-3 pt-3 border-t border-border-subtle' },
-        h(
-          Button,
-          {
-            type: 'button',
-            variant: 'secondary',
-            onClick: onClose,
-            disabled: isSubmitting,
-          },
-          'Hủy'
-        ),
-        h(
-          Button,
-          {
-            type: 'button',
-            variant: 'primary',
-            loading: isSubmitting,
-            loadingText: 'Đang gộp...',
-            onClick: handleExecuteMerge,
-          },
-          `Xác nhận gộp vào ${retainedGuest.displayName}`
-        )
-      )
     )
   );
 };

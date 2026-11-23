@@ -46,7 +46,7 @@ export const BulkMarkSentDialog: React.FC<BulkMarkSentDialogProps> = ({
       'div',
       {
         className:
-          'bg-surface w-full max-w-md rounded-card border border-border-control shadow-2xl p-6 text-text-main',
+          'bg-surface w-full max-w-md sm:max-w-lg rounded-card border border-border-control shadow-2xl p-6 text-text-main',
       },
       // Header
       h(

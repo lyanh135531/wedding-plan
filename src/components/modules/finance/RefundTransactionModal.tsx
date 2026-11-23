@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TextInput } from '@/components/ui/input';
+import { ModalDialog } from '@/components/ui/dialog';
 import { formatVND } from '@/lib/utils';
 import { RotateCcw } from 'lucide-react';
 
@@ -40,93 +41,65 @@ export const RefundTransactionModal: React.FC<RefundTransactionModalProps> = ({
   };
 
   return h(
-    'div',
+    ModalDialog,
     {
-      className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'refund-title',
-    },
-    h(
-      'div',
-      {
-        className:
-          'bg-surface w-full max-w-md rounded-card border border-border-control shadow-2xl p-6 text-text-main',
-      },
-      h(
+      isOpen,
+      onClose,
+      title: 'Ghi nhận hoàn tiền từ nhà cung cấp',
+      maxWidth: 'sm',
+      footer: h(
         'div',
-        { className: 'flex items-center justify-between border-b border-border-subtle pb-3 mb-4' },
+        { className: 'flex items-center justify-end gap-3 w-full' },
         h(
-          'div',
-          { className: 'flex items-center gap-2' },
-          h(RotateCcw, { className: 'w-5 h-5 text-primary' }),
-          h('h2', { id: 'refund-title', className: 'text-base font-bold' }, 'Ghi nhận hoàn tiền từ nhà cung cấp')
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+          },
+          'Hủy'
         ),
         h(
-          'button',
+          Button,
           {
-            onClick: onClose,
-            className: 'text-text-muted hover:text-text-main p-1 rounded',
-            'aria-label': 'Đóng',
+            type: 'submit',
+            form: 'refund-form',
+            variant: 'primary',
           },
-          '✕'
+          'Xác nhận hoàn tiền'
         )
       ),
-
+    },
+    h(
+      'form',
+      { id: 'refund-form', onSubmit: handleSubmit, className: 'space-y-4' },
       h(
-        'form',
-        { onSubmit: handleSubmit, className: 'space-y-4' },
-        h(
-          'div',
-          { className: 'p-3 bg-page border border-border-subtle rounded text-xs space-y-1' },
-          h('p', null, `Nhà cung cấp: `, h('span', { className: 'font-semibold text-text-main' }, vendorName)),
-          h('p', null, `Khoản đã chi trước đó: `, h('span', { className: 'font-mono font-semibold text-text-main' }, formatVND(originalOutflowAmount)))
-        ),
+        'div',
+        { className: 'p-3 bg-page border border-border-subtle rounded text-xs space-y-1' },
+        h('p', null, `Nhà cung cấp: `, h('span', { className: 'font-semibold text-text-main' }, vendorName)),
+        h('p', null, `Khoản đã chi trước đó: `, h('span', { className: 'font-mono font-semibold text-text-main' }, formatVND(originalOutflowAmount)))
+      ),
 
-        h(CurrencyInput, {
-          label: 'Số tiền hoàn lại thực nhận (VND)',
-          value: refundAmount,
-          onChange: setRefundAmount,
-          required: true,
-        }),
+      h(CurrencyInput, {
+        label: 'Số tiền hoàn lại thực nhận (VND)',
+        value: refundAmount,
+        onChange: setRefundAmount,
+        required: true,
+      }),
 
-        h(DatePicker, {
-          label: 'Ngày nhận tiền hoàn',
-          value: refundDate,
-          onChange: setRefundDate,
-          required: true,
-        }),
+      h(DatePicker, {
+        label: 'Ngày nhận tiền hoàn',
+        value: refundDate,
+        onChange: setRefundDate,
+        required: true,
+      }),
 
-        h(TextInput, {
-          label: 'Lý do hoàn tiền',
-          value: reason,
-          onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value),
-          required: true,
-        }),
-
-        h(
-          'div',
-          { className: 'flex items-center justify-end gap-3 pt-3 border-t border-border-subtle' },
-          h(
-            Button,
-            {
-              type: 'button',
-              variant: 'secondary',
-              onClick: onClose,
-            },
-            'Hủy'
-          ),
-          h(
-            Button,
-            {
-              type: 'submit',
-              variant: 'primary',
-            },
-            'Xác nhận hoàn tiền'
-          )
-        )
-      )
+      h(TextInput, {
+        label: 'Lý do hoàn tiền',
+        value: reason,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value),
+        required: true,
+      })
     )
   );
 };

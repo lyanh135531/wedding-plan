@@ -96,14 +96,14 @@ export const DrawerSheet: React.FC<DrawerSheetProps> = ({
         'div',
         {
           className:
-            'px-6 py-4 border-b border-border-subtle flex items-start justify-between gap-4 shrink-0',
+            'px-6 py-4.5 border-b border-border-subtle/80 flex items-start justify-between gap-4 shrink-0 bg-[#FFFEFA]',
         },
         h(
           'div',
           { className: 'flex flex-col' },
-          h('h2', { id: titleId, className: 'text-lg font-semibold text-text-main' }, title),
+          h('h2', { id: titleId, className: 'text-lg font-serif font-medium text-primary-luxury tracking-tight' }, title),
           description &&
-            h('p', { id: descriptionId, className: 'text-sm text-text-muted mt-1' }, description)
+            h('p', { id: descriptionId, className: 'text-xs text-text-muted mt-1 leading-relaxed' }, description)
         ),
         h(
           'button',
@@ -112,18 +112,18 @@ export const DrawerSheet: React.FC<DrawerSheetProps> = ({
             onClick: onClose,
             'aria-label': 'Đóng bảng điều hướng',
             className:
-              'min-h-[44px] min-w-[44px] h-11 w-11 -mr-2 -mt-2 inline-flex items-center justify-center rounded-full text-text-muted hover:text-text-main hover:bg-black/5 transition-colors focus-visible:outline-2 focus-visible:outline-focus',
+              'min-h-[40px] min-w-[40px] h-10 w-10 -mr-2 -mt-1 inline-flex items-center justify-center rounded-full text-text-muted hover:text-text-main hover:bg-[#173C33]/5 transition-colors focus-visible:outline-2 focus-visible:outline-focus',
           },
-          h(X, { className: 'w-5 h-5' })
+          h(X, { className: 'w-4.5 h-4.5' })
         )
       ),
       // Content
-      h('div', { className: 'flex-1 p-6 overflow-y-auto' }, children),
+      h('div', { className: 'dialog-scroll flex-1 p-6 overflow-y-auto overscroll-contain' }, children),
       // Footer
       footer &&
         h(
           'div',
-          { className: 'px-6 py-4 border-t border-border-subtle bg-page shrink-0' },
+          { className: 'px-6 py-3.5 border-t border-border-subtle/80 bg-[#FAF9F5] shrink-0' },
           footer
         )
     )

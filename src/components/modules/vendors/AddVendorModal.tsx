@@ -148,10 +148,35 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
       title: 'Thêm Nhà Cung Cấp Mới',
       description: 'Nhập thông tin đối tác dịch vụ hoặc địa điểm tổ chức tiệc cưới.',
       maxWidth: 'lg',
+      footer: React.createElement(
+        'div',
+        { className: 'flex items-center justify-end gap-3 w-full' },
+        React.createElement(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            disabled: loading,
+          },
+          'Hủy bỏ'
+        ),
+        React.createElement(
+          Button,
+          {
+            type: 'submit',
+            form: 'add-vendor-form',
+            variant: 'primary',
+            loading,
+            loadingText: 'Đang lưu đối tác...',
+          },
+          'Thêm đối tác'
+        )
+      ),
     },
     React.createElement(
       'form',
-      { onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
+      { id: 'add-vendor-form', onSubmit: handleSubmit, className: 'space-y-4 pt-2' },
       errorMsg &&
         React.createElement(
           'div',
@@ -408,34 +433,8 @@ export const AddVendorModal: React.FC<AddVendorModalProps> = ({
           rows: 3,
           placeholder: 'Ghi chú về đàm phán giá, ưu đãi bí mật...',
           className:
-            'w-full p-2.5 bg-page border border-border-control rounded-control text-base focus:outline-2 focus:outline-focus',
+            'w-full p-2.5 bg-page border border-border-control rounded-control text-base focus:outline-2 focus:outline-focus resize-none',
         })
-      ),
-
-      // Footer Actions
-      React.createElement(
-        'div',
-        { className: 'pt-4 flex items-center justify-end gap-3 border-t border-border-subtle' },
-        React.createElement(
-          Button,
-          {
-            type: 'button',
-            variant: 'secondary',
-            onClick: onClose,
-            disabled: loading,
-          },
-          'Hủy bỏ'
-        ),
-        React.createElement(
-          Button,
-          {
-            type: 'submit',
-            variant: 'primary',
-            loading,
-            loadingText: 'Đang lưu đối tác...',
-          },
-          'Thêm đối tác'
-        )
       )
     )
   );

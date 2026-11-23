@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CurrencyInput } from '@/components/ui/currency-input';
 import { TextInput } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
+import { ModalDialog } from '@/components/ui/dialog';
 import { formatVND } from '@/lib/utils';
 import { DollarSign, ShieldCheck } from 'lucide-react';
 
@@ -68,50 +69,47 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   const formattedConfirm = amount ? formatVND(amount) : '0 ₫';
 
   return h(
-    'div',
+    ModalDialog,
     {
-      className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'record-payment-title',
-    },
-    h(
-      'div',
-      {
-        className:
-          'bg-surface w-full max-w-md rounded-card border border-border-control shadow-2xl p-6 text-text-main',
-      },
-      // Header
-      h(
+      isOpen,
+      onClose,
+      title: 'Ghi nhận thanh toán chi tiền',
+      maxWidth: 'sm',
+      footer: h(
         'div',
-        { className: 'flex items-center justify-between border-b border-border-subtle pb-3 mb-4' },
+        { className: 'flex items-center justify-end gap-3 w-full' },
         h(
-          'div',
-          { className: 'flex items-center gap-2' },
-          h(DollarSign, { className: 'w-5 h-5 text-primary' }),
-          h('h2', { id: 'record-payment-title', className: 'text-base font-bold' }, 'Ghi nhận thanh toán chi tiền')
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            disabled: isSubmitting,
+          },
+          'Hủy bỏ'
         ),
         h(
-          'button',
+          Button,
           {
-            onClick: onClose,
-            className: 'text-text-muted hover:text-text-main p-1 rounded',
-            'aria-label': 'Đóng',
+            type: 'submit',
+            form: 'record-payment-form',
+            variant: 'primary',
+            loading: isSubmitting,
+            loadingText: 'Đang lưu...',
           },
-          '✕'
+          `Xác nhận chi ${formattedConfirm}`
         )
       ),
-
+    },
+    h(
+      'form',
+      { id: 'record-payment-form', onSubmit: handleSubmit, className: 'space-y-4' },
       h(
-        'form',
-        { onSubmit: handleSubmit, className: 'space-y-4' },
-        h(
-          'div',
-          { className: 'p-3 bg-page border border-border-subtle rounded text-xs' },
-          h('span', { className: 'text-text-muted block' }, 'Khoản chi liên kết:'),
-          h('span', { className: 'font-semibold text-text-main text-sm mt-0.5 block' }, costItemName)
-        ),
+        'div',
+        { className: 'p-3 bg-page border border-border-subtle rounded text-xs' },
+        h('span', { className: 'text-text-muted block' }, 'Khoản chi liên kết:'),
+        h('span', { className: 'font-semibold text-text-main text-sm mt-0.5 block' }, costItemName)
+      ),
 
         // Amount Input
         h(CurrencyInput, {
@@ -214,34 +212,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           { className: 'flex items-center gap-1.5 text-[11px] text-text-muted pt-1' },
           h(ShieldCheck, { className: 'w-3.5 h-3.5 text-primary' }),
           h('span', null, 'Khóa chống submit trùng lặp (Idempotency Key v4) được kích hoạt.')
-        ),
-
-        // Buttons
-        h(
-          'div',
-          { className: 'flex items-center justify-end gap-3 pt-3 border-t border-border-subtle' },
-          h(
-            Button,
-            {
-              type: 'button',
-              variant: 'secondary',
-              onClick: onClose,
-              disabled: isSubmitting,
-            },
-            'Hủy bỏ'
-          ),
-          h(
-            Button,
-            {
-              type: 'submit',
-              variant: 'primary',
-              loading: isSubmitting,
-              loadingText: 'Đang lưu...',
-            },
-            `Xác nhận chi ${formattedConfirm}`
-          )
         )
       )
-    )
   );
 };

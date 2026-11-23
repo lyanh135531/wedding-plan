@@ -162,7 +162,7 @@ export const PageShell: React.FC<PageShellProps> = ({
       h(
         'div',
         {
-          className: `workspace-content flex-1 w-full mx-auto p-4 sm:p-6 lg:px-9 lg:py-8 ${maxWidthClass}`,
+          className: `workspace-content flex-1 w-full mx-auto p-4 sm:p-6 lg:px-9 lg:py-8 mb-4 sm:mb-0 ${maxWidthClass}`,
         },
         // Breadcrumbs (nếu có)
         breadcrumbs && breadcrumbs.length > 0
@@ -209,12 +209,12 @@ export const PageShell: React.FC<PageShellProps> = ({
         showScopeSelector
           ? h(
               'div',
-              { className: 'sm:hidden mb-4' },
+              { className: 'sm:hidden mb-5' },
               h(
                 'label',
                 {
                   htmlFor: 'mobile-event-scope',
-                  className: 'block text-xs font-medium text-text-muted mb-1',
+                  className: 'block text-xs font-medium text-text-muted mb-1.5',
                 },
                 'Phạm vi buổi lễ đang xem:'
               ),
@@ -226,7 +226,7 @@ export const PageShell: React.FC<PageShellProps> = ({
                   onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                     setScope(e.target.value),
                   className:
-                    'w-full h-11 px-3 text-sm bg-surface text-text-main border border-border-control rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] transition-colors',
+                    'scope-selector-pill w-full h-11 text-xs font-medium shadow-xs',
                 },
                 h('option', { value: 'all' }, 'Tất cả buổi (Tổng hợp)'),
                 !isFamily

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ModalDialog } from '@/components/ui/dialog';
 import { CheckSquare } from 'lucide-react';
 import { TaskItem } from './TaskDeadlineGroups';
 
@@ -69,44 +70,39 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   };
 
   return h(
-    'div',
+    ModalDialog,
     {
-      className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 app-overlay',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'create-task-title',
-    },
-    h(
-      'div',
-      {
-        className:
-          'bg-surface w-full max-w-md rounded-card border border-border-control shadow-2xl p-6 text-text-main',
-      },
-      h(
+      isOpen,
+      onClose,
+      title: 'Thêm công việc mới',
+      maxWidth: 'md',
+      footer: h(
         'div',
-        { className: 'flex items-center justify-between border-b border-border-subtle pb-3 mb-4' },
+        { className: 'flex items-center justify-end gap-3 w-full' },
         h(
-          'div',
-          { className: 'flex items-center gap-2' },
-          h(CheckSquare, { className: 'w-5 h-5 text-primary' }),
-          h('h2', { id: 'create-task-title', className: 'text-base font-bold' }, 'Thêm công việc mới')
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+          },
+          'Hủy'
         ),
         h(
-          'button',
+          Button,
           {
-            onClick: onClose,
-            className: 'text-text-muted hover:text-text-main p-1 rounded',
-            'aria-label': 'Đóng',
+            type: 'submit',
+            form: 'create-task-form',
+            variant: 'primary',
           },
-          '✕'
+          'Lưu công việc'
         )
       ),
-
-      h(
-        'form',
-        { onSubmit: handleSubmit, className: 'space-y-4' },
-        h(TextInput, {
+    },
+    h(
+      'form',
+      { id: 'create-task-form', onSubmit: handleSubmit, className: 'space-y-4' },
+      h(TextInput, {
           label: 'Tên công việc',
           value: title,
           onChange: (e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value),
@@ -245,31 +241,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => setSharedTitle(e.target.value),
               placeholder: 'Ví dụ: Đón khách họ hàng lúc 8h sáng',
             })
-        ),
-
-        // Buttons
-        h(
-          'div',
-          { className: 'flex items-center justify-end gap-3 pt-3 border-t border-border-subtle' },
-          h(
-            Button,
-            {
-              type: 'button',
-              variant: 'secondary',
-              onClick: onClose,
-            },
-            'Hủy'
-          ),
-          h(
-            Button,
-            {
-              type: 'submit',
-              variant: 'primary',
-            },
-            'Lưu công việc'
-          )
         )
       )
-    )
   );
 };

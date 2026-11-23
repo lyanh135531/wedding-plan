@@ -3,6 +3,8 @@
 import * as React from 'react';
 import { SupportMember, SupportMemberFormData, SupportRole } from './types';
 import { ROLE_CONFIG } from './SupportMemberCard';
+import { ModalDialog } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { X, Users, AlertCircle, Info } from 'lucide-react';
 
 const h = React.createElement;
@@ -116,51 +118,44 @@ export const AddEditSupportMemberModal: React.FC<AddEditSupportMemberModalProps>
   };
 
   return h(
-    'div',
+    ModalDialog,
     {
-      className:
-        'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150',
-      'data-testid': 'add-edit-support-member-modal',
-    },
-    h(
-      'div',
-      {
-        className:
-          'bg-surface rounded-xl shadow-xl w-full max-w-lg border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]',
-      },
-      // Header
-      h(
+      isOpen,
+      onClose,
+      title: initialData ? 'Chỉnh sửa thông tin thành viên' : 'Thêm thành viên đội hỗ trợ',
+      maxWidth: 'lg',
+      footer: h(
         'div',
-        {
-          className:
-            'flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50',
-        },
+        { className: 'flex items-center justify-end gap-3 w-full' },
         h(
-          'div',
-          { className: 'flex items-center gap-2' },
-          h(Users, { className: 'w-5 h-5 text-primary' }),
-          h(
-            'h2',
-            { className: 'text-base font-semibold text-gray-900' },
-            initialData ? 'Chỉnh sửa thông tin thành viên' : 'Thêm thành viên đội hỗ trợ'
-          )
-        ),
-        h(
-          'button',
+          Button,
           {
             type: 'button',
+            variant: 'secondary',
             onClick: onClose,
-            className: 'p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition',
           },
-          h(X, { className: 'w-4 h-4' })
+          'Hủy'
+        ),
+        h(
+          Button,
+          {
+            type: 'submit',
+            form: 'support-member-form',
+            variant: 'primary',
+          },
+          initialData ? 'Lưu thay đổi' : 'Thêm thành viên'
         )
       ),
+    },
+    h(
+      'form',
+      { id: 'support-member-form', onSubmit: handleSubmit, className: 'space-y-4 text-sm' },
       // Invariant Info Banner
       h(
         'div',
         {
           className:
-            'px-6 py-2.5 bg-blue-50 border-b border-blue-200 flex items-center gap-2 text-xs text-blue-800',
+            'p-3 bg-blue-50 border border-blue-200/80 rounded-control flex items-center gap-2 text-xs text-blue-800',
         },
         h(Info, { className: 'w-4 h-4 text-blue-600 shrink-0' }),
         h(
@@ -169,20 +164,16 @@ export const AddEditSupportMemberModal: React.FC<AddEditSupportMemberModalProps>
           'Quy định bất biến: Hồ sơ hỗ trợ dùng để liên lạc vận hành, tuyệt đối không gửi lời mời hay cấp tài khoản đăng nhập.'
         )
       ),
-      // Form Body
-      h(
-        'form',
-        { onSubmit: handleSubmit, className: 'p-6 overflow-y-auto space-y-4 flex-1 text-sm' },
-        error &&
-          h(
-            'div',
-            {
-              className:
-                'p-3 rounded-lg bg-red-50 text-red-700 text-xs flex items-center gap-2 border border-red-200',
-            },
-            h(AlertCircle, { className: 'w-4 h-4 shrink-0' }),
-            error
-          ),
+      error &&
+        h(
+          'div',
+          {
+            className:
+              'p-3 rounded-lg bg-red-50 text-red-700 text-xs flex items-center gap-2 border border-red-200',
+          },
+          h(AlertCircle, { className: 'w-4 h-4 shrink-0' }),
+          error
+        ),
         // Name & Phone
         h(
           'div',
@@ -348,32 +339,7 @@ export const AddEditSupportMemberModal: React.FC<AddEditSupportMemberModalProps>
               'Chia sẻ liên hệ này cho người nhà (Family View) xem để phối hợp'
             )
           )
-        ),
-        // Footer buttons
-        h(
-          'div',
-          { className: 'pt-4 border-t border-gray-100 flex items-center justify-end gap-3' },
-          h(
-            'button',
-            {
-              type: 'button',
-              onClick: onClose,
-              className:
-                'px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition',
-            },
-            'Hủy'
-          ),
-          h(
-            'button',
-            {
-              type: 'submit',
-              className:
-                'px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition shadow-xs',
-            },
-            initialData ? 'Lưu thay đổi' : 'Thêm thành viên'
-          )
         )
       )
-    )
   );
 };

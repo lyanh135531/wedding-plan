@@ -37,9 +37,9 @@ export const StatCard: React.FC<StatCardProps> = ({
     'div',
     {
       className: cn(
-        'stat-card p-6 rounded-card bg-surface border border-border-subtle shadow-card flex flex-col justify-between transition-all duration-150',
+        'stat-card p-6 rounded-card bg-surface border border-border-subtle shadow-card flex flex-col justify-between transition-all duration-200',
         isClickable &&
-          'hover:border-primary/40 hover:shadow cursor-pointer focus-visible:outline-2 focus-visible:outline-focus',
+          'hover:border-primary/40 hover:shadow-card-elevated cursor-pointer focus-visible:outline-2 focus-visible:outline-focus',
         className
       ),
       onClick,

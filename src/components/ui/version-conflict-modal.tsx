@@ -41,6 +41,23 @@ export const VersionConflictModal: React.FC<VersionConflictModalProps> = ({
       maxWidth: 'lg',
       showCloseButton: false,
       className,
+      footer: h(
+        'div',
+        {
+          className:
+            'flex flex-col sm:flex-row items-center justify-end gap-3 w-full',
+        },
+        h(
+          Button,
+          { variant: 'secondary', onClick: onUseServer, className: 'w-full sm:w-auto' },
+          'Tải bản mới của máy chủ'
+        ),
+        h(
+          Button,
+          { variant: 'primary', onClick: onKeepLocal, className: 'w-full sm:w-auto' },
+          'Chép lại nội dung đang nhập'
+        )
+      ),
     },
     h(
       'div',
@@ -103,23 +120,6 @@ export const VersionConflictModal: React.FC<VersionConflictModalProps> = ({
               )
             )
           )
-        )
-      ),
-      h(
-        'div',
-        {
-          className:
-            'flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-border-subtle',
-        },
-        h(
-          Button,
-          { variant: 'secondary', onClick: onUseServer, className: 'w-full sm:w-auto' },
-          'Tải bản mới của máy chủ'
-        ),
-        h(
-          Button,
-          { variant: 'primary', onClick: onKeepLocal, className: 'w-full sm:w-auto' },
-          'Chép lại nội dung đang nhập'
         )
       )
     )

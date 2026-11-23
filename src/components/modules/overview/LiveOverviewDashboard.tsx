@@ -72,7 +72,13 @@ export function LiveOverviewDashboard() {
       onQuickAddCost: () => router.push('/budget'),
       onQuickAddTask: () => router.push('/tasks'),
     }),
-    !settings && isOwner && h(Button, { onClick: () => router.push('/setup') }, 'Thiết lập thông tin đám cưới'),
+    !settings && isOwner && h('div', { className: 'p-5 rounded-2xl bg-gradient-to-r from-amber-50/80 via-surface to-page border border-amber-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm' },
+      h('div', null,
+        h('h3', { className: 'text-sm font-semibold text-text-main' }, 'Chưa hoàn tất thiết lập đám cưới'),
+        h('p', { className: 'text-xs text-text-muted mt-0.5' }, 'Cập nhật tên cô dâu, chú rể và ngày trọng đại để cá nhân hóa toàn bộ sổ cưới.')
+      ),
+      h(Button, { onClick: () => router.push('/setup'), className: 'shrink-0 self-start sm:self-auto' }, 'Thiết lập thông tin đám cưới')
+    ),
     isOwner && data.finance && h(StatCardsRow, {
       projectedCost: BigInt(data.finance.budgetSummary.totalProjectedCost),
       netPaid: BigInt(data.finance.budgetSummary.totalNetPaid),

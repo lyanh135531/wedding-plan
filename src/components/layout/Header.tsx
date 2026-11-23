@@ -103,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
               value: currentScope,
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setScope(e.target.value),
               className:
-                'h-11 max-w-[200px] lg:max-w-[260px] px-3.5 py-1.5 text-xs bg-page text-text-main border border-border-subtle rounded-control focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors',
+                'scope-selector-pill h-10 max-w-[200px] lg:max-w-[260px] focus:outline-none focus:ring-2 focus:ring-[#BFA16E]/40',
             },
             h('option', { value: 'all' }, 'Tất cả buổi (Tổng hợp)'),
             isOwner
@@ -145,10 +145,10 @@ export const Header: React.FC<HeaderProps> = ({
         {
           href: '/notifications',
           className:
-            'relative p-2 rounded-full border border-border-subtle text-text-muted hover:text-text-main hover:bg-page min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20',
+            'relative p-2 rounded-full border border-border-subtle/70 bg-surface/80 text-text-muted hover:text-text-main hover:bg-page min-w-[44px] min-h-[44px] flex items-center justify-center transition-all hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20',
           'aria-label': 'Thông báo',
         },
-        h(Bell, { className: 'w-5 h-5 text-text-muted', 'aria-hidden': 'true' })
+        h(Bell, { className: 'w-4 h-4 text-text-muted transition-transform hover:scale-105', 'aria-hidden': 'true' })
       ),
 
       // Đúng 01 nút Primary CTA: Chỉ hiển thị cho Chủ sở hữu

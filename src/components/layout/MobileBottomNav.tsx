@@ -92,7 +92,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             'flex flex-col items-center justify-center flex-1 py-1 min-h-[44px] text-text-muted hover:text-text-main transition-colors',
           'aria-label': 'Mở danh mục điều hướng mở rộng',
         },
-        h(MenuIcon, { className: 'w-5 h-5 mb-0.5 text-border-control', 'aria-hidden': 'true' }),
+        h(MenuIcon, { className: 'w-5 h-5 mb-0.5 text-text-muted', 'aria-hidden': 'true' }),
         h('span', { className: 'text-[12px] leading-tight text-center' }, 'Menu')
       )
     )

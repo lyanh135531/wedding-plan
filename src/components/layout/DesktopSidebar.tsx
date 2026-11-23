@@ -113,19 +113,19 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
     // Brand Header
     h(
       'div',
-      { className: 'min-h-[96px] flex items-center gap-3 px-5 py-5 border-b border-white/10 shrink-0' },
-      h(BrandMark, { className: 'w-10 h-10 shrink-0 text-[#D4BF8F]' }),
+      { className: 'min-h-[96px] flex items-center gap-3 px-5 py-5 border-b border-white/10 shrink-0 bg-white/[0.02]' },
+      h(BrandMark, { className: 'w-10 h-10 shrink-0 text-[#D4BF8F] filter drop-shadow-[0_2px_8px_rgba(212,191,143,0.3)]' }),
       h(
         'div',
         null,
         h(
           'span',
-          { className: 'font-serif font-medium text-[17px] text-[#F6F3E9] block leading-snug' },
+          { className: 'font-serif font-medium text-[17px] text-[#F6F3E9] block leading-snug tracking-tight' },
           'Sổ Quản Lý Đám Cưới'
         ),
         h(
           'span',
-          { className: 'text-[10px] text-[#B8C4B8] block mt-2' },
+          { className: 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/10 text-[#C8D5CB] border border-white/10 mt-1.5' },
           isFamily ? 'Quyền: Người nhà (Chỉ xem)' : 'Quyền: Chủ sở hữu'
         )
       )
@@ -202,9 +202,13 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
     // Footer System Info
     h(
       'div',
-      { className: 'p-5 border-t border-white/10 text-[10px] text-[#B8C4B8] shrink-0 space-y-2' },
-      h('div', { className: 'flex items-center gap-2' }, h(Lock, { className: 'w-3 h-3', 'aria-hidden': true }), 'Không gian riêng của gia đình'),
-      h('div', { className: 'text-[#8DA397] tracking-wide' }, 'Giờ Việt Nam · VND'),
+      { className: 'p-4 border-t border-white/10 text-[10px] text-[#B8C4B8] shrink-0 space-y-2.5 bg-black/15' },
+      h(
+        'div',
+        { className: 'space-y-1' },
+        h('div', { className: 'flex items-center gap-2 font-medium text-[#D3DDD4]' }, h(Lock, { className: 'w-3 h-3 text-[#BFA16E]', 'aria-hidden': true }), 'Không gian riêng của gia đình'),
+        h('div', { className: 'text-[#8DA397] tracking-wide pl-5' }, 'Giờ Việt Nam · VND'),
+      ),
       h(LogoutButton)
     )
   );

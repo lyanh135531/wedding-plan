@@ -97,10 +97,35 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
       isOpen,
       onClose,
       title: editingTable ? 'Chỉnh Sửa Bàn Tiệc' : 'Thêm Bàn Tiệc Mới',
+      footer: h(
+        'div',
+        { className: 'flex items-center justify-end gap-2.5 w-full' },
+        h(
+          Button,
+          {
+            type: 'button',
+            variant: 'secondary',
+            onClick: onClose,
+            className: 'text-xs',
+          },
+          'Hủy'
+        ),
+        h(
+          Button,
+          {
+            type: 'submit',
+            form: formId,
+            disabled: saving,
+            variant: 'primary',
+            className: 'text-xs',
+          },
+          editingTable ? 'Cập nhật bàn' : 'Tạo bàn'
+        )
+      ),
     },
     h(
       'form',
-      { onSubmit: handleSubmit, className: 'space-y-4' },
+      { id: formId, onSubmit: handleSubmit, className: 'space-y-4' },
       saveError && h('p', { role: 'alert', className: 'text-danger' }, saveError),
       error &&
         h(
@@ -209,34 +234,8 @@ export const AddEditTableModal: React.FC<AddEditTableModalProps> = ({
           rows: 2,
           placeholder: 'Ghi chú phục vụ, yêu cầu vị trí...',
           className:
-            'w-full p-2 border border-border-control rounded-control text-xs text-text-main focus:outline-none focus:ring-2 focus:ring-primary',
+            'w-full p-2 border border-border-control rounded-control text-xs text-text-main focus:outline-none focus:ring-2 focus:ring-primary resize-none',
         })
-      ),
-
-      // Modal Actions
-      h(
-        'div',
-        { className: 'flex items-center justify-end gap-2 pt-3 border-t border-border-subtle' },
-        h(
-          Button,
-          {
-            type: 'button',
-            variant: 'secondary',
-            onClick: onClose,
-            className: 'text-xs',
-          },
-          'Hủy'
-        ),
-        h(
-          Button,
-          {
-            type: 'submit',
-            disabled: saving,
-            variant: 'primary',
-            className: 'text-xs',
-          },
-          editingTable ? 'Cập nhật bàn' : 'Tạo bàn'
-        )
       )
     )
   );

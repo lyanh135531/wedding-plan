@@ -67,7 +67,8 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
           Button,
           {
             variant: 'primary',
-            className: 'bg-accent hover:bg-accent-hover text-white',
+            className:
+              'bg-gradient-to-r from-accent to-[#A88B57] hover:from-[#B49561] hover:to-[#967B48] text-white shadow-gold border-0 active:scale-[0.98] transition-all',
             leftIcon: h(Plus, { className: 'w-4 h-4' }),
             onClick: () => setMenuOpen(!menuOpen),
             'aria-expanded': menuOpen,
@@ -81,7 +82,7 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
             'div',
             {
               className:
-                'absolute right-0 mt-2 w-48 bg-surface border border-border-control rounded-card shadow-lg py-1.5 z-20',
+                'absolute right-0 mt-2 w-52 bg-surface/98 backdrop-blur-md border border-border-subtle rounded-2xl shadow-luxury py-2 z-20',
               role: 'menu',
             },
             h(
