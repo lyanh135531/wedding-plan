@@ -71,7 +71,7 @@ export const DrawerSheet: React.FC<DrawerSheetProps> = ({
       role: 'presentation',
       className:
         'app-overlay fixed inset-0 z-50 flex justify-end animate-in fade-in duration-150',
-      onClick: onClose,
+      onClick: (e: React.MouseEvent) => e.stopPropagation(),
     },
     h(
       'div',

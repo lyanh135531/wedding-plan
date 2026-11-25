@@ -1,9 +1,39 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ModalDialog } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DrawerSheet } from '@/components/ui/sheet';
+
+const hookState = vi.hoisted(() => ({ stubHooks: false }));
+
+vi.mock('react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react')>();
+  const wrapped = {
+    ...actual,
+    useRef: <T,>(init: T) => (hookState.stubHooks ? { current: init } : actual.useRef(init)),
+    useId: () => (hookState.stubHooks ? 'mock-id' : actual.useId()),
+    useEffect: (fn: React.EffectCallback, deps?: React.DependencyList) =>
+      hookState.stubHooks ? undefined : actual.useEffect(fn, deps),
+  };
+  return { ...wrapped, default: wrapped };
+});
+
+function findElement(
+  node: React.ReactNode,
+  predicate: (el: React.ReactElement<Record<string, unknown>>) => boolean
+): React.ReactElement<Record<string, unknown>> | null {
+  if (!React.isValidElement(node)) return null;
+  const el = node as React.ReactElement<Record<string, unknown>>;
+  if (predicate(el)) return el;
+  const children = el.props?.children;
+  if (!children) return null;
+  for (const child of React.Children.toArray(children as React.ReactNode)) {
+    const match = findElement(child, predicate);
+    if (match) return match;
+  }
+  return null;
+}
 
 describe('ModalDialog, ConfirmDialog & DrawerSheet Components', () => {
   describe('ModalDialog (src/components/ui/dialog.tsx)', () => {
@@ -91,6 +121,56 @@ describe('ModalDialog, ConfirmDialog & DrawerSheet Components', () => {
       expect(html).toContain('md:max-w-[480px]');
       expect(html).toContain('w-full h-full');
       expect(html).toContain('Lưu');
+    });
+
+    it('does not call onClose when clicking backdrop overlay on ModalDialog or DrawerSheet', () => {
+      hookState.stubHooks = true;
+
+      try {
+        const cases = [
+          {
+            renderTree: (onClose: () => void) =>
+              (ModalDialog as React.FC<React.ComponentProps<typeof ModalDialog>>)({
+                isOpen: true,
+                title: 'Thêm khách mời',
+                onClose,
+                children: React.createElement('input', { type: 'text' }),
+              }),
+            closeAriaLabel: 'Đóng hộp thoại',
+          },
+          {
+            renderTree: (onClose: () => void) =>
+              (DrawerSheet as React.FC<React.ComponentProps<typeof DrawerSheet>>)({
+                isOpen: true,
+                title: 'Cập nhật RSVP',
+                onClose,
+                children: React.createElement('p', null, 'Chi tiết'),
+              }),
+            closeAriaLabel: 'Đóng bảng điều hướng',
+          },
+        ];
+
+        for (const { renderTree, closeAriaLabel } of cases) {
+          const onClose = vi.fn();
+          const tree = renderTree(onClose);
+
+          const overlay = findElement(tree, (el) => el.props.role === 'presentation');
+          expect(overlay).not.toBeNull();
+          const stopPropagation = vi.fn();
+          (overlay!.props.onClick as (e: { stopPropagation: () => void }) => void)({
+            stopPropagation,
+          });
+          expect(stopPropagation).toHaveBeenCalledTimes(1);
+          expect(onClose).not.toHaveBeenCalled();
+
+          const closeBtn = findElement(tree, (el) => el.props['aria-label'] === closeAriaLabel);
+          expect(closeBtn).not.toBeNull();
+          (closeBtn!.props.onClick as () => void)();
+          expect(onClose).toHaveBeenCalledTimes(1);
+        }
+      } finally {
+        hookState.stubHooks = false;
+      }
     });
   });
 });

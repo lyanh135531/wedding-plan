@@ -49,7 +49,7 @@ export const DirtyFormGuardModal: React.FC<DirtyFormGuardModalProps> = ({
     // Backdrop
     h('div', {
       className: 'app-overlay fixed inset-0 transition-opacity',
-      onClick: onCancel,
+      onClick: (e: React.MouseEvent) => e.stopPropagation(),
       'aria-hidden': 'true',
     }),
     // Dialog Card

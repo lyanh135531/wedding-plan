@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { DirtyFormGuardModal } from '@/components/layout/DirtyFormGuardModal';
@@ -55,5 +55,42 @@ describe('DirtyFormGuardModal Component (UI/UX Spec §3.3)', () => {
 
     expect(html).toContain('Cảnh báo mất dữ liệu khách');
     expect(html).toContain('Khách mời chưa được lưu vào danh sách.');
+  });
+
+  it('does not call onCancel when clicking the backdrop overlay', () => {
+    vi.spyOn(React, 'useEffect').mockImplementation(() => {});
+
+    try {
+      const onCancel = vi.fn();
+      const onConfirm = vi.fn();
+      const tree = (DirtyFormGuardModal as React.FC<
+        React.ComponentProps<typeof DirtyFormGuardModal>
+      >)({
+        isOpen: true,
+        onConfirm,
+        onCancel,
+      });
+
+      const children = React.Children.toArray(
+        (tree as React.ReactElement<{ children: React.ReactNode }>).props.children
+      );
+      const backdrop = children.find(
+        (node): node is React.ReactElement<Record<string, unknown>> =>
+          React.isValidElement(node) &&
+          typeof node.props.className === 'string' &&
+          node.props.className.includes('app-overlay')
+      );
+
+      expect(backdrop).toBeDefined();
+      const stopPropagation = vi.fn();
+      (backdrop!.props.onClick as (e: { stopPropagation: () => void }) => void)({
+        stopPropagation,
+      });
+      expect(stopPropagation).toHaveBeenCalledTimes(1);
+      expect(onCancel).not.toHaveBeenCalled();
+      expect(onConfirm).not.toHaveBeenCalled();
+    } finally {
+      vi.restoreAllMocks();
+    }
   });
 });
