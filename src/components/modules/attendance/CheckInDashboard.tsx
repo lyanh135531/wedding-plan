@@ -4,6 +4,8 @@ import { useMutationFetch } from '@/components/common/useMutationFetch';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
+import { Pagination } from '@/components/ui/pagination';
+import { usePagination } from '@/components/common/usePagination';
 import { useRole } from '@/context/RoleContext';
 import {
   Users,
@@ -196,6 +198,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
   const totalGuests = guests.length;
   const checkedInCount = guests.filter((g) => g.isCheckedIn).length;
   const notCheckedInCount = totalGuests - checkedInCount;
+  const pagination = usePagination(guests, { defaultPageSize: 25, resetKey: `${eventId}:${searchQuery}` });
 
   return h(
     'div',
@@ -303,7 +306,7 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
         : h(
             'div',
             { className: 'divide-y divide-border-subtle' },
-            guests.map((g) =>
+            pagination.pagedItems.map((g) =>
               h(
                 'div',
                 {
@@ -396,6 +399,17 @@ export const CheckInDashboard: React.FC<CheckInDashboardProps> = ({
             )
           )
     ),
+
+    guests.length > 0 &&
+      h(Pagination, {
+        currentPage: pagination.currentPage,
+        pageSize: pagination.pageSize,
+        totalItems: pagination.totalItems,
+        onPageChange: pagination.setCurrentPage,
+        onPageSizeChange: pagination.setPageSize,
+        pageSizeOptions: [10, 25, 50, 100],
+        unitLabel: 'khách',
+      }),
 
     // Modal: Confirm declined guest check in
     declinedGuest &&

@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Pagination } from '@/components/ui/pagination';
+import { usePagination } from '@/components/common/usePagination';
 import { TaskActions } from './TaskActions';
 import { CheckSquare } from 'lucide-react';
 
@@ -50,6 +52,7 @@ export function LiveTasksManager() {
   }, [revision]);
   const visible = tasks.filter((task) => currentScope === 'all' || (currentScope === 'common'
     ? !(task.eventId || task.event_id) : (task.eventId || task.event_id) === currentScope));
+  const pagination = usePagination(visible, { defaultPageSize: 25, resetKey: currentScope });
   const mutate = async (operation: () => Promise<unknown>) => {
     if (busy.current) return false;
     busy.current = true;
@@ -85,13 +88,16 @@ export function LiveTasksManager() {
       h('label', { className: 'flex gap-2 items-center min-h-[44px]' }, h('input', { type: 'checkbox', checked: shared, disabled: saving, onChange: (event: React.ChangeEvent<HTMLInputElement>) => setShared(event.target.checked) }), 'Chia sẻ công việc này với người nhà'),
       h(Button, { type: 'submit', loading: saving }, 'Lưu công việc'),
     ),
-    loading ? h('p', { role: 'status' }, 'Đang tải công việc...') : visible.length ? h('ul', { className: 'space-y-3' }, visible.map((task) => h('li', { key: task.id, 'data-testid': `task-${task.id}`, className: 'bg-surface border rounded-card p-4 space-y-2' },
-      h('h3', { className: 'font-semibold break-words' }, task.title),
-      isOwner && h(TaskActions, { id: task.id, choices: tasks, reload: () => setRevision(v=>v+1) }),
-      h('p', { className: 'text-sm text-text-muted' }, task.is_waiting_official_date ? 'Hạn sẽ được tính khi chốt ngày buổi lễ' : task.computed_due_date ? `Hạn: ${new Date(task.computed_due_date).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}` : 'Chưa có hạn'),
-      isOwner ? h('select', { className: selectClass, 'aria-label': `Trạng thái ${task.title}`, value: task.status, disabled: saving, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => {
-        void mutate(() => api(`/api/v1/tasks/${task.id}/status`, { method: 'PATCH', body: jsonBody({ status: event.target.value, version: task.version }) }));
-      } }, Object.entries(statuses).map(([value, label]) => h('option', { key: value, value }, label))) : h('p', null, statuses[task.status as keyof typeof statuses] || task.status),
-    ))) : h(EmptyState, { title: 'Chăm chút từng việc, thong thả đón ngày vui', description: 'Tạo công việc, chọn hạn hoàn thành và cùng gia đình theo dõi từng bước chuẩn bị.', icon: h(CheckSquare, { className: 'w-7 h-7 text-accent', strokeWidth: 1.4 }), action: isOwner ? { label: 'Tạo công việc đầu tiên', onClick: startCreating } : undefined }),
+    loading ? h('p', { role: 'status' }, 'Đang tải công việc...') : visible.length ? h(React.Fragment, null,
+      h('ul', { className: 'space-y-3' }, pagination.pagedItems.map((task) => h('li', { key: task.id, 'data-testid': `task-${task.id}`, className: 'bg-surface border rounded-card p-4 space-y-2' },
+        h('h3', { className: 'font-semibold break-words' }, task.title),
+        isOwner && h(TaskActions, { id: task.id, choices: tasks, reload: () => setRevision(v=>v+1) }),
+        h('p', { className: 'text-sm text-text-muted' }, task.is_waiting_official_date ? 'Hạn sẽ được tính khi chốt ngày buổi lễ' : task.computed_due_date ? `Hạn: ${new Date(task.computed_due_date).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}` : 'Chưa có hạn'),
+        isOwner ? h('select', { className: selectClass, 'aria-label': `Trạng thái ${task.title}`, value: task.status, disabled: saving, onChange: (event: React.ChangeEvent<HTMLSelectElement>) => {
+          void mutate(() => api(`/api/v1/tasks/${task.id}/status`, { method: 'PATCH', body: jsonBody({ status: event.target.value, version: task.version }) }));
+        } }, Object.entries(statuses).map(([value, label]) => h('option', { key: value, value }, label))) : h('p', null, statuses[task.status as keyof typeof statuses] || task.status),
+      ))),
+      h(Pagination, { currentPage: pagination.currentPage, pageSize: pagination.pageSize, totalItems: pagination.totalItems, onPageChange: pagination.setCurrentPage, onPageSizeChange: pagination.setPageSize, pageSizeOptions: [10, 25, 50, 100], unitLabel: 'công việc' }),
+    ) : h(EmptyState, { title: 'Chăm chút từng việc, thong thả đón ngày vui', description: 'Tạo công việc, chọn hạn hoàn thành và cùng gia đình theo dõi từng bước chuẩn bị.', icon: h(CheckSquare, { className: 'w-7 h-7 text-accent', strokeWidth: 1.4 }), action: isOwner ? { label: 'Tạo công việc đầu tiên', onClick: startCreating } : undefined }),
   );
 }

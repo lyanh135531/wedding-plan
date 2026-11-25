@@ -6,6 +6,8 @@ import { weddingDateKey } from '@/lib/dates';
 import { TextInput } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Pagination } from '@/components/ui/pagination';
+import { usePagination } from '@/components/common/usePagination';
 import { AppointmentsWorkspace } from './AppointmentsWorkspace';
 import { CalendarDays } from 'lucide-react';
 
@@ -18,6 +20,7 @@ export function LiveCalendarView() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [revision, setRevision] = React.useState(0);
+  const pagination = usePagination(items, { defaultPageSize: 20, resetKey: `${start}:${end}` });
   React.useEffect(() => {
     const today = new Date();
     setStart(weddingDateKey(new Date(today.getTime() - 7 * 86400000)));
@@ -46,10 +49,13 @@ export function LiveCalendarView() {
     h('a', { href: '/api/v1/export/calendar.ics', className: 'inline-flex min-h-[44px] items-center text-primary underline' }, 'Tải lịch .ics'),
     error && h(Alert, { variant: 'danger', action: { label: 'Thử lại', onClick: () => setRevision((value) => value + 1) } }, error),
     !error && (loading ? h('p', { role: 'status' }, 'Đang tải lịch...') : items.length ?
-      h('ul', { className: 'space-y-3' }, items.map((item) => h('li', { key: item.id, className: 'bg-surface border rounded-card p-4 space-y-1' },
-        h('h2', { className: 'font-semibold break-words' }, h('a', { className: 'underline', href: item.itemType === 'task' ? '/tasks' : item.itemType === 'payment_schedule' ? '/payments' : '/calendar' }, item.title)),
-        h('p', { className: 'text-sm text-text-muted' }, new Date(item.dateTime).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })),
-        item.location && h('p', { className: 'text-sm' }, item.location),
-      ))) : h(EmptyState, { title: 'Chưa có lịch trong khoảng ngày này', description: 'Các cuộc hẹn, buổi lễ và hạn công việc sẽ được tập hợp tại đây. Bạn có thể chọn một khoảng thời gian khác để xem.', icon: h(CalendarDays, { className: 'w-7 h-7 text-accent', strokeWidth: 1.4 }) })),
+      h(React.Fragment, null,
+        h('ul', { className: 'space-y-3' }, pagination.pagedItems.map((item) => h('li', { key: item.id, className: 'bg-surface border rounded-card p-4 space-y-1' },
+          h('h2', { className: 'font-semibold break-words' }, h('a', { className: 'underline', href: item.itemType === 'task' ? '/tasks' : item.itemType === 'payment_schedule' ? '/payments' : '/calendar' }, item.title)),
+          h('p', { className: 'text-sm text-text-muted' }, new Date(item.dateTime).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })),
+          item.location && h('p', { className: 'text-sm' }, item.location),
+        ))),
+        h(Pagination, { currentPage: pagination.currentPage, pageSize: pagination.pageSize, totalItems: pagination.totalItems, onPageChange: pagination.setCurrentPage, onPageSizeChange: pagination.setPageSize, pageSizeOptions: [10, 20, 50], unitLabel: 'sự kiện' }),
+      ) : h(EmptyState, { title: 'Chưa có lịch trong khoảng ngày này', description: 'Các cuộc hẹn, buổi lễ và hạn công việc sẽ được tập hợp tại đây. Bạn có thể chọn một khoảng thời gian khác để xem.', icon: h(CalendarDays, { className: 'w-7 h-7 text-accent', strokeWidth: 1.4 }) })),
   );
 }

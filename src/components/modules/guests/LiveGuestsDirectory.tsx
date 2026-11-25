@@ -7,6 +7,8 @@ import { useEventScope } from '@/context/EventScopeContext';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Pagination } from '@/components/ui/pagination';
+import { usePagination } from '@/components/common/usePagination';
 import { AddGuestModal, type AddGuestDraft } from './AddGuestModal';
 import { AddFamilyModal, type AddFamilyModalProps } from './AddFamilyModal';
 import { RsvpUpdateDrawer, type MemberRsvpState } from './RsvpUpdateDrawer';
@@ -517,6 +519,10 @@ export function LiveGuestsDirectory() {
       }),
     [guests, attendance, invitations, search, sideFilter, rsvpFilter]
   );
+  const pagination = usePagination(shown, {
+    defaultPageSize: 25,
+    resetKey: `${eventId}:${archived}:${search}:${sideFilter}:${rsvpFilter}`,
+  });
 
   const hasActiveFilters = Boolean(search.trim() || sideFilter !== 'all' || rsvpFilter !== 'all');
   const clearFilters = () => {
@@ -734,19 +740,30 @@ export function LiveGuestsDirectory() {
 
       {/* Compact Guest List */}
       {!loading && !error && shown.length > 0 && (
-        <CompactGuestList
-          guests={shown}
-          attendance={attendance}
-          invitations={invitations}
-          seatedNames={seatedNames}
-          isOwner={isOwner}
-          eventId={eventId}
-          busy={busy}
-          onOpenDetail={openDetail}
-          onInvite={(guest) => void invite(guest)}
-          onOpenRsvp={(id) => setRsvpGuest(id)}
-          reload={load}
-        />
+        <>
+          <CompactGuestList
+            guests={pagination.pagedItems}
+            attendance={attendance}
+            invitations={invitations}
+            seatedNames={seatedNames}
+            isOwner={isOwner}
+            eventId={eventId}
+            busy={busy}
+            onOpenDetail={openDetail}
+            onInvite={(guest) => void invite(guest)}
+            onOpenRsvp={(id) => setRsvpGuest(id)}
+            reload={load}
+          />
+          <Pagination
+            currentPage={pagination.currentPage}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            onPageChange={pagination.setCurrentPage}
+            onPageSizeChange={pagination.setPageSize}
+            pageSizeOptions={[10, 25, 50, 100]}
+            unitLabel="khách"
+          />
+        </>
       )}
 
       {/* Modals & Drawers */}

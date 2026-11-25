@@ -4,6 +4,8 @@ import { useMutationFetch } from '@/components/common/useMutationFetch';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
+import { Pagination } from '@/components/ui/pagination';
+import { usePagination } from '@/components/common/usePagination';
 import { useRole } from '@/context/RoleContext';
 import { PermissionDeniedView } from '@/components/layout/PermissionDeniedView';
 import {
@@ -351,6 +353,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
     if (activeTab === 'unidentified') return !g.isSenderIdentified && !g.isVoided;
     return true;
   });
+  const giftPagination = usePagination(filteredGifts, { defaultPageSize: 25, resetKey: `${eventId}:${activeTab}` });
 
   const etiquetteTemplate = selectedGift
     ? `Vợ chồng chúng con/em xin chân thành cảm ơn ${
@@ -488,7 +491,7 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
         : h(
             'div',
             { className: 'divide-y divide-border-subtle' },
-            filteredGifts.map((g) =>
+            giftPagination.pagedItems.map((g) =>
               h(
                 'div',
                 {
@@ -601,6 +604,17 @@ export const GiftsDashboard: React.FC<GiftsDashboardProps> = ({ eventId = '' }) 
             )
           )
     ),
+
+    filteredGifts.length > 0 &&
+      h(Pagination, {
+        currentPage: giftPagination.currentPage,
+        pageSize: giftPagination.pageSize,
+        totalItems: giftPagination.totalItems,
+        onPageChange: giftPagination.setCurrentPage,
+        onPageSizeChange: giftPagination.setPageSize,
+        pageSizeOptions: [10, 25, 50, 100],
+        unitLabel: 'quà mừng',
+      }),
 
     // Modal: Add Gift (with multi-contributor AT25)
     isAddModalOpen &&

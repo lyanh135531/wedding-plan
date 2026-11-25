@@ -18,7 +18,7 @@ export function SettingsAdvancedWorkspace() {
   if (!isOwner) return null;
   return <div className="space-y-8">{error && <p role="alert" className="text-danger">{error}</p>}<div className="surface-card p-5 space-y-3"><h2 className="text-xl font-serif">Thông tin hai người & Ngân sách chung</h2><Button disabled={!config} onClick={() => setOpen(true)}>Chỉnh sửa thông tin</Button></div>
     {open && config && <RecordEditor title="Thông tin đám cưới" record={config} close={() => setOpen(false)} fields={[{ key: 'groomName', label: 'Họ và tên chú rể', required: true }, { key: 'brideName', label: 'Họ và tên cô dâu', required: true }, { key: 'tentativeDateNote', label: 'Ghi chú thời gian dự kiến' }, { key: 'representativeEventId', label: 'Buổi lễ đại diện', type: 'select', options: events.filter(e => e.status !== 'cancelled').map(e => ({ value: e.id, label: String(e.title) })) }, { key: 'budgetTarget', label: 'Ngân sách mục tiêu (VND, để trống nếu chưa chốt)' }, { key: 'contingencyBudget', label: 'Ngân sách dự phòng (VND)' }]} save={async body => { const r = await api<{ data: RecordData }>('/api/v1/configuration', { method: 'PATCH', body: jsonBody({ ...body, version: config.version }) }); setConfig(r.data); router.refresh(); }} />}
-    <ResourceWorkspace title="Buổi lễ" endpoint="/api/v1/events" fields={eventFields} canDelete={false} onChanged={() => { setRevision(v => v + 1); router.refresh(); }} />
+    <ResourceWorkspace title="Buổi lễ" endpoint="/api/v1/events" fields={eventFields} canDelete={false} paginate={false} onChanged={() => { setRevision(v => v + 1); router.refresh(); }} />
     <SharingWorkspace />
   </div>;
 }

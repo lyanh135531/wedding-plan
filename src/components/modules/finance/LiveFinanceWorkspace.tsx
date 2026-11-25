@@ -11,6 +11,8 @@ import { useSaveAction } from '@/components/common/useSaveAction';
 import { formatVND } from '@/lib/utils';
 import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Pagination } from '@/components/ui/pagination';
+import { usePagination } from '@/components/common/usePagination';
 import { CategoryEditor } from './CategoryEditor';
 import { calculateCostItemMetrics } from '@/lib/finance/calculator';
 import { CostActions } from './CostActions';
@@ -119,10 +121,12 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
     finally { if (request === generation.current) setLoading(false); }
   }, []);
   useEffect(() => { if (isOwner) void load(); return () => { generation.current++; }; }, [load, isOwner]);
-  if (!isOwner) return <p>Bạn không có quyền xem tài chính.</p>;
   const shownCosts = costs.filter((cost) => currentScope === 'common' ? cost.eventId === null : !eventId || cost.eventId === eventId);
   const ids = new Set(shownCosts.map((cost) => cost.id));
   const shownPayments = payments.filter((payment) => ids.has(payment.costItemId));
+  const costPagination = usePagination(shownCosts, { defaultPageSize: 20, resetKey: `budget:${currentScope}` });
+  const paymentPagination = usePagination(shownPayments, { defaultPageSize: 20, resetKey: `payments:${currentScope}` });
+  if (!isOwner) return <p>Bạn không có quyền xem tài chính.</p>;
   const net = shownPayments.filter((payment) => !payment.isVoided).reduce((sum, payment) => sum + (payment.paymentType === 'outflow' ? 1n : -1n) * BigInt(payment.amount), 0n);
   const metrics = shownCosts.map(cost=>calculateCostItemMetrics({estimatedAmount:cost.estimatedAmount===null?null:BigInt(cost.estimatedAmount),contractedAmount:cost.contractedAmount===null?null:BigInt(cost.contractedAmount),finalSettlementAmount:cost.finalSettlementAmount===null?null:BigInt(cost.finalSettlementAmount)},shownPayments.filter(p=>p.costItemId===cost.id).map(p=>({...p,amount:BigInt(p.amount)}))));
   const projected = metrics.reduce((sum,m)=>sum+(m.forecastAmount??0n),0n);
@@ -149,16 +153,17 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
         <h2 className="text-sm font-semibold mb-4">Danh mục ngân sách</h2>
         {categories.length ? <ul className="flex flex-wrap gap-3">{categories.map((category) => <li key={category.id} className="rounded-control bg-page border border-border-subtle px-4 py-3 text-xs"><span className="font-medium">{category.name}</span><span className="text-text-muted ml-3 tabular-nums">{formatVND(BigInt(category.allocatedAmount || '0'))}</span><CategoryEditor category={category} reload={load}/></li>)}</ul> : <p className="text-xs text-text-muted">Chưa có danh mục. Hãy bắt đầu với các hạng mục dành cho đám cưới của bạn.</p>}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{shownCosts.map((cost) => <article key={cost.id} className="rounded-card border border-border-subtle p-4 bg-surface">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{costPagination.pagedItems.map((cost) => <article key={cost.id} className="rounded-card border border-border-subtle p-4 bg-surface">
         <h2 className="font-bold">{cost.name}</h2><p>{cost.contractedAmount === null ? 'Chưa có giá hợp đồng' : formatVND(BigInt(cost.contractedAmount))}</p>
         <CostActions cost={{...cost}} categories={categories} reload={load} />
       </article>)}</div>
+      {!loading && !error && shownCosts.length > 0 && <Pagination currentPage={costPagination.currentPage} pageSize={costPagination.pageSize} totalItems={costPagination.totalItems} onPageChange={costPagination.setCurrentPage} onPageSizeChange={costPagination.setPageSize} pageSizeOptions={[10, 20, 50, 100]} unitLabel="khoản chi" />}
       {!loading && !error && !shownCosts.length && <EmptyState title="Một kế hoạch rõ ràng cho từng khoản chi"
         description="Ghi lại chi phí, theo dõi thanh toán và dành ngân sách cho những điều quan trọng với hai bạn."
         icon={<Wallet className="w-7 h-7 text-accent" strokeWidth={1.4} />}
         action={{ label: categories.length ? 'Tạo khoản chi đầu tiên' : 'Tạo danh mục đầu tiên', onClick: () => setEditor({ type: categories.length ? 'cost' : 'category' }) }} />}
     </>}
-    {view === 'payments' && <div className="space-y-3">{shownPayments.map((payment) => <article key={payment.id} data-testid={`payment-${payment.id}`} className="rounded-card border border-border-subtle bg-surface p-4 space-y-2">
+    {view === 'payments' && <div className="space-y-3">{paymentPagination.pagedItems.map((payment) => <article key={payment.id} data-testid={`payment-${payment.id}`} className="rounded-card border border-border-subtle bg-surface p-4 space-y-2">
       <h2 className="font-semibold">{payment.costItemName}</h2>
       <p>{payment.paymentType === 'refund' ? 'Hoàn tiền' : 'Chi tiền'} · {formatVND(BigInt(payment.amount))}</p>
       <p>{new Date(payment.transactionTime).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</p>
@@ -166,7 +171,7 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
         {payment.paymentType === 'outflow' && <Button variant="secondary" onClick={() => setEditor({ type: 'refund', payment })}>Hoàn tiền</Button>}
         <Button variant="secondary" onClick={() => setEditor({ type: 'void', payment })}>Hủy giao dịch</Button>
       </div>}
-    </article>)}{!loading && !error && !shownPayments.length && <EmptyState title="Chưa có giao dịch trong sổ chi tiêu" description="Các khoản chi và tiền hoàn sẽ được lưu tại đây để gia đình dễ dàng cùng đối chiếu." icon={<Receipt className="w-7 h-7 text-accent" strokeWidth={1.4} />} />}</div>}
+    </article>)}{!loading && !error && shownPayments.length > 0 && <Pagination currentPage={paymentPagination.currentPage} pageSize={paymentPagination.pageSize} totalItems={paymentPagination.totalItems} onPageChange={paymentPagination.setCurrentPage} onPageSizeChange={paymentPagination.setPageSize} pageSizeOptions={[10, 20, 50, 100]} unitLabel="giao dịch" />}{!loading && !error && !shownPayments.length && <EmptyState title="Chưa có giao dịch trong sổ chi tiêu" description="Các khoản chi và tiền hoàn sẽ được lưu tại đây để gia đình dễ dàng cùng đối chiếu." icon={<Receipt className="w-7 h-7 text-accent" strokeWidth={1.4} />} />}</div>}
     {editor && <FinanceEditor editor={editor} categories={categories} costs={shownCosts} eventId={eventId} close={() => setEditor(null)} saved={load} />}
   </section>;
 }

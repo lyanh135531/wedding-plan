@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { CalendarInput } from '@/components/ui/calendar-input';
+import { Pagination } from '@/components/ui/pagination';
+import { usePagination } from './usePagination';
 import { removeVietnameseDiacritics } from '@/lib/utils';
 
 export type RecordData = { id: string; version?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
@@ -108,9 +110,9 @@ export function RecordEditor({ title, fields, record, save, close, draftScope }:
   </ModalDialog>;
 }
 
-export function ResourceWorkspace({ title, endpoint, eventId, fields, defaults = {}, titleKey = 'title', canEdit = true, canDelete = true, canCreate = true, detail, actions, itemIdKey = 'id', onChanged, preparePayload }: {
+export function ResourceWorkspace({ title, endpoint, eventId, fields, defaults = {}, titleKey = 'title', canEdit = true, canDelete = true, canCreate = true, paginate = true, detail, actions, itemIdKey = 'id', onChanged, preparePayload }: {
   title: string; endpoint: string; eventId?: string; fields: Field[]; defaults?: Record<string, unknown>; titleKey?: string;
-  canEdit?: boolean; canDelete?: boolean; canCreate?: boolean; itemIdKey?: string; onChanged?: () => void;
+  canEdit?: boolean; canDelete?: boolean; canCreate?: boolean; paginate?: boolean; itemIdKey?: string; onChanged?: () => void;
   preparePayload?: (body: Record<string, unknown>) => Record<string, unknown>;
   detail?: (record: RecordData) => React.ReactNode; actions?: (record: RecordData, reload: () => void) => React.ReactNode;
 }) {
@@ -135,6 +137,8 @@ export function ResourceWorkspace({ title, endpoint, eventId, fields, defaults =
     return () => controller.abort();
   }, [endpoint, eventId, revision]);
   const filtered = records.filter(r => removeVietnameseDiacritics(JSON.stringify(r)).toLowerCase().includes(removeVietnameseDiacritics(search).toLowerCase()));
+  const pagination = usePagination(filtered, { defaultPageSize: 10, resetKey: `${endpoint}:${eventId ?? ''}:${search}` });
+  const visibleRecords = paginate ? pagination.pagedItems : filtered;
   return <section className="space-y-4">
     <div className="flex flex-wrap gap-3 justify-between items-center"><h2 className="font-serif text-2xl">{title}</h2><div className="flex gap-2 print:hidden"><Button variant="secondary" onClick={reload} disabled={loading}>Tải lại</Button><Button variant="secondary" onClick={()=>window.print()} disabled={loading || !!error}>In danh sách</Button>{isOwner && canCreate && <Button disabled={loading || !!error} onClick={() => setEditor('new')}>Thêm mới</Button>}</div></div>
     <input aria-label={`Tìm trong ${title.toLowerCase()}`} placeholder="Tìm kiếm…" className={`${controlClass} print:hidden`} value={search} onChange={e => setSearch(e.target.value)} />
@@ -142,7 +146,7 @@ export function ResourceWorkspace({ title, endpoint, eventId, fields, defaults =
     {error && <p role="alert" className="text-danger">{error}</p>}
     {loading ? <p role="status">Đang tải…</p> : !error && <>
       {!filtered.length && <div className="surface-card p-6 text-text-muted">{records.length ? 'Không có kết quả phù hợp.' : 'Chưa có dữ liệu. Thêm bản ghi đầu tiên để bắt đầu.'}</div>}
-      <div className="space-y-3">{filtered.map(record => <article key={record.id} className="surface-card p-5 space-y-3">
+      <div className="space-y-3">{visibleRecords.map(record => <article key={record.id} className="surface-card p-5 space-y-3">
         <h3 className="font-semibold break-words">{fields.find(f=>f.key===titleKey)?.options?.find(o=>o.value===record[titleKey])?.label || String(record[titleKey] ?? '')}</h3>
         <dl className="grid sm:grid-cols-2 gap-2 text-sm">{fields.filter(f => f.key !== titleKey).map(field => {
           const value = record[field.key] ?? record.metadata?.[field.key];
@@ -163,6 +167,7 @@ export function ResourceWorkspace({ title, endpoint, eventId, fields, defaults =
         </div>
         {selected === record.id && detail?.(record)}
       </article>)}</div>
+      {paginate && filtered.length > 0 && <Pagination className="print:hidden" currentPage={pagination.currentPage} pageSize={pagination.pageSize} totalItems={pagination.totalItems} onPageChange={pagination.setCurrentPage} onPageSizeChange={pagination.setPageSize} pageSizeOptions={[10, 25, 50, 100]} unitLabel="bản ghi" />}
     </>}
     {editor && <RecordEditor draftScope={endpoint} title={`${editor === 'new' ? 'Thêm' : 'Sửa'} ${title.toLowerCase()}`} fields={fields} record={editor === 'new' ? undefined : editor} close={() => setEditor(null)} save={async payload => {
       const body = jsonBody(preparePayload ? preparePayload(payload) : { ...defaults, ...(eventId ? { eventId } : {}), ...payload, ...(editor !== 'new' && editor.version ? { version: editor.version } : {}) });
