@@ -404,6 +404,7 @@ describe('S18: Seating Screen & Components Unit Tests', () => {
 
       expect(html).toContain('#01');
       expect(html).toContain('h-1.5 w-full rounded-full');
+      expect(html).toContain('sm:grid-cols-2');
       expect(html).toContain('100%');
       expect(html).toContain('2 / 2 chỗ');
     });

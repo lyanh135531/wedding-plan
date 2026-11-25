@@ -247,53 +247,29 @@ export function LiveSeatingWorkspace() {
   const selectedGuest = guests.find((guest) => guest.id === selected);
 
   return (
-    <section className="space-y-4">
-      {/* Editorial Header */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow mb-1.5">Sắp xếp chỗ ngồi</p>
-          <h1 className="text-[26px] sm:text-[32px] font-medium leading-tight">Sơ Đồ Xếp Bàn Tiệc</h1>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {isOwner && (
-            <Button
-              leftIcon={<Plus className="w-4 h-4" />}
-              disabled={!eventId || busy}
-              onClick={() => setEditing(null)}
-            >
-              Thêm bàn tiệc
-            </Button>
-          )}
-          <Button
-            variant="secondary"
-            leftIcon={<Printer className="w-4 h-4" />}
-            onClick={() => setExporting(true)}
-          >
-            In sơ đồ bàn
-          </Button>
-        </div>
-      </div>
-
-      {/* Unified Overview & Table Filter Bar */}
-      <div className="surface-card p-4 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-border-subtle/70">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
-            <span>
-              Buổi lễ:{' '}
-              <strong className="font-medium text-text-main">
-                {activeEvent?.name || 'Chưa có buổi lễ'}
-              </strong>
-            </span>
+    <section className="space-y-3">
+      {/* Compact Unified Header & Filter Bar */}
+      <div className="surface-card p-3 space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <h1 className="text-lg sm:text-xl font-semibold leading-tight text-text-main">
+              Sơ Đồ Xếp Bàn Tiệc
+            </h1>
+            {activeEvent?.name && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-page border border-border-subtle text-[11px] font-medium text-text-muted">
+                {activeEvent.name}
+              </span>
+            )}
             {!loading && !error && (
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium tabular-nums">
+              <div className="flex flex-wrap items-center gap-1 text-[11px]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold tabular-nums">
                   <Users className="w-3 h-3" aria-hidden="true" />
                   Đã xếp {stats.seatedCount}/{stats.totalGuests}
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-warning-bg text-warning font-medium tabular-nums">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-warning-bg text-warning font-semibold tabular-nums">
                   Còn {stats.unseatedCount} chưa xếp
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-page border border-border-subtle text-text-main font-medium tabular-nums">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-page border border-border-subtle text-text-main font-medium tabular-nums">
                   <Armchair className="w-3 h-3 text-primary" aria-hidden="true" />
                   {stats.totalTables} bàn ({stats.occupiedSeats}/{stats.totalCapacity} ghế)
                 </span>
@@ -301,24 +277,35 @@ export function LiveSeatingWorkspace() {
             )}
           </div>
 
-          {isOwner && (
-            <p className="text-xs text-text-muted">
-              {selectedGuest ? (
-                <span className="text-primary font-medium">
-                  Đang chọn <strong>{selectedGuest.name}</strong> — bấm vào bàn để xếp
-                </span>
-              ) : (
-                'Kéo khách sang bàn hoặc chạm chọn khách rồi bấm bàn'
-              )}
-            </p>
-          )}
+          <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+            {isOwner && (
+              <Button
+                size="sm"
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+                disabled={!eventId || busy}
+                onClick={() => setEditing(null)}
+                className="h-9 min-h-[36px] px-3 text-xs"
+              >
+                Thêm bàn tiệc
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="secondary"
+              leftIcon={<Printer className="w-3.5 h-3.5" />}
+              onClick={() => setExporting(true)}
+              className="h-9 min-h-[36px] px-3 text-xs"
+            >
+              In sơ đồ bàn
+            </Button>
+          </div>
         </div>
 
-        {/* Table Search & Filter Row */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        {/* Table Search, Filter & Active Selection Row */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <div className="relative flex-1 min-w-0">
             <Search
-              className="w-4 h-4 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              className="w-3.5 h-3.5 text-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
               aria-hidden="true"
             />
             <input
@@ -327,7 +314,7 @@ export function LiveSeatingWorkspace() {
               placeholder="Tìm bàn theo tên hoặc số bàn..."
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
-              className="w-full h-11 pl-10 pr-9 text-sm bg-surface border border-border-control rounded-control focus:outline-none focus:border-primary"
+              className="w-full h-11 pl-9 pr-8 text-xs bg-surface border border-border-control rounded-control focus:outline-none focus:border-primary"
             />
             {tableSearch && (
               <button
@@ -345,7 +332,7 @@ export function LiveSeatingWorkspace() {
             aria-label="Lọc bàn tiệc"
             value={tableFilter}
             onChange={(e) => setTableFilter(e.target.value as TableFilterOption)}
-            className="h-11 sm:w-48 text-sm bg-surface border border-border-control rounded-control"
+            className="h-11 sm:w-44 text-xs bg-surface border border-border-control rounded-control"
           >
             <option value="all">Tất cả bàn tiệc</option>
             <option value="available">Còn chỗ trống</option>
@@ -354,14 +341,19 @@ export function LiveSeatingWorkspace() {
             <option value="rectangular">Chỉ bàn chữ nhật</option>
           </select>
 
-          {selected && (
-            <button
-              type="button"
-              onClick={() => setSelected(null)}
-              className="h-11 px-3 text-xs font-medium text-text-muted hover:text-text-main rounded-control border border-border-subtle bg-page whitespace-nowrap"
-            >
-              Bỏ chọn khách
-            </button>
+          {selectedGuest && (
+            <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-control bg-primary/10 border border-primary/20 text-xs text-primary">
+              <span className="truncate">
+                Đang chọn <strong>{selectedGuest.name}</strong> — bấm bàn để xếp
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelected(null)}
+                className="font-semibold underline whitespace-nowrap shrink-0"
+              >
+                Bỏ chọn
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -385,22 +377,28 @@ export function LiveSeatingWorkspace() {
 
       {/* Loading skeleton */}
       {loading && (
-        <div role="status" className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-pulse">
+        <div
+          role="status"
+          className="grid grid-cols-1 lg:grid-cols-[248px_minmax(0,1fr)] xl:grid-cols-[264px_minmax(0,1fr)] gap-3 animate-pulse"
+        >
           <span className="sr-only">Đang tải sơ đồ bàn…</span>
-          <div className="surface-card p-4 h-72" />
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="surface-card h-48" />
-            <div className="surface-card h-48" />
+          <div className="surface-card p-3 h-64" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="surface-card h-40" />
+            <div className="surface-card h-40" />
           </div>
         </div>
       )}
 
       {/* Main Split Workspace (items-start prevents stretching tables to match left sidebar!) */}
       {!loading && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start" aria-busy={busy || refreshing}>
+        <div
+          className="grid grid-cols-1 lg:grid-cols-[248px_minmax(0,1fr)] xl:grid-cols-[264px_minmax(0,1fr)] gap-3 items-start"
+          aria-busy={busy || refreshing}
+        >
           {/* Left Sticky Unseated Guest Panel */}
           <aside
-            className={`surface-card p-4 flex flex-col gap-3 lg:sticky lg:top-20 transition-all ${
+            className={`surface-card p-3 flex flex-col gap-2 lg:sticky lg:top-20 transition-all ${
               unseatedDragOver ? 'border-primary ring-2 ring-primary/30 bg-primary/[0.03]' : ''
             }`}
             onDragOver={(e) => {
@@ -412,9 +410,9 @@ export function LiveSeatingWorkspace() {
             onDragLeave={() => setUnseatedDragOver(false)}
             onDrop={handleUnseatedDrop}
           >
-            <div className="flex items-center justify-between gap-2 pb-2 border-b border-border-subtle/80">
-              <h2 className="text-sm font-semibold text-text-main">Khách đã xác nhận, chưa xếp bàn</h2>
-              <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-semibold tabular-nums">
+            <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-border-subtle/70">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">Chưa xếp bàn</h2>
+              <span className="text-[11px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold tabular-nums">
                 {stats.unseatedCount}
               </span>
             </div>
@@ -446,7 +444,7 @@ export function LiveSeatingWorkspace() {
             </div>
 
             {/* Compact Side Filter Pills */}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1">
               {(
                 [
                   ['all', 'Tất cả'],
@@ -459,7 +457,7 @@ export function LiveSeatingWorkspace() {
                   key={key}
                   type="button"
                   onClick={() => setGuestSideFilter(key)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border ${
+                  className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors border ${
                     guestSideFilter === key
                       ? 'bg-primary text-white border-primary'
                       : 'bg-page text-text-muted border-border-subtle hover:text-text-main'
@@ -471,13 +469,13 @@ export function LiveSeatingWorkspace() {
             </div>
 
             {/* Bounded Scrollable Unseated Guest List */}
-            <div className="space-y-1.5 max-h-[420px] lg:max-h-[calc(100vh-22rem)] overflow-y-auto pr-1">
+            <div className="space-y-1 max-h-[360px] lg:max-h-[calc(100vh-14.5rem)] overflow-y-auto pr-0.5">
               {stats.unseatedCount === 0 ? (
-                <p className="text-xs text-text-muted italic py-6 text-center">
+                <p className="text-xs text-text-muted italic py-4 text-center">
                   Tất cả khách đã được xếp vào bàn.
                 </p>
               ) : unseatedFiltered.length === 0 ? (
-                <p className="text-xs text-text-muted italic py-6 text-center">
+                <p className="text-xs text-text-muted italic py-4 text-center">
                   Không tìm thấy khách phù hợp.
                 </p>
               ) : (
@@ -507,7 +505,7 @@ export function LiveSeatingWorkspace() {
                           setSelected(isSelected ? null : guest.id);
                         }
                       }}
-                      className={`w-full rounded-control px-3 py-2 border text-left transition-all flex items-center justify-between gap-2 ${
+                      className={`w-full rounded-md px-2.5 py-1.5 border text-left transition-all flex items-center justify-between gap-1.5 ${
                         isOwner && !busy ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
                       } ${
                         isSelected
@@ -515,16 +513,16 @@ export function LiveSeatingWorkspace() {
                           : 'bg-page/60 border-border-subtle hover:border-primary/45 hover:bg-page'
                       }`}
                     >
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
                         {isOwner && (
                           <GripVertical
-                            className={`w-3.5 h-3.5 shrink-0 ${
+                            className={`w-3 h-3 shrink-0 ${
                               isSelected ? 'text-white/75' : 'text-text-muted/60'
                             }`}
                             aria-hidden="true"
                           />
                         )}
-                        <span className="text-sm font-medium truncate">{guest.name}</span>
+                        <span className="text-xs font-medium truncate">{guest.name}</span>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         {guest.needsSeat === false && (
@@ -538,7 +536,7 @@ export function LiveSeatingWorkspace() {
                         )}
                         {guest.side && (
                           <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                            className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
                               isSelected
                                 ? 'bg-white/20 text-white'
                                 : 'bg-surface border border-border-subtle text-text-muted'
@@ -556,9 +554,9 @@ export function LiveSeatingWorkspace() {
           </aside>
 
           {/* Right Tables Grid (items-start so each card hugs its own height) */}
-          <div className="lg:col-span-2">
+          <div className="min-w-0">
             {displayedTables.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
                 {displayedTables.map((table) => (
                   <TableCard
                     key={table.id}
