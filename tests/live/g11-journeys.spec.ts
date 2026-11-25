@@ -244,7 +244,7 @@ test('guest RSVP, seating, finance and immutable handover persist across reloads
   const guest = (await db.query('SELECT id FROM guests WHERE display_name=$1', [guestName])).rows[0];
   expect(guest).toBeTruthy();
   const guestCard = page.getByTestId(`guest-${guest.id}`);
-  await guestCard.getByRole('button', { name: 'Mời dự buổi', exact: true }).click();
+  await expect(guestCard.getByText('Sẽ tham dự', { exact: true })).toBeVisible();
   await guestCard.getByRole('button', { name: 'Cập nhật RSVP', exact: true }).click();
   const rsvp = page.getByRole('dialog');
   await rsvp.getByRole('button', { name: 'Tham dự', exact: true }).click();

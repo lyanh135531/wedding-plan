@@ -407,6 +407,7 @@ export function LiveGuestsDirectory() {
         is_placeholder: draft.isPlaceholder,
         placeholder_for: draft.placeholderFor || null,
         sub_tags: draft.subTags,
+        ...(eventId ? { event_id: eventId, initial_rsvp_status: 'accepted' } : {}),
       }),
     });
     await load();
@@ -423,6 +424,7 @@ export function LiveGuestsDirectory() {
           ...member,
           displayName: member.name,
           phone: member.phone || null,
+          rsvpStatus: 'accepted',
         })),
       }),
     });
@@ -443,6 +445,26 @@ export function LiveGuestsDirectory() {
           member_guest_ids: [guest.id],
         }),
       });
+      const attRes = await api<{ data: AttendanceOwnerDto[] }>(
+        `/api/v1/attendance?guestId=${guest.id}&eventId=${eventId}`
+      );
+      const createdAtt = attRes.data[0];
+      if (createdAtt && createdAtt.rsvp_status !== 'accepted') {
+        await api('/api/v1/attendance', {
+          method: 'PATCH',
+          body: jsonBody({
+            guest_id: guest.id,
+            event_id: eventId,
+            rsvp_status: 'accepted',
+            needs_seat: createdAtt.needs_seat,
+            needs_meal: createdAtt.needs_meal,
+            meal_dietary_tier: createdAtt.meal_dietary_tier,
+            accommodation_needed: createdAtt.accommodation_needed ?? false,
+            transport_needed: createdAtt.transport_needed ?? false,
+            version: createdAtt.version,
+          }),
+        });
+      }
       await load();
     } catch (failure) {
       setError((failure as Error).message);

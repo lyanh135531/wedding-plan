@@ -1,7 +1,7 @@
 import { eq, and, sql, desc, inArray } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '@/db/schema';
-import { guests, attendance, auditLogs } from '@/db/schema';
+import { guests, attendance, auditLogs, invitations, invitationMembers, events } from '@/db/schema';
 import {
   guestOwnerDtoSchema,
   guestFamilyDtoSchema,
@@ -196,7 +196,8 @@ export async function getGuestById(
 }
 
 /**
- * Creates a single guest profile.
+ * Creates a single guest profile, and optionally seeds an individual invitation
+ * and default attendance record when `event_id` is supplied.
  */
 export async function createGuest(
   txDb: TxDb,
@@ -220,6 +221,59 @@ export async function createGuest(
       version: 1,
     })
     .returning();
+
+  if (input.event_id) {
+    const [targetEvent] = await txDb
+      .select({ id: events.id })
+      .from(events)
+      .where(eq(events.id, input.event_id))
+      .limit(1);
+
+    if (!targetEvent) {
+      throw new Error('Buổi lễ không tồn tại');
+    }
+
+    const rsvpStatus = input.initial_rsvp_status ?? 'accepted';
+    const isBaby = created.ageTier === 'baby';
+    const isDeclined = rsvpStatus === 'declined';
+    const needsSeat = !isBaby && !isDeclined;
+    const needsMeal = !isBaby && !isDeclined;
+    const defaultDietary = created.ageTier === 'child' ? 'child_portion' : 'regular';
+
+    const [createdInv] = await txDb
+      .insert(invitations)
+      .values({
+        eventId: input.event_id,
+        cardName: created.displayName,
+        representativeGuestId: created.id,
+        deliveryMethod: 'paper',
+        status: 'save_the_date',
+        version: 1,
+      })
+      .returning();
+
+    await txDb.insert(invitationMembers).values({
+      invitationId: createdInv.id,
+      guestId: created.id,
+    });
+
+    await txDb.insert(attendance).values({
+      guestId: created.id,
+      eventId: input.event_id,
+      rsvpStatus,
+      contactCount: 0,
+      contactNotes: null,
+      nextFollowupDate: null,
+      needsSeat,
+      needsMeal,
+      mealDietaryTier: defaultDietary,
+      dietaryNotes: null,
+      accommodationNeeded: false,
+      transportNeeded: false,
+      isOriginOnsite: false,
+      version: 1,
+    });
+  }
 
   return mapToOwnerDto(created);
 }

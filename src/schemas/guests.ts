@@ -93,7 +93,7 @@ export type GuestFamilyDto = z.infer<typeof guestFamilyDtoSchema>;
 /**
  * Tạo & Sửa khách mời (Chỉ Owner)
  */
-export const createGuestSchema = z.object({
+const baseGuestFieldsSchema = z.object({
   display_name: requiredStringSchema('Tên hiển thị của khách', 100),
   side: guestSideEnum.default('unassigned'),
   group_id: uuidSchema.nullable().optional(),
@@ -106,9 +106,14 @@ export const createGuestSchema = z.object({
   is_placeholder: z.boolean().default(false),
   placeholder_for: z.string().trim().max(100).nullable().optional(),
 });
+
+export const createGuestSchema = baseGuestFieldsSchema.extend({
+  event_id: uuidSchema.optional(),
+  initial_rsvp_status: rsvpStatusEnum.optional(),
+});
 export type CreateGuestInput = z.infer<typeof createGuestSchema>;
 
-export const updateGuestSchema = createGuestSchema.extend({
+export const updateGuestSchema = baseGuestFieldsSchema.extend({
   version: versionSchema,
 });
 export type UpdateGuestInput = z.infer<typeof updateGuestSchema>;
