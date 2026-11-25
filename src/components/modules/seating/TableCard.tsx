@@ -69,7 +69,7 @@ export const TableCard: React.FC<TableCardProps> = ({
     e.preventDefault();
     setIsDragOver(false);
     const guestId = e.dataTransfer.getData('text/plain');
-    if (guestId && onDropGuest) {
+    if (guestId && onDropGuest && !table.seatedGuestIds.includes(guestId)) {
       onDropGuest(table.id, guestId);
     }
   };
@@ -179,8 +179,15 @@ export const TableCard: React.FC<TableCardProps> = ({
                 {
                   key: g.id,
                   'data-testid': `seated-guest-${g.id}`,
-                  className:
-                    'px-2.5 py-1.5 bg-page border border-border-subtle rounded text-xs text-text-main flex items-center justify-between gap-2',
+                  draggable: canMutate,
+                  onDragStart: (e: React.DragEvent) => {
+                    if (!canMutate) return;
+                    e.dataTransfer.setData('text/plain', g.id);
+                    e.dataTransfer.effectAllowed = 'move';
+                  },
+                  className: `px-2.5 py-1.5 bg-page border border-border-subtle rounded text-xs text-text-main flex items-center justify-between gap-2 transition-all ${
+                    canMutate ? 'cursor-grab active:cursor-grabbing hover:border-primary/50' : ''
+                  }`,
                 },
                 h(
                   'div',

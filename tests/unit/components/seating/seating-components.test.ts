@@ -168,6 +168,8 @@ describe('S18: Seating Screen & Components Unit Tests', () => {
       expect(html).toContain('Bàn tròn');
       expect(html).toContain('Bàn VIP 01 (Nhà Trai)');
       expect(html).toContain('2 / 10 chỗ');
+      expect(html).toContain('draggable="true"');
+      expect(html).toContain('cursor-grab');
     });
 
     it('renders rectangular shape badge and Table Full warning when capacity is reached (AT21)', () => {
