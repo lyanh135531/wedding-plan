@@ -8,6 +8,7 @@ import { useRole } from '@/context/RoleContext';
 import { api } from '@/lib/api/request';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DocumentActions } from '@/components/modules/DocumentActions';
+import { useLoadState } from '@/components/common/useLoadState';
 import { FileText } from 'lucide-react';
 
 const h = React.createElement;
@@ -28,7 +29,7 @@ export default function DocumentsPage() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(25);
   const [totalItems, setTotalItems] = React.useState(0);
-  const [loading, setLoading] = React.useState(true);
+  const { loading, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [revision, setRevision] = React.useState(0);
@@ -39,7 +40,8 @@ export default function DocumentsPage() {
   React.useEffect(() => {
     const controller = new AbortController();
     const offset = (currentPage - 1) * pageSize;
-    setLoading(true);
+    const filterKey = `${currentPage}:${pageSize}:${archived}:${query}`;
+    beginLoad(filterKey);
     setError(null);
     api<{ data: Document[]; total?: number; hasMore: boolean }>(
       `/api/v1/documents?offset=${offset}&limit=${pageSize}&archived=${archived}&q=${encodeURIComponent(query)}`,
@@ -49,16 +51,17 @@ export default function DocumentsPage() {
         if (!controller.signal.aborted) {
           setFiles(result.data);
           setTotalItems(result.total ?? offset + result.data.length);
+          markLoaded(filterKey);
         }
       })
       .catch((failure) => {
-        if (!controller.signal.aborted) setError((failure as Error).message);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted) {
+          setError((failure as Error).message);
+          finishLoad();
+        }
       });
     return () => controller.abort();
-  }, [currentPage, pageSize, revision, archived, query]);
+  }, [currentPage, pageSize, revision, archived, query, beginLoad, markLoaded, finishLoad]);
 
   const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.currentTarget;

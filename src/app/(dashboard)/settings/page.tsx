@@ -9,6 +9,7 @@ import { Alert } from '@/components/ui/alert';
 import { api, jsonBody } from '@/lib/api/request';
 import Link from 'next/link';
 import { SettingsAdvancedWorkspace } from '@/components/modules/SettingsAdvancedWorkspace';
+import { useLoadState } from '@/components/common/useLoadState';
 
 const h = React.createElement;
 
@@ -16,20 +17,23 @@ export default function SettingsPage() {
   const { isOwner } = useRole();
   const [weddingName, setWeddingName] = React.useState('');
   const [version, setVersion] = React.useState<number | null>(null);
-  const [loading, setLoading] = React.useState(true);
+  const { loading, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState(false);
   const load = React.useCallback(async () => {
-    setLoading(true);
+    beginLoad('settings');
     setError(null);
     try {
       const { data } = await api<{ data: { shortTitle: string | null; groomName: string; brideName: string; version: number } | null }>('/api/v1/settings');
       setWeddingName(data ? data.shortTitle || `${data.groomName} & ${data.brideName}` : '');
       setVersion(data?.version ?? null);
-    } catch (failure) { setError((failure as Error).message); }
-    finally { setLoading(false); }
-  }, []);
+      markLoaded('settings');
+    } catch (failure) {
+      setError((failure as Error).message);
+      finishLoad();
+    }
+  }, [beginLoad, markLoaded, finishLoad]);
   React.useEffect(() => { void load(); }, [load]);
   const save = async () => {
     if (saving || version === null) return;

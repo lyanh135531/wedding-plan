@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { usePagination } from '@/components/common/usePagination';
+import { useLoadState } from '@/components/common/useLoadState';
 import { AddGuestModal, type AddGuestDraft } from './AddGuestModal';
 import { AddFamilyModal, type AddFamilyModalProps } from './AddFamilyModal';
 import { RsvpUpdateDrawer, type MemberRsvpState } from './RsvpUpdateDrawer';
@@ -317,7 +318,7 @@ export function LiveGuestsDirectory() {
   const [attendance, setAttendance] = useState<LiveAttendance[]>([]);
   const [invitations, setInvitations] = useState<InvitationOwnerDto[]>([]);
   const [seatedNames, setSeatedNames] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
+  const { loading, refreshing, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch] = useState('');
@@ -340,7 +341,8 @@ export function LiveGuestsDirectory() {
     // Its old reload callback must not replace the current list.
     if (currentFilters.current.eventId !== eventId) return;
     const request = ++generation.current;
-    setLoading(true);
+    const scopeKey = eventId || 'none';
+    beginLoad(scopeKey);
     setError(null);
     try {
       const [people, attendees, cards] = await Promise.all([
@@ -370,12 +372,14 @@ export function LiveGuestsDirectory() {
           ])
         )
       );
+      markLoaded(scopeKey);
     } catch (failure) {
-      if (request === generation.current) setError((failure as Error).message);
-    } finally {
-      if (request === generation.current) setLoading(false);
+      if (request === generation.current) {
+        setError((failure as Error).message);
+        finishLoad();
+      }
     }
-  }, [eventId]);
+  }, [eventId, beginLoad, markLoaded, finishLoad]);
 
   useEffect(() => {
     void load();
@@ -550,7 +554,7 @@ export function LiveGuestsDirectory() {
     isOwner && detail ? attendance.some((row) => row.guest_id === detail.id) : false;
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4" aria-busy={busy || refreshing}>
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>

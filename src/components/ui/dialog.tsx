@@ -47,9 +47,9 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
           );
           if (focusable.length > 0) {
-            focusable[0].focus();
+            focusable[0].focus({ preventScroll: true });
           } else {
-            dialogRef.current.focus();
+            dialogRef.current.focus({ preventScroll: true });
           }
         }
       }, 50);
@@ -57,7 +57,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
       return () => {
         clearTimeout(timer);
         document.body.style.overflow = '';
-        previouslyFocusedElementRef.current?.focus();
+        previouslyFocusedElementRef.current?.focus({ preventScroll: true });
       };
     }
   }, [isOpen]);

@@ -10,6 +10,7 @@ import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { usePagination } from '@/components/common/usePagination';
+import { useLoadState } from '@/components/common/useLoadState';
 import { TaskActions } from './TaskActions';
 import { CheckSquare } from 'lucide-react';
 
@@ -26,7 +27,7 @@ export function LiveTasksManager() {
   const { isOwner } = useRole();
   const { currentScope, availableEvents } = useEventScope();
   const [tasks, setTasks] = React.useState<Task[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const { loading, refreshing, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = React.useState<string | null>(null);
   const [revision, setRevision] = React.useState(0);
   const [creating, setCreating] = React.useState(false);
@@ -44,12 +45,22 @@ export function LiveTasksManager() {
   };
   React.useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    allPages<Task>('/api/v1/tasks').then((data) => { if (!cancelled) setTasks(data); })
-      .catch((failure) => { if (!cancelled) setError((failure as Error).message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+    beginLoad('tasks');
+    allPages<Task>('/api/v1/tasks')
+      .then((data) => {
+        if (!cancelled) {
+          setTasks(data);
+          markLoaded('tasks');
+        }
+      })
+      .catch((failure) => {
+        if (!cancelled) {
+          setError((failure as Error).message);
+          finishLoad();
+        }
+      });
     return () => { cancelled = true; };
-  }, [revision]);
+  }, [revision, beginLoad, markLoaded, finishLoad]);
   const visible = tasks.filter((task) => currentScope === 'all' || (currentScope === 'common'
     ? !(task.eventId || task.event_id) : (task.eventId || task.event_id) === currentScope));
   const pagination = usePagination(visible, { defaultPageSize: 25, resetKey: currentScope });
@@ -72,7 +83,7 @@ export function LiveTasksManager() {
     }) }));
     if (saved) { setCreating(false); setTitle(''); setDate(''); }
   };
-  return h('div', { className: 'space-y-5' },
+  return h('div', { className: 'space-y-5', 'aria-busy': saving || refreshing },
     h('div', { className: 'flex justify-between items-center gap-3' },
       h('div', null, h('p', { className: 'eyebrow mb-3' }, 'Từng bước, cùng nhau'), h('h1', { className: 'text-[28px] sm:text-[32px] font-medium' }, 'Danh sách công việc')),
       isOwner && h(Button, { disabled: loading || saving, onClick: () => creating ? setCreating(false) : startCreating() }, creating ? 'Đóng biểu mẫu' : 'Thêm công việc'),

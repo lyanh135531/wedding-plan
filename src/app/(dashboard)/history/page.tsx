@@ -6,6 +6,7 @@ import { Alert } from '@/components/ui/alert';
 import { Pagination } from '@/components/ui/pagination';
 import { useRole } from '@/context/RoleContext';
 import { api } from '@/lib/api/request';
+import { useLoadState } from '@/components/common/useLoadState';
 
 const h = React.createElement;
 interface Entry {
@@ -23,7 +24,7 @@ export default function HistoryPage() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(25);
   const [totalItems, setTotalItems] = React.useState(0);
-  const [loading, setLoading] = React.useState(true);
+  const { loading, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = React.useState<string | null>(null);
   const [revision, setRevision] = React.useState(0);
 
@@ -31,7 +32,8 @@ export default function HistoryPage() {
     if (!isOwner) return;
     const controller = new AbortController();
     const offset = (currentPage - 1) * pageSize;
-    setLoading(true);
+    const scopeKey = `${currentPage}:${pageSize}:${isOwner}`;
+    beginLoad(scopeKey);
     setError(null);
     api<{ data: Entry[]; total?: number; hasMore: boolean }>(
       `/api/v1/history?offset=${offset}&limit=${pageSize}`,
@@ -41,16 +43,17 @@ export default function HistoryPage() {
         if (!controller.signal.aborted) {
           setEntries(result.data);
           setTotalItems(result.total ?? offset + result.data.length);
+          markLoaded(scopeKey);
         }
       })
       .catch((failure) => {
-        if (!controller.signal.aborted) setError((failure as Error).message);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted) {
+          setError((failure as Error).message);
+          finishLoad();
+        }
       });
     return () => controller.abort();
-  }, [currentPage, pageSize, revision, isOwner]);
+  }, [currentPage, pageSize, revision, isOwner, beginLoad, markLoaded, finishLoad]);
 
   return h(
     PageShell,

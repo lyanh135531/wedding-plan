@@ -9,6 +9,7 @@ import { vendorsApi } from '@/lib/vendors/api-client';
 import { Toast, ToastMessage } from '@/components/ui/toast';
 import { ModalDialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useLoadState } from '@/components/common/useLoadState';
 import { AlertCircle, Trash2, Loader2 } from 'lucide-react';
 import { VendorProfileHeader } from './VendorProfileHeader';
 import { VendorInfoCards } from './VendorInfoCards';
@@ -37,7 +38,8 @@ export const VendorDetailScreen: React.FC<VendorDetailScreenProps> = ({
     initialQuotes || []
   );
 
-  const [loading, setLoading] = React.useState(!initialVendor);
+  const initialScope = initialVendor ? `${vendorId}:${isOwner}` : null;
+  const { loading, beginLoad, markLoaded, finishLoad } = useLoadState(!initialVendor, initialScope);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
   // Modals
@@ -61,8 +63,9 @@ export const VendorDetailScreen: React.FC<VendorDetailScreenProps> = ({
 
   const loadVendorData = React.useCallback(async () => {
     if (!vendorId) return;
+    const scopeKey = `${vendorId}:${isOwner}`;
     try {
-      setLoading(true);
+      beginLoad(scopeKey);
       setErrorMsg(null);
 
       // Load vendor detail
@@ -78,12 +81,12 @@ export const VendorDetailScreen: React.FC<VendorDetailScreenProps> = ({
           setErrorMsg('Không thể tải báo giá. Hãy kiểm tra kết nối và thử lại.');
         }
       }
+      markLoaded(scopeKey);
     } catch {
       setErrorMsg('Không thể tải thông tin nhà cung cấp. Hãy kiểm tra kết nối và thử lại.');
-    } finally {
-      setLoading(false);
+      finishLoad();
     }
-  }, [vendorId, isOwner]);
+  }, [vendorId, isOwner, beginLoad, markLoaded, finishLoad]);
 
   React.useEffect(() => {
     loadVendorData();

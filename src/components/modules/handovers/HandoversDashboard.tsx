@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { api } from '@/lib/api/request';
 import { useSaveAction } from '@/components/common/useSaveAction';
+import { useLoadState } from '@/components/common/useLoadState';
 import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
 import { useRole } from '@/context/RoleContext';
@@ -90,7 +91,7 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
   const [snapshots, setSnapshots] = React.useState<HandoverSnapshotItem[]>([]);
   const [selectedSnapshotId, setSelectedSnapshotId] = React.useState<string | null>(null);
   const [diffInfo, setDiffInfo] = React.useState<{ hasChanges: boolean; diffSummary: string } | null>(null);
-  const [loading, setLoading] = React.useState(false);
+  const { loading, beginLoad, markLoaded, finishLoad } = useLoadState(false);
 
   // Modals state
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = React.useState(false);
@@ -102,10 +103,11 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
 
   const fetchData = React.useCallback(async () => {
     const request = ++generation.current;
-    setLoading(true);
+    const scopeKey = eventId || 'none';
+    beginLoad(scopeKey);
     setErrorMsg(null);
     try {
-      if (!eventId) { setLiveData(null); setSnapshots([]); return; }
+      if (!eventId) { setLiveData(null); setSnapshots([]); markLoaded(scopeKey); return; }
       const [live, snapshots] = await Promise.all([
         api<{ data: HandoverPacketData }>(`/api/v1/handovers/packet?eventId=${eventId}`),
         api<{ data: HandoverSnapshotItem[] }>(`/api/v1/handovers/snapshots?eventId=${eventId}`),
@@ -114,9 +116,14 @@ export const HandoversDashboard: React.FC<HandoversDashboardProps> = ({ eventId 
       setLiveData(live.data); setSnapshots(snapshots.data);
       setSelectedSnapshotId((current) => snapshots.data.some((snapshot) => snapshot.id === current) ? current : snapshots.data[0]?.id || null);
       setRefresh((value) => value + 1);
-    } catch (error) { if (request === generation.current) setErrorMsg((error as Error).message); }
-    finally { if (request === generation.current) setLoading(false); }
-  }, [eventId]);
+      markLoaded(scopeKey);
+    } catch (error) {
+      if (request === generation.current) {
+        setErrorMsg((error as Error).message);
+        finishLoad();
+      }
+    }
+  }, [eventId, beginLoad, markLoaded, finishLoad]);
 
   React.useEffect(() => {
     setSelectedSnapshotId(null); setDiffInfo(null); setLiveData(null); setSnapshots([]);

@@ -33,7 +33,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
-        cancelButtonRef.current?.focus();
+        cancelButtonRef.current?.focus({ preventScroll: true });
       }, 60);
       return () => clearTimeout(timer);
     }

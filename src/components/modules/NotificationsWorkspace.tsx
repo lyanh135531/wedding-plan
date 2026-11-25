@@ -5,10 +5,11 @@ import { api, jsonBody } from '@/lib/api/request';
 import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/ui/pagination';
 import { usePagination } from '@/components/common/usePagination';
+import { useLoadState } from '@/components/common/useLoadState';
 
 export function NotificationsWorkspace() {
   const [items, setItems] = useState<{ key: string; title: string; date: string; read: boolean; href: string }[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { loading, refreshing, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -16,17 +17,22 @@ export function NotificationsWorkspace() {
 
   useEffect(() => {
     const c = new AbortController();
-    setLoading(true);
+    beginLoad('notifications');
     api<{ data: typeof items }>('/api/v1/notifications', { signal: c.signal })
-      .then((r) => setItems(r.data))
-      .catch((f) => {
-        if (!c.signal.aborted) setError(f.message);
+      .then((r) => {
+        if (!c.signal.aborted) {
+          setItems(r.data);
+          markLoaded('notifications');
+        }
       })
-      .finally(() => {
-        if (!c.signal.aborted) setLoading(false);
+      .catch((f) => {
+        if (!c.signal.aborted) {
+          setError(f.message);
+          finishLoad();
+        }
       });
     return () => c.abort();
-  }, [revision]);
+  }, [revision, beginLoad, markLoaded, finishLoad]);
 
   const update = async (key: string, snooze = false) => {
     if (busy) return;
@@ -43,7 +49,7 @@ export function NotificationsWorkspace() {
   };
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4" aria-busy={busy || refreshing}>
       <h1 className="font-serif text-2xl">Thông báo &amp; Nhắc việc</h1>
       <p>Các việc chưa hoàn tất và lịch sắp tới trong 7 ngày, bao gồm các hạn đã qua.</p>
       {error && <p role="alert">{error}</p>}

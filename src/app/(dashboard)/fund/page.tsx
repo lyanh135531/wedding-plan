@@ -10,6 +10,7 @@ import { api, jsonBody } from '@/lib/api/request';
 import { formatVND } from '@/lib/utils';
 import { FundingEntriesWorkspace } from '@/components/modules/finance/FundingEntriesWorkspace';
 import { useSaveAction } from '@/components/common/useSaveAction';
+import { useLoadState } from '@/components/common/useLoadState';
 
 const h = React.createElement;
 interface Settings { initialBalance: string; openingAsOf: string | null; fundScopeConfirmed: boolean; version: number; notes: string | null }
@@ -24,14 +25,14 @@ export default function FundPage() {
   const [confirmed, setConfirmed] = React.useState(false);
   const [version, setVersion] = React.useState(1);
   const [notes, setNotes] = React.useState('');
-  const [loading, setLoading] = React.useState(true);
+  const { loading, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = React.useState<string | null>(null);
   const [revision, setRevision] = React.useState(0);
   const { saving, saveError, runSave } = useSaveAction();
   React.useEffect(() => {
     if (!isOwner) return;
     const controller = new AbortController();
-    setLoading(true);
+    beginLoad('fund');
     setError(null);
     Promise.all([
       api<{ data: Settings | null }>('/api/v1/finance/fund-settings', { signal: controller.signal }),
@@ -46,10 +47,10 @@ export default function FundPage() {
       setNotes(settings.data?.notes ?? '');
       setLedger(overview.data.cashLedger);
       setEntries(contributions.data);
-    }).catch((failure) => { if (!controller.signal.aborted) setError((failure as Error).message); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+      markLoaded('fund');
+    }).catch((failure) => { if (!controller.signal.aborted) { setError((failure as Error).message); finishLoad(); } });
     return () => controller.abort();
-  }, [isOwner, revision]);
+  }, [isOwner, revision, beginLoad, markLoaded, finishLoad]);
   const save = (event: React.FormEvent) => {
     event.preventDefault();
     void runSave(async () => {

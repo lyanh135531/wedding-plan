@@ -7,6 +7,7 @@ import { api, jsonBody } from '@/lib/api/request';
 import { removeVietnameseDiacritics } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { useLoadState } from '@/components/common/useLoadState';
 import { TableCard } from './TableCard';
 import { AddEditTableModal, type AddEditTableModalProps } from './AddEditTableModal';
 import { SeatingExportModal } from './SeatingExportModal';
@@ -111,7 +112,7 @@ export function LiveSeatingWorkspace() {
   const [editing, setEditing] = useState<TableItem | null | undefined>(undefined);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { loading, refreshing, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [busy, setBusy] = useState(false);
 
   const [guestSearch, setGuestSearch] = useState('');
@@ -124,12 +125,14 @@ export function LiveSeatingWorkspace() {
 
   const load = useCallback(async () => {
     const request = ++generation.current;
+    const scopeKey = eventId || 'none';
     setError(null);
-    setLoading(true);
+    beginLoad(scopeKey);
     try {
       if (!eventId) {
         setTables([]);
         setGuests([]);
+        markLoaded(scopeKey);
         return;
       }
       const { data } = await api<{ data: SeatingData }>(`/api/v1/seating?eventId=${eventId}`);
@@ -162,12 +165,14 @@ export function LiveSeatingWorkspace() {
           ];
         })
       );
+      markLoaded(scopeKey);
     } catch (failure) {
-      if (request === generation.current) setError((failure as Error).message);
-    } finally {
-      if (request === generation.current) setLoading(false);
+      if (request === generation.current) {
+        setError((failure as Error).message);
+        finishLoad();
+      }
     }
-  }, [eventId]);
+  }, [eventId, beginLoad, markLoaded, finishLoad]);
 
   useEffect(() => {
     void load();
@@ -392,7 +397,7 @@ export function LiveSeatingWorkspace() {
 
       {/* Main Split Workspace (items-start prevents stretching tables to match left sidebar!) */}
       {!loading && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start" aria-busy={busy}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start" aria-busy={busy || refreshing}>
           {/* Left Sticky Unseated Guest Panel */}
           <aside
             className={`surface-card p-4 flex flex-col gap-3 lg:sticky lg:top-20 transition-all ${

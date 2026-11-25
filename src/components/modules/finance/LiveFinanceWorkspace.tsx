@@ -13,6 +13,7 @@ import { StatCard } from '@/components/ui/stat-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { usePagination } from '@/components/common/usePagination';
+import { useLoadState } from '@/components/common/useLoadState';
 import { CategoryEditor } from './CategoryEditor';
 import { calculateCostItemMetrics } from '@/lib/finance/calculator';
 import { CostActions } from './CostActions';
@@ -105,21 +106,31 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
   const [costs, setCosts] = useState<Cost[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [editor, setEditor] = useState<Editor | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { loading, refreshing, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = useState<string | null>(null);
   const generation = useRef(0);
   const load = useCallback(async () => {
     const request = ++generation.current;
-    setLoading(true); setError(null);
+    beginLoad('finance');
+    setError(null);
     try {
       const [groups, items, ledger] = await Promise.all([
         api<{ data: Category[] }>('/api/v1/finance/categories'),
         allPages<Cost>('/api/v1/finance/costs'), allPages<Payment>('/api/v1/finance/payments'),
       ]);
-      if (request === generation.current) { setCategories(groups.data); setCosts(items); setPayments(ledger); }
-    } catch (failure) { if (request === generation.current) setError((failure as Error).message); }
-    finally { if (request === generation.current) setLoading(false); }
-  }, []);
+      if (request === generation.current) {
+        setCategories(groups.data);
+        setCosts(items);
+        setPayments(ledger);
+        markLoaded('finance');
+      }
+    } catch (failure) {
+      if (request === generation.current) {
+        setError((failure as Error).message);
+        finishLoad();
+      }
+    }
+  }, [beginLoad, markLoaded, finishLoad]);
   useEffect(() => { if (isOwner) void load(); return () => { generation.current++; }; }, [load, isOwner]);
   const shownCosts = costs.filter((cost) => currentScope === 'common' ? cost.eventId === null : !eventId || cost.eventId === eventId);
   const ids = new Set(shownCosts.map((cost) => cost.id));
@@ -132,7 +143,7 @@ export function LiveFinanceWorkspace({ view }: { view: 'budget' | 'payments' }) 
   const projected = metrics.reduce((sum,m)=>sum+(m.forecastAmount??0n),0n);
   const remaining = metrics.reduce((sum,m)=>sum+(m.projectedRemaining??0n),0n);
   const missing = metrics.filter(m=>m.isPriceMissing).length;
-  return <section className="space-y-5">
+  return <section className="space-y-5" aria-busy={refreshing}>
     <div className="flex flex-wrap justify-between items-center gap-5">
       <div><p className="eyebrow mb-3">Tài chính cho ngày chung đôi</p><h1 className="text-[28px] sm:text-[32px] font-medium">{view === 'budget' ? 'Ngân sách & khoản chi' : 'Thanh toán & chi tiêu'}</h1></div>
       <div className="flex gap-2 flex-wrap">

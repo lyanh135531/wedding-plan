@@ -10,6 +10,7 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import { CalendarInput } from '@/components/ui/calendar-input';
 import { Pagination } from '@/components/ui/pagination';
 import { usePagination } from './usePagination';
+import { useLoadState } from './useLoadState';
 import { removeVietnameseDiacritics } from '@/lib/utils';
 
 export type RecordData = { id: string; version?: number; metadata?: Record<string, unknown>; [key: string]: unknown };
@@ -118,7 +119,7 @@ export function ResourceWorkspace({ title, endpoint, eventId, fields, defaults =
 }) {
   const { isOwner } = useRole();
   const [records, setRecords] = useState<RecordData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { loading, refreshing, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [revision, setRevision] = useState(0);
@@ -129,17 +130,31 @@ export function ResourceWorkspace({ title, endpoint, eventId, fields, defaults =
   const lock = useRef(false);
   const requestKey = useRef({ body: '', key: '' });
   const reload = () => { setRevision(v => v + 1); onChanged?.(); };
+  const scopeKey = `${endpoint}:${eventId ?? ''}`;
   useEffect(() => {
-    const controller = new AbortController(); setLoading(true); setError('');
+    const controller = new AbortController();
+    beginLoad(scopeKey);
+    setError('');
     const url = eventId ? `${endpoint}?eventId=${encodeURIComponent(eventId)}` : endpoint;
-    api<{ data: RecordData[] }>(url, { signal: controller.signal }).then(result => { if (!controller.signal.aborted) setRecords(result.data); })
-      .catch(f => { if (!controller.signal.aborted) setError(f.message); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    api<{ data: RecordData[] }>(url, { signal: controller.signal })
+      .then(result => {
+        if (!controller.signal.aborted) {
+          setRecords(result.data);
+          markLoaded(scopeKey);
+        }
+      })
+      .catch(f => {
+        if (!controller.signal.aborted) {
+          setError(f.message);
+          finishLoad();
+        }
+      });
     return () => controller.abort();
-  }, [endpoint, eventId, revision]);
+  }, [endpoint, eventId, revision, scopeKey, beginLoad, markLoaded, finishLoad]);
   const filtered = records.filter(r => removeVietnameseDiacritics(JSON.stringify(r)).toLowerCase().includes(removeVietnameseDiacritics(search).toLowerCase()));
   const pagination = usePagination(filtered, { defaultPageSize: 10, resetKey: `${endpoint}:${eventId ?? ''}:${search}` });
   const visibleRecords = paginate ? pagination.pagedItems : filtered;
-  return <section className="space-y-4">
+  return <section className="space-y-4" aria-busy={refreshing}>
     <div className="flex flex-wrap gap-3 justify-between items-center"><h2 className="font-serif text-2xl">{title}</h2><div className="flex gap-2 print:hidden"><Button variant="secondary" onClick={reload} disabled={loading}>Tải lại</Button><Button variant="secondary" onClick={()=>window.print()} disabled={loading || !!error}>In danh sách</Button>{isOwner && canCreate && <Button disabled={loading || !!error} onClick={() => setEditor('new')}>Thêm mới</Button>}</div></div>
     <input aria-label={`Tìm trong ${title.toLowerCase()}`} placeholder="Tìm kiếm…" className={`${controlClass} print:hidden`} value={search} onChange={e => setSearch(e.target.value)} />
     {notice && <p role="status" className="text-success">{notice}</p>}

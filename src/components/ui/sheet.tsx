@@ -39,13 +39,13 @@ export const DrawerSheet: React.FC<DrawerSheetProps> = ({
       document.body.style.overflow = 'hidden';
 
       const timer = setTimeout(() => {
-        sheetRef.current?.focus();
+        sheetRef.current?.focus({ preventScroll: true });
       }, 50);
 
       return () => {
         clearTimeout(timer);
         document.body.style.overflow = '';
-        previouslyFocusedElementRef.current?.focus();
+        previouslyFocusedElementRef.current?.focus({ preventScroll: true });
       };
     }
   }, [isOpen]);

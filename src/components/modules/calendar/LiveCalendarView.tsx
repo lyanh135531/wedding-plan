@@ -8,6 +8,7 @@ import { Alert } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Pagination } from '@/components/ui/pagination';
 import { usePagination } from '@/components/common/usePagination';
+import { useLoadState } from '@/components/common/useLoadState';
 import { AppointmentsWorkspace } from './AppointmentsWorkspace';
 import { CalendarDays } from 'lucide-react';
 
@@ -17,7 +18,7 @@ export function LiveCalendarView() {
   const [start, setStart] = React.useState('');
   const [end, setEnd] = React.useState('');
   const [items, setItems] = React.useState<CalendarItem[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const { loading, beginLoad, markLoaded, finishLoad } = useLoadState();
   const [error, setError] = React.useState<string | null>(null);
   const [revision, setRevision] = React.useState(0);
   const pagination = usePagination(items, { defaultPageSize: 20, resetKey: `${start}:${end}` });
@@ -30,15 +31,25 @@ export function LiveCalendarView() {
     if (!start || !end) return;
     if (end < start) { setError('Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.'); return; }
     const controller = new AbortController();
-    setLoading(true);
+    const rangeKey = `${start}:${end}`;
+    beginLoad(rangeKey);
     setError(null);
     const query = new URLSearchParams({ startDate: `${start}T00:00:00+07:00`, endDate: `${end}T23:59:59.999+07:00` });
     api<{ data: CalendarItem[] }>(`/api/v1/calendar?${query}`, { signal: controller.signal })
-      .then((result) => { if (!controller.signal.aborted) setItems(result.data); })
-      .catch((failure) => { if (!controller.signal.aborted) setError((failure as Error).message); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setItems(result.data);
+          markLoaded(rangeKey);
+        }
+      })
+      .catch((failure) => {
+        if (!controller.signal.aborted) {
+          setError((failure as Error).message);
+          finishLoad();
+        }
+      });
     return () => controller.abort();
-  }, [start, end, revision]);
+  }, [start, end, revision, beginLoad, markLoaded, finishLoad]);
   return h('div', { className: 'space-y-5' },
     h('div', null, h('p', { className: 'eyebrow mb-3' }, 'Những cột mốc cùng nhau'), h('h1', { className: 'text-[28px] sm:text-[32px] font-medium' }, 'Lịch hẹn & ngày quan trọng')),
     h('div', { className: 'surface-card p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl' },
