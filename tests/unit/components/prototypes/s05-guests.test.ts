@@ -86,6 +86,37 @@ describe('S05 & S07: Guests & Invitations Tripartite Prototype', () => {
     expect(html).toContain('1 thiệp, 4 người');
   });
 
+  it('AddFamilyModal renders side-by-side header grid, inline member row, and hides delete when single member', () => {
+    const multiHtml = renderToStaticMarkup(
+      h(AddFamilyModal, {
+        isOpen: true,
+        onClose: () => {},
+        onSubmit: () => {},
+      })
+    );
+
+    expect(multiHtml).toContain('sm:grid-cols-12');
+    expect(multiHtml).toContain('sm:grid-cols-[28px_minmax(0,1fr)_144px_44px]');
+    expect(multiHtml).toContain('aria-label="Xóa thành viên 1"');
+    expect(multiHtml).toContain('4 người');
+
+    const singleHtml = renderToStaticMarkup(
+      h(AddFamilyModal, {
+        isOpen: true,
+        initialGroupName: 'Gia đình Tư',
+        initialMembers: [
+          { id: '1', name: 'Tư', ageTier: 'adult', isRepresentative: true },
+        ],
+        onClose: () => {},
+        onSubmit: () => {},
+      })
+    );
+
+    expect(singleHtml).toContain('sm:grid-cols-[28px_minmax(0,1fr)_144px]');
+    expect(singleHtml).not.toContain('Xóa thành viên');
+    expect(singleHtml).toContain('1 thiệp, 1 người');
+  });
+
   it('RsvpUpdateDrawer (UXT03) updates independent attendance per event and warns when unseating', () => {
     const html = renderToStaticMarkup(
       h(RsvpUpdateDrawer, {
