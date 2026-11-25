@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from '@/lib/auth/session';
 import { withTransactionScopedContext } from '@/db/client';
-import { getGuestById, updateGuest, softDeleteGuest } from '@/lib/guests';
+import { getGuestById, updateGuest, deleteGuest } from '@/lib/guests';
 import { updateGuestSchema } from '@/schemas/guests';
 
 export const dynamic = 'force-dynamic';
@@ -92,7 +92,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
       session.user.id,
       session.role,
       async (_client, txDb) => {
-        return softDeleteGuest(txDb, id, session.user.id);
+        return deleteGuest(txDb, id, session.user.id);
       }
     );
 
@@ -100,7 +100,7 @@ export async function DELETE(req: NextRequest, props: { params: Promise<{ id: st
       return NextResponse.json({ error: 'NOT_FOUND: Guest not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, message: 'Đã lưu trữ hồ sơ khách mời' });
+    return NextResponse.json({ success: true, message: 'Đã xóa vĩnh viễn khách mời' });
   } catch (error: any) {
     console.error(`[DELETE /api/v1/guests/${id} error]:`, error);
     return NextResponse.json({ error: error?.message || 'INTERNAL_ERROR' }, { status: 500 });

@@ -202,7 +202,6 @@ export function CompactGuestList({
             : { variant: 'neutral' as const, text: 'Chưa mời' };
           const tableName = seatedNames[guest.id];
           const phone = 'phone' in guest ? guest.phone : null;
-          const isArchived = 'is_archived' in guest && guest.is_archived;
 
           return (
             <article
@@ -226,11 +225,6 @@ export function CompactGuestList({
                   {guest.age_tier !== 'adult' && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-info-bg text-info text-[11px] font-medium">
                       {AGE_LABELS[guest.age_tier]}
-                    </span>
-                  )}
-                  {isArchived && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-danger-bg text-danger text-[11px] font-medium">
-                      Đã lưu trữ
                     </span>
                   )}
                 </div>
@@ -329,7 +323,6 @@ export function LiveGuestsDirectory() {
   const [search, setSearch] = useState('');
   const [sideFilter, setSideFilter] = useState<GuestSideFilter>('all');
   const [rsvpFilter, setRsvpFilter] = useState<GuestRsvpFilter>('all');
-  const [archived, setArchived] = useState(false);
 
   const [addGuest, setAddGuest] = useState(false);
   const [addFamily, setAddFamily] = useState(false);
@@ -339,19 +332,19 @@ export function LiveGuestsDirectory() {
 
   const duplicateState = useDuplicateReview();
   const generation = useRef(0);
-  const currentFilters = useRef({ eventId, archived });
-  currentFilters.current = { eventId, archived };
+  const currentFilters = useRef({ eventId });
+  currentFilters.current = { eventId };
 
   const load = useCallback(async () => {
     // A mutation may finish after the user has changed the visible filter.
     // Its old reload callback must not replace the current list.
-    if (currentFilters.current.eventId !== eventId || currentFilters.current.archived !== archived) return;
+    if (currentFilters.current.eventId !== eventId) return;
     const request = ++generation.current;
     setLoading(true);
     setError(null);
     try {
       const [people, attendees, cards] = await Promise.all([
-        allPages<LiveGuest>(`/api/v1/guests?isArchived=${archived}`),
+        allPages<LiveGuest>('/api/v1/guests'),
         eventId
           ? api<{
               data: {
@@ -382,7 +375,7 @@ export function LiveGuestsDirectory() {
     } finally {
       if (request === generation.current) setLoading(false);
     }
-  }, [eventId, archived]);
+  }, [eventId]);
 
   useEffect(() => {
     void load();
@@ -543,7 +536,7 @@ export function LiveGuestsDirectory() {
   );
   const pagination = usePagination(shown, {
     defaultPageSize: 25,
-    resetKey: `${eventId}:${archived}:${search}:${sideFilter}:${rsvpFilter}`,
+    resetKey: `${eventId}:${search}:${sideFilter}:${rsvpFilter}`,
   });
 
   const hasActiveFilters = Boolean(search.trim() || sideFilter !== 'all' || rsvpFilter !== 'all');
@@ -611,15 +604,6 @@ export function LiveGuestsDirectory() {
 
           {isOwner && (
             <div className="flex flex-wrap items-center gap-3">
-              <label className="inline-flex items-center gap-2 text-xs text-text-muted hover:text-text-main cursor-pointer select-none min-h-8">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-border-control"
-                  checked={archived}
-                  onChange={(e) => setArchived(e.target.checked)}
-                />
-                <span>Xem hồ sơ đã lưu trữ</span>
-              </label>
               <DuplicateReviewTrigger
                 busy={duplicateState.busy}
                 onClick={() => void duplicateState.checkDuplicates()}
@@ -734,26 +718,22 @@ export function LiveGuestsDirectory() {
       {/* Empty state */}
       {!loading && !error && shown.length === 0 && (
         <EmptyState
-          type={hasActiveFilters || archived ? 'no_filter_match' : 'no_data'}
+          type={hasActiveFilters ? 'no_filter_match' : 'no_data'}
           title={
             hasActiveFilters
               ? 'Không tìm thấy khách mời phù hợp'
-              : archived
-              ? 'Chưa có hồ sơ nào được lưu trữ'
               : 'Những gương mặt thân thương, bắt đầu từ đây'
           }
           description={
             hasActiveFilters
               ? 'Thử đổi từ khóa hoặc xóa bộ lọc để xem toàn bộ danh sách khách mời.'
-              : archived
-              ? 'Hồ sơ khách mời sau khi lưu trữ sẽ xuất hiện tại đây.'
               : 'Thêm khách mời để cùng theo dõi thiệp mời, phản hồi và sắp xếp chỗ ngồi cho ngày chung vui.'
           }
           icon={<Users className="w-7 h-7 text-accent" strokeWidth={1.4} />}
           action={
             hasActiveFilters
               ? { label: 'Xóa bộ lọc', onClick: clearFilters }
-              : isOwner && !archived
+              : isOwner
               ? { label: 'Thêm khách mời đầu tiên', onClick: () => setAddGuest(true) }
               : undefined
           }

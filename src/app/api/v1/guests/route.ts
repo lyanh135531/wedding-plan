@@ -21,7 +21,6 @@ export async function GET(req: NextRequest) {
   const rsvpParam = searchParams.get('rsvpStatus');
   const rsvpStatus = rsvpParam && rsvpStatusEnum.safeParse(rsvpParam).success ? (rsvpParam as any) : undefined;
   const eventId = searchParams.get('eventId') || undefined;
-  const isArchived = searchParams.get('isArchived') === 'true';
   const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '100', 10) || 100, 1), 500);
   const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10) || 0, 0);
 
@@ -36,7 +35,7 @@ export async function GET(req: NextRequest) {
           groupId,
           rsvpStatus,
           eventId,
-          isArchived,
+          isArchived: false,
           limit,
           offset,
           role: session.role,

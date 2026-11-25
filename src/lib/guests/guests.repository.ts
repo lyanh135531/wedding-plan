@@ -319,9 +319,11 @@ export async function updateGuest(
 }
 
 /**
- * Soft deletes a guest profile and records audit log.
+ * Permanently deletes a guest profile inside a transaction, deleting empty
+ * solo invitation cards or reassigning multi-member card representatives first
+ * so the invitations.representative_guest_id FK constraint holds.
  */
-export async function softDeleteGuest(
+export async function deleteGuest(
   txDb: TxDb,
   id: string,
   deleterUserId: string
@@ -329,14 +331,65 @@ export async function softDeleteGuest(
   const [existing] = await txDb.select().from(guests).where(eq(guests.id, id));
   if (!existing) return false;
 
-  await txDb
-    .update(guests)
-    .set({
-      isArchived: true,
-      archivedAt: new Date(),
-      updatedAt: new Date(),
+  // 1. Gather all invitations referencing this guest via membership or representative FK
+  const memberInvRows = await txDb
+    .select({ invitationId: invitationMembers.invitationId })
+    .from(invitationMembers)
+    .where(eq(invitationMembers.guestId, id));
+
+  const repInvRows = await txDb
+    .select({
+      id: invitations.id,
+      version: invitations.version,
+      representativeGuestId: invitations.representativeGuestId,
     })
-    .where(eq(guests.id, id));
+    .from(invitations)
+    .where(eq(invitations.representativeGuestId, id));
+
+  const memberInvIds = memberInvRows.map((row) => row.invitationId);
+  const allInvIds = Array.from(
+    new Set([...memberInvIds, ...repInvRows.map((row) => row.id)])
+  );
+
+  // 2. Remove the deleted guest from invitation_members before re-checking card members
+  if (memberInvIds.length > 0) {
+    await txDb.delete(invitationMembers).where(eq(invitationMembers.guestId, id));
+  }
+
+  // 3. Delete empty cards or promote another member to representative before deleting guest
+  if (allInvIds.length > 0) {
+    const affectedCards = await txDb
+      .select({
+        id: invitations.id,
+        version: invitations.version,
+        representativeGuestId: invitations.representativeGuestId,
+      })
+      .from(invitations)
+      .where(inArray(invitations.id, allInvIds));
+
+    for (const card of affectedCards) {
+      const remainingMembers = await txDb
+        .select({ guestId: invitationMembers.guestId })
+        .from(invitationMembers)
+        .where(eq(invitationMembers.invitationId, card.id));
+
+      if (remainingMembers.length === 0) {
+        await txDb.delete(invitations).where(eq(invitations.id, card.id));
+      } else if (card.representativeGuestId === id) {
+        await txDb
+          .update(invitations)
+          .set({
+            representativeGuestId: remainingMembers[0].guestId,
+            version: card.version + 1,
+            updatedAt: new Date(),
+          })
+          .where(eq(invitations.id, card.id));
+      }
+    }
+  }
+
+  // 4. Hard delete guest (DB cascades attendance, seats, followups, meals, rooms, trips; sets gift_contributors.guest_id NULL)
+  await txDb.delete(guests).where(eq(guests.id, id));
 
   await txDb.insert(auditLogs).values({
     userId: deleterUserId,
@@ -344,7 +397,7 @@ export async function softDeleteGuest(
     entityType: 'guest',
     entityId: id,
     beforeState: existing,
-    afterState: { isArchived: true },
+    afterState: null,
   });
 
   return true;

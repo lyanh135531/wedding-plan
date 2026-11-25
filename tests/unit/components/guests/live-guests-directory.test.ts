@@ -214,7 +214,7 @@ describe('LiveGuestsDirectory compact layout helpers and view', () => {
     expect(html).toContain('Cập nhật RSVP');
     expect(html).toContain('Mời dự buổi');
     expect(html).toContain('aria-label="Sửa hồ sơ"');
-    expect(html).toContain('aria-label="Lưu trữ hồ sơ"');
+    expect(html).toContain('aria-label="Xóa khách mời"');
   });
 
   it('hides owner mutation controls and omits private contact info in family_view mode', () => {
@@ -249,6 +249,6 @@ describe('LiveGuestsDirectory compact layout helpers and view', () => {
     expect(html).not.toContain('Cập nhật RSVP');
     expect(html).not.toContain('Mời dự buổi');
     expect(html).not.toContain('Sửa hồ sơ');
-    expect(html).not.toContain('Lưu trữ hồ sơ');
+    expect(html).not.toContain('Xóa khách mời');
   });
 });
