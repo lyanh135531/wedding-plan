@@ -11,6 +11,11 @@ import {
   TableItem,
   GuestSeatingItem,
 } from '@/components/modules/seating';
+import {
+  computeSeatingStats,
+  filterUnseatedGuests,
+  filterSeatingTables,
+} from '@/components/modules/seating/LiveSeatingWorkspace';
 
 const h = React.createElement;
 
@@ -305,6 +310,151 @@ describe('S18: Seating Screen & Components Unit Tests', () => {
 
       expect(ownerHtml).toContain('Bản in Chủ sở hữu');
       expect(ownerHtml).toContain('Gần sân khấu chính');
+    });
+  });
+
+  describe('LiveSeatingWorkspace helpers & TableCard enhancements', () => {
+    const sampleTables: TableItem[] = [
+      {
+        id: 't1',
+        name: 'Bàn VIP 01',
+        tableNumber: '01',
+        capacity: 2,
+        shape: 'round',
+        seatedGuestIds: ['g1', 'g2'],
+        notes: 'Gần sân khấu',
+      },
+      {
+        id: 't2',
+        name: 'Bàn Gia Đình 02',
+        tableNumber: '02',
+        capacity: 10,
+        shape: 'rectangular',
+        seatedGuestIds: ['g6'],
+      },
+    ];
+
+    const sampleGuests: GuestSeatingItem[] = [
+      {
+        id: 'g1',
+        name: 'Anh Mẫn',
+        groupName: 'Nhà trai',
+        tableId: 't1',
+        side: 'groom',
+        rsvpStatus: 'attending',
+      },
+      {
+        id: 'g2',
+        name: 'Chị Ý',
+        groupName: 'Nhà gái',
+        tableId: 't1',
+        side: 'bride',
+        rsvpStatus: 'attending',
+      },
+      {
+        id: 'g3',
+        name: 'Nguyễn Văn Minh',
+        groupName: 'Đồng nghiệp',
+        tableId: null,
+        side: 'groom',
+        rsvpStatus: 'attending',
+      },
+      {
+        id: 'g4',
+        name: 'Trần Thu Thảo',
+        groupName: 'Bạn thân',
+        tableId: null,
+        side: 'bride',
+        rsvpStatus: 'attending',
+      },
+      {
+        id: 'g5',
+        name: 'Phạm Hoàng',
+        groupName: 'Bạn chung',
+        tableId: null,
+        side: 'mutual',
+        rsvpStatus: 'attending',
+      },
+      {
+        id: 'g6',
+        name: 'Bé Bin',
+        groupName: 'Gia đình',
+        tableId: 't2',
+        side: 'groom',
+        rsvpStatus: 'attending',
+        needsSeat: false,
+      },
+    ];
+
+    it('renders #01 tableNumber badge and seat progress bar on TableCard', () => {
+      const html = renderToStaticMarkup(
+        h(
+          RoleProvider,
+          { initialRole: 'owner' },
+          h(TableCard, {
+            table: sampleTables[0],
+            guests: sampleGuests.slice(0, 2),
+            onDropGuest: () => {},
+            onUnseatGuest: () => {},
+            onEditTable: () => {},
+            onDeleteTable: () => {},
+          })
+        )
+      );
+
+      expect(html).toContain('#01');
+      expect(html).toContain('h-1.5 w-full rounded-full');
+      expect(html).toContain('100%');
+      expect(html).toContain('2 / 2 chỗ');
+    });
+
+    it('computes overview KPI stats excluding non-seat guests from occupied count', () => {
+      const stats = computeSeatingStats(sampleTables, sampleGuests);
+
+      expect(stats).toEqual({
+        totalGuests: 6,
+        seatedCount: 3,
+        unseatedCount: 3,
+        totalTables: 2,
+        occupiedSeats: 2,
+        totalCapacity: 12,
+      });
+    });
+
+    it('filters unseated guests with Vietnamese diacritic-insensitive search and side pills', () => {
+      const bySearch = filterUnseatedGuests(sampleGuests, 'nguyen van', 'all');
+      expect(bySearch.map((g) => g.id)).toEqual(['g3']);
+
+      const bySide = filterUnseatedGuests(sampleGuests, '', 'bride');
+      expect(bySide.map((g) => g.id)).toEqual(['g4']);
+
+      const combined = filterUnseatedGuests(sampleGuests, 'pham', 'mutual');
+      expect(combined.map((g) => g.id)).toEqual(['g5']);
+    });
+
+    it('filters seating tables by availability, shape, and table name or number', () => {
+      expect(filterSeatingTables(sampleTables, sampleGuests, '', 'all').map((t) => t.id)).toEqual([
+        't1',
+        't2',
+      ]);
+      expect(
+        filterSeatingTables(sampleTables, sampleGuests, '', 'available').map((t) => t.id)
+      ).toEqual(['t2']);
+      expect(filterSeatingTables(sampleTables, sampleGuests, '', 'full').map((t) => t.id)).toEqual([
+        't1',
+      ]);
+      expect(
+        filterSeatingTables(sampleTables, sampleGuests, '', 'round').map((t) => t.id)
+      ).toEqual(['t1']);
+      expect(
+        filterSeatingTables(sampleTables, sampleGuests, '', 'rectangular').map((t) => t.id)
+      ).toEqual(['t2']);
+      expect(
+        filterSeatingTables(sampleTables, sampleGuests, '01', 'all').map((t) => t.id)
+      ).toEqual(['t1']);
+      expect(
+        filterSeatingTables(sampleTables, sampleGuests, 'gia dinh', 'all').map((t) => t.id)
+      ).toEqual(['t2']);
     });
   });
 });

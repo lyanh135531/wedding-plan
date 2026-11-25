@@ -15,6 +15,7 @@ export interface GuestSeatingItem {
   id: string;
   name: string;
   groupName: string;
+  side?: 'groom' | 'bride' | 'mutual' | 'unassigned';
   tableId: string | null;
   rsvpStatus?: 'attending' | 'declined' | 'pending';
   needsSeat?: boolean; // false for infants (AT07)
