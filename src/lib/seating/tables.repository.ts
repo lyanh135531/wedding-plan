@@ -1,4 +1,4 @@
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, desc } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '@/db/schema';
 import { tables } from '@/db/schema';
@@ -84,7 +84,7 @@ export async function listTablesByEvent(
     .select()
     .from(tables)
     .where(eq(tables.eventId, eventId))
-    .orderBy(tables.name);
+    .orderBy(desc(tables.createdAt), tables.name);
 
   if (role === 'family_view') {
     return rows.map(mapToTableFamilyDto);

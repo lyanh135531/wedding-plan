@@ -9,6 +9,7 @@ export interface TableItem {
   notes?: string | null;
   seatedGuestIds: string[];
   version?: number;
+  createdAt?: string;
 }
 
 export interface GuestSeatingItem {

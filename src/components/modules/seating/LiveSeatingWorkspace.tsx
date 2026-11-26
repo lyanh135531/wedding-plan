@@ -71,7 +71,18 @@ export function filterUnseatedGuests(
 }
 
 /**
- * Filters table cards by table name/number and availability/shape filter.
+ * Returns true if a table's seat-consuming guest count meets or exceeds capacity.
+ */
+export function isTableFull(table: TableItem, guests: GuestSeatingItem[]): boolean {
+  const seatCount = table.seatedGuestIds.filter(
+    (id) => guests.find((g) => g.id === id)?.needsSeat !== false
+  ).length;
+  return seatCount >= table.capacity;
+}
+
+/**
+ * Filters table cards by table name/number and availability/shape filter,
+ * sorting open tables newest-first and pushing full tables to the bottom.
  */
 export function filterSeatingTables(
   tables: TableItem[],
@@ -80,7 +91,7 @@ export function filterSeatingTables(
   filter: TableFilterOption
 ) {
   const normQuery = removeVietnameseDiacritics(search.trim());
-  return tables.filter((table) => {
+  const filtered = tables.filter((table) => {
     if (normQuery) {
       const target = `${table.name} ${table.tableNumber || ''}`;
       if (!removeVietnameseDiacritics(target).includes(normQuery)) return false;
@@ -88,13 +99,23 @@ export function filterSeatingTables(
     if (filter === 'round') return table.shape === 'round';
     if (filter === 'rectangular') return table.shape === 'rectangular';
     if (filter === 'available' || filter === 'full') {
-      const seatCount = table.seatedGuestIds.filter(
-        (id) => guests.find((g) => g.id === id)?.needsSeat !== false
-      ).length;
-      const isFull = seatCount >= table.capacity;
-      return filter === 'full' ? isFull : !isFull;
+      const full = isTableFull(table, guests);
+      return filter === 'full' ? full : !full;
     }
     return true;
+  });
+
+  return [...filtered].sort((a, b) => {
+    const aFull = isTableFull(a, guests) ? 1 : 0;
+    const bFull = isTableFull(b, guests) ? 1 : 0;
+    if (aFull !== bFull) return aFull - bFull;
+
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    if (Number.isFinite(aTime) && Number.isFinite(bTime) && aTime !== bTime) {
+      return bTime - aTime;
+    }
+    return 0;
   });
 }
 
@@ -141,6 +162,7 @@ export function LiveSeatingWorkspace() {
         data.tables.map((table) => ({
           ...table,
           tableNumber: table.tableNumber || undefined,
+          createdAt: table.createdAt,
           seatedGuestIds: data.seats
             .filter((seat) => seat.tableId === table.id)
             .map((seat) => seat.guestId),
@@ -242,6 +264,43 @@ export function LiveSeatingWorkspace() {
   const displayedTables = useMemo(
     () => filterSeatingTables(tables, guests, tableSearch, tableFilter),
     [tables, guests, tableSearch, tableFilter]
+  );
+  const openDisplayedTables = useMemo(
+    () => displayedTables.filter((table) => !isTableFull(table, guests)),
+    [displayedTables, guests]
+  );
+  const fullDisplayedTables = useMemo(
+    () => displayedTables.filter((table) => isTableFull(table, guests)),
+    [displayedTables, guests]
+  );
+
+  const renderTableCard = (table: TableItem) => (
+    <TableCard
+      key={table.id}
+      table={table}
+      guests={guests}
+      selectedGuestId={busy ? null : selected}
+      onSeatGuest={isOwner ? (id) => seat(id) : undefined}
+      onDropGuest={isOwner ? (tableId, guestId) => seat(tableId, guestId) : undefined}
+      onEditTable={isOwner ? (item) => setEditing(item) : undefined}
+      onUnseatGuest={
+        isOwner
+          ? (id, guestId) =>
+              void mutate(() =>
+                api(`/api/v1/tables/${id}/seats/${guestId}`, { method: 'DELETE' })
+              )
+          : undefined
+      }
+      onDeleteTable={
+        isOwner
+          ? (id) => {
+              if (window.confirm('Xóa bàn và bỏ các chỗ đã xếp trên bàn này?')) {
+                void mutate(() => api(`/api/v1/tables/${id}`, { method: 'DELETE' }));
+              }
+            }
+          : undefined
+      }
+    />
   );
 
   const selectedGuest = guests.find((guest) => guest.id === selected);
@@ -553,38 +612,27 @@ export function LiveSeatingWorkspace() {
             </div>
           </aside>
 
-          {/* Right Tables Grid (items-start so each card hugs its own height) */}
+          {/* Right Tables Grid (open tables newest-first, full tables collapsed at bottom) */}
           <div className="min-w-0">
             {displayedTables.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
-                {displayedTables.map((table) => (
-                  <TableCard
-                    key={table.id}
-                    table={table}
-                    guests={guests}
-                    selectedGuestId={busy ? null : selected}
-                    onSeatGuest={isOwner ? (id) => seat(id) : undefined}
-                    onDropGuest={isOwner ? (tableId, guestId) => seat(tableId, guestId) : undefined}
-                    onEditTable={isOwner ? (item) => setEditing(item) : undefined}
-                    onUnseatGuest={
-                      isOwner
-                        ? (id, guestId) =>
-                            void mutate(() =>
-                              api(`/api/v1/tables/${id}/seats/${guestId}`, { method: 'DELETE' })
-                            )
-                        : undefined
-                    }
-                    onDeleteTable={
-                      isOwner
-                        ? (id) => {
-                            if (window.confirm('Xóa bàn và bỏ các chỗ đã xếp trên bàn này?')) {
-                              void mutate(() => api(`/api/v1/tables/${id}`, { method: 'DELETE' }));
-                            }
-                          }
-                        : undefined
-                    }
-                  />
-                ))}
+              <div className="space-y-4">
+                {openDisplayedTables.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+                    {openDisplayedTables.map(renderTableCard)}
+                  </div>
+                )}
+
+                {fullDisplayedTables.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted px-0.5">
+                      <span>Bàn đã đủ người ({fullDisplayedTables.length})</span>
+                      <div className="h-px flex-1 bg-border-subtle" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 items-start">
+                      {fullDisplayedTables.map(renderTableCard)}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <EmptyState

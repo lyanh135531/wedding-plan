@@ -386,14 +386,34 @@ describe('S18: Seating Screen & Components Unit Tests', () => {
       },
     ];
 
-    it('renders #01 tableNumber badge and seat progress bar on TableCard', () => {
-      const html = renderToStaticMarkup(
+    it('collapses full TableCard by default and supports expanded view with #01 badge and seat grid', () => {
+      const collapsedHtml = renderToStaticMarkup(
         h(
           RoleProvider,
           { initialRole: 'owner' },
           h(TableCard, {
             table: sampleTables[0],
             guests: sampleGuests.slice(0, 2),
+          })
+        )
+      );
+
+      expect(collapsedHtml).toContain('#01');
+      expect(collapsedHtml).toContain('data-collapsed="true"');
+      expect(collapsedHtml).toContain('h-1.5 w-full rounded-full');
+      expect(collapsedHtml).toContain('100%');
+      expect(collapsedHtml).toContain('2 / 2 chỗ');
+      expect(collapsedHtml).toContain('Mở rộng bàn Bàn VIP 01');
+      expect(collapsedHtml).not.toContain('sm:grid-cols-2');
+
+      const expandedHtml = renderToStaticMarkup(
+        h(
+          RoleProvider,
+          { initialRole: 'owner' },
+          h(TableCard, {
+            table: sampleTables[0],
+            guests: sampleGuests.slice(0, 2),
+            defaultCollapsed: false,
             onDropGuest: () => {},
             onUnseatGuest: () => {},
             onEditTable: () => {},
@@ -402,11 +422,9 @@ describe('S18: Seating Screen & Components Unit Tests', () => {
         )
       );
 
-      expect(html).toContain('#01');
-      expect(html).toContain('h-1.5 w-full rounded-full');
-      expect(html).toContain('sm:grid-cols-2');
-      expect(html).toContain('100%');
-      expect(html).toContain('2 / 2 chỗ');
+      expect(expandedHtml).toContain('data-collapsed="false"');
+      expect(expandedHtml).toContain('sm:grid-cols-2');
+      expect(expandedHtml).toContain('Thu gọn bàn Bàn VIP 01');
     });
 
     it('computes overview KPI stats excluding non-seat guests from occupied count', () => {
@@ -433,10 +451,10 @@ describe('S18: Seating Screen & Components Unit Tests', () => {
       expect(combined.map((g) => g.id)).toEqual(['g5']);
     });
 
-    it('filters seating tables by availability, shape, and table name or number', () => {
+    it('filters seating tables by availability, shape, and table name or number with open tables first and full tables last', () => {
       expect(filterSeatingTables(sampleTables, sampleGuests, '', 'all').map((t) => t.id)).toEqual([
-        't1',
         't2',
+        't1',
       ]);
       expect(
         filterSeatingTables(sampleTables, sampleGuests, '', 'available').map((t) => t.id)
@@ -456,6 +474,35 @@ describe('S18: Seating Screen & Components Unit Tests', () => {
       expect(
         filterSeatingTables(sampleTables, sampleGuests, 'gia dinh', 'all').map((t) => t.id)
       ).toEqual(['t2']);
+    });
+
+    it('places newly created open tables at the very top and pushes full tables to the bottom', () => {
+      const ordered = filterSeatingTables(
+        [
+          {
+            ...sampleTables[0],
+            id: 'full-old',
+            createdAt: '2026-11-26T08:00:00.000Z',
+          },
+          {
+            ...sampleTables[1],
+            id: 'open-old',
+            createdAt: '2026-11-26T09:00:00.000Z',
+          },
+          {
+            ...sampleTables[1],
+            id: 'open-newest',
+            name: 'Bàn Mới Tạo',
+            seatedGuestIds: [],
+            createdAt: '2026-11-26T14:45:00.000Z',
+          },
+        ],
+        sampleGuests,
+        '',
+        'all'
+      );
+
+      expect(ordered.map((t) => t.id)).toEqual(['open-newest', 'open-old', 'full-old']);
     });
   });
 });
