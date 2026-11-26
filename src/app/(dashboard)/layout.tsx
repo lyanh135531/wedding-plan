@@ -13,7 +13,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await getCurrentSession();
-  if (!session) redirect('/login');
+  if (!session || session.role !== 'owner') redirect('/login');
   const eventList = await withTransactionScopedContext(session.user.id, session.role,
     async (_client, db) => db.select({ id: events.id, title: events.title, status: events.status }).from(events));
   return React.createElement(RoleProvider, {

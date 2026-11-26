@@ -1,28 +1,27 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+const SESSION_COOKIES = [
+  'session_token',
+  '__Secure-session_token',
+  'better-auth.session_token',
+  '__Secure-better-auth.session_token',
+] as const;
 
 export function middleware(request: NextRequest) {
-  // Allow login and setup pages to prevent redirect loops
-  if (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/setup") {
+  const { pathname, search } = request.nextUrl;
+
+  if (pathname === '/login') {
     return NextResponse.next();
   }
 
-  // Check for session_token cookie (Better Auth default)
-  const sessionToken = request.cookies.get("session_token") ||
-    request.cookies.get("__Secure-session_token") ||
-    request.cookies.get("better-auth.session_token") ||
-    request.cookies.get("__Secure-better-auth.session_token");
-
-  // Protect dashboard routes
-  const isDashboardRoute = 
-    request.nextUrl.pathname.startsWith("/overview") ||
-    request.nextUrl.pathname.startsWith("/guests") ||
-    request.nextUrl.pathname.startsWith("/budget") ||
-    request.nextUrl.pathname.startsWith("/tasks") ||
-    request.nextUrl.pathname.startsWith("/seating");
-
-  if (isDashboardRoute && !sessionToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  const hasSessionCookie = SESSION_COOKIES.some((name) => Boolean(request.cookies.get(name)?.value));
+  if (!hasSessionCookie) {
+    const loginUrl = new URL('/login', request.url);
+    if (pathname !== '/' && pathname !== '/overview' && pathname !== '/invite') {
+      loginUrl.searchParams.set('returnTo', `${pathname}${search}`);
+    }
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
@@ -30,12 +29,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/overview", 
-    "/login", 
-    "/setup", 
-    "/guests/:path*", 
-    "/budget/:path*", 
-    "/tasks/:path*", 
-    "/seating/:path*"
+    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|fonts/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2|ico|css|js)$).*)',
   ],
 };

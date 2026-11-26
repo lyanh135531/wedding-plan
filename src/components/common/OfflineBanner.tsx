@@ -118,7 +118,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
   forceOffline,
   forceOnline,
   forceReconnected,
-  showHandoverLink = true,
+  showHandoverLink = false,
   onDismissReconnected,
 }) => {
   const { isOnline, hasReconnected, dismissReconnected } = useNetworkStatus({
@@ -196,7 +196,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
           h(
             'p',
             { className: 'font-medium' },
-            'Mất kết nối mạng. Ứng dụng ở chế độ xem an toàn (không ghi dữ liệu offline để tránh xung đột sổ tiền/sơ đồ bàn theo PLAN §22.2). Vui lòng sử dụng Bộ bàn giao ngày cưới đã in/tải trước đó.'
+            'Mất kết nối mạng. Ứng dụng ở chế độ xem an toàn (không ghi dữ liệu offline để tránh xung đột sổ tiền/sơ đồ bàn).'
           )
         ),
         showHandoverLink

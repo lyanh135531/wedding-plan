@@ -15,7 +15,7 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
   it('renders fixed 64px header with H1 title and offset for desktop sidebar', () => {
     const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS },
@@ -38,7 +38,7 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
   it('renders mobile menu button when onToggleSidebarMobile is provided', () => {
     const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS },
@@ -55,10 +55,10 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
     expect(html).toContain('lg:hidden');
   });
 
-  it('displays "Chỉ xem" role badge for Family View, but NOT for Owner', () => {
-    const ownerTree = React.createElement(
+  it('does NOT render legacy family-view "Chỉ xem" badge or role switcher button', () => {
+    const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS },
@@ -66,29 +66,15 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
       )
     );
 
-    const ownerHtml = renderToStaticMarkup(ownerTree);
-    expect(ownerHtml).not.toContain('Chỉ xem');
-
-    const familyTree = React.createElement(
-      RoleProvider,
-      { initialRole: 'family_view' },
-      React.createElement(
-        EventScopeProvider,
-        { initialEvents: MOCK_EVENTS },
-        React.createElement(Header, { title: 'Tổng quan' })
-      )
-    );
-
-    const familyHtml = renderToStaticMarkup(familyTree);
-    expect(familyHtml).toContain('Chỉ xem');
-    expect(familyHtml).toContain('bg-[#EFF8FF]');
-    expect(familyHtml).toContain('text-[#175CD3]');
+    const html = renderToStaticMarkup(tree);
+    expect(html).not.toContain('Chỉ xem');
+    expect(html).not.toContain('Vai trò:');
   });
 
   it('renders optional badge when provided', () => {
     const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS },
@@ -103,10 +89,10 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
     expect(html).toContain('text-[#854D0E]');
   });
 
-  it('EventScopeSelector: Owner sees "Chi phí / Việc chung" and events list', () => {
+  it('EventScopeSelector renders "Chi phí / Việc chung" and events list', () => {
     const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS, initialScope: 'all' },
@@ -124,27 +110,10 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
     expect(html).toContain('Lễ Lại Mặt (Đã hủy)');
   });
 
-  it('EventScopeSelector: Family View NEVER sees "Chi phí / Việc chung"', () => {
+  it('EventScopeSelector does not render when showScopeSelector is false', () => {
     const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'family_view' },
-      React.createElement(
-        EventScopeProvider,
-        { initialEvents: MOCK_EVENTS },
-        React.createElement(Header, { title: 'Khách mời' })
-      )
-    );
-
-    const html = renderToStaticMarkup(tree);
-
-    expect(html).toContain('Tất cả buổi (Tổng hợp)');
-    expect(html).not.toContain('Chi phí / Việc chung');
-  });
-
-  it('EventScopeSelector: does not render when showScopeSelector is false', () => {
-    const tree = React.createElement(
-      RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS },
@@ -157,17 +126,16 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
     expect(html).not.toContain('id="event-scope-select"');
   });
 
-  it('Primary CTA: rendered for Owner, completely hidden for Family View', () => {
+  it('renders Primary CTA consistently', () => {
     const ctaButton = React.createElement(
       'button',
       { className: 'btn-primary' },
       'Thêm khách mới'
     );
 
-    // Owner: shows CTA
-    const ownerTree = React.createElement(
+    const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS },
@@ -178,31 +146,14 @@ describe('Header Component (UI/UX Spec §2.2, §3.1, §3.2, §3.3)', () => {
       )
     );
 
-    const ownerHtml = renderToStaticMarkup(ownerTree);
-    expect(ownerHtml).toContain('Thêm khách mới');
-
-    // Family View: hides CTA 100%
-    const familyTree = React.createElement(
-      RoleProvider,
-      { initialRole: 'family_view' },
-      React.createElement(
-        EventScopeProvider,
-        { initialEvents: MOCK_EVENTS },
-        React.createElement(Header, {
-          title: 'Khách mời',
-          primaryAction: ctaButton,
-        })
-      )
-    );
-
-    const familyHtml = renderToStaticMarkup(familyTree);
-    expect(familyHtml).not.toContain('Thêm khách mới');
+    const html = renderToStaticMarkup(tree);
+    expect(html).toContain('Thêm khách mới');
   });
 
   it('renders Notification Bell without a fabricated unread indicator', () => {
     const tree = React.createElement(
       RoleProvider,
-      { initialRole: 'owner' },
+      null,
       React.createElement(
         EventScopeProvider,
         { initialEvents: MOCK_EVENTS },

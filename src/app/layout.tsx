@@ -9,7 +9,11 @@ const h = React.createElement;
 
 export const metadata = {
   title: 'Sổ Quản Lý Đám Cưới',
-  description: 'Hệ thống quản lý đám cưới nội bộ dành riêng cho gia đình',
+  description: 'Không gian quản lý đám cưới riêng tư của cô dâu và chú rể',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({

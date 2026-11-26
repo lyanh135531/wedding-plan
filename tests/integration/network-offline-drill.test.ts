@@ -81,9 +81,9 @@ describe('Milestone M11.3: Network Failure & Offline Drill (Requirement R4, PLAN
       expect(html).toContain('aria-live="assertive"');
       expect(html).toContain('data-status="offline"');
 
-      // Exact mandatory message from PLAN §22.2
+      // Direct offline message without deprecated handovers link by default
       expect(html).toContain(
-        'Mất kết nối mạng. Ứng dụng ở chế độ xem an toàn (không ghi dữ liệu offline để tránh xung đột sổ tiền/sơ đồ bàn theo PLAN §22.2). Vui lòng sử dụng Bộ bàn giao ngày cưới đã in/tải trước đó.'
+        'Mất kết nối mạng. Ứng dụng ở chế độ xem an toàn (không ghi dữ liệu offline để tránh xung đột sổ tiền/sơ đồ bàn).'
       );
 
       // Warning color styling (amber / warning)
@@ -91,9 +91,7 @@ describe('Milestone M11.3: Network Failure & Offline Drill (Requirement R4, PLAN
       expect(html).toContain('border-[#F59E0B]');
       expect(html).toContain('text-[#92400E]');
 
-      // Direct link to Handover Pack
-      expect(html).toContain('href="/handovers"');
-      expect(html).toContain('Xem Bộ bàn giao');
+      expect(html).not.toContain('href="/handovers"');
     });
 
     it('renders green success banner when network connection is restored', () => {

@@ -16,13 +16,17 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)', () => {
-  it('links only to existing application pages', () => {
-    for (const item of SIDEBAR_NAV_GROUPS.flatMap((group) => group.items)) {
-      expect(fs.existsSync(path.join(process.cwd(), 'src/app/(dashboard)', item.href, 'page.tsx')), item.href).toBe(true);
-    }
-  });
   beforeEach(() => {
     currentPathname = '/overview';
+  });
+
+  it('links only to existing application pages', () => {
+    for (const item of SIDEBAR_NAV_GROUPS.flatMap((group) => group.items)) {
+      expect(
+        fs.existsSync(path.join(process.cwd(), 'src/app/(dashboard)', item.href, 'page.tsx')),
+        item.href
+      ).toBe(true);
+    }
   });
 
   it('renders the 5 authoritative navigation groups from PLAN §4.1', () => {
@@ -36,7 +40,7 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
     ]);
   });
 
-  it('renders fixed 240px sidebar for Desktop (≥1024px) with brand title and system info', () => {
+  it('renders fixed 240px sidebar for Desktop (≥1024px) with couple branding and system info', () => {
     const tree = React.createElement(
       RoleProvider,
       { initialRole: 'owner' },
@@ -45,22 +49,22 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
 
     const html = renderToStaticMarkup(tree);
 
-    // Bố cục cố định 240px, ẩn dưới lg (< 1024px)
     expect(html).toContain('w-[240px]');
     expect(html).toContain('hidden lg:flex');
     expect(html).toContain('h-screen');
     expect(html).toContain('fixed');
 
-    // Tiêu đề thương hiệu
     expect(html).toContain('Sổ Quản Lý Đám Cưới');
-    expect(html).toContain('Quyền: Chủ sở hữu');
+    expect(html).toContain('Cô dâu &amp; Chú rể');
+    expect(html).not.toContain('Quyền: Chủ sở hữu');
+    expect(html).not.toContain('Quyền: Người nhà');
 
-    // Thông tin múi giờ và tiền tệ chuẩn
     expect(html).toContain('Giờ Việt Nam · VND');
-    expect(html).toContain('Không gian riêng của gia đình');
+    expect(html).toContain('Không gian riêng của hai bạn');
+    expect(html).toContain('Khóa sổ / Đăng xuất');
   });
 
-  it('renders all 5 groups and financial links for Owner role', () => {
+  it('renders kept menus and omits the 4 removed menus', () => {
     const tree = React.createElement(
       RoleProvider,
       { initialRole: 'owner' },
@@ -69,56 +73,25 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
 
     const html = renderToStaticMarkup(tree);
 
-    // Đầy đủ 5 nhóm
     expect(html).toContain('Tổng quan');
     expect(html).toContain('Chuẩn bị');
     expect(html).toContain('Khách &amp; tiệc');
     expect(html).toContain('Tài chính');
     expect(html).toContain('Ngày cưới &amp; cài đặt');
 
-    // Các liên kết tài chính hiện diện
     expect(html).toContain('href="/budget"');
     expect(html).toContain('href="/payments"');
     expect(html).toContain('href="/fund"');
     expect(html).toContain('href="/gifts"');
-
-    // Các liên kết quản trị & lịch sử
-    expect(html).toContain('href="/history"');
     expect(html).toContain('href="/data/import"');
     expect(html).toContain('href="/data/export"');
     expect(html).toContain('href="/settings"');
-  });
 
-  it('BẢO MẬT: Ẩn 100% nhóm Tài chính và các route cấm khi ở vai trò Người nhà (Family View)', () => {
-    const tree = React.createElement(
-      RoleProvider,
-      { initialRole: 'family_view' },
-      React.createElement(DesktopSidebar)
-    );
-
-    const html = renderToStaticMarkup(tree);
-
-    // Vai trò hiển thị chuẩn
-    expect(html).toContain('Quyền: Người nhà (Chỉ xem)');
-
-    // Nhóm Tài chính biến mất hoàn toàn
-    expect(html).not.toContain('Tài chính');
-    expect(html).not.toContain('href="/budget"');
-    expect(html).not.toContain('href="/payments"');
-    expect(html).not.toContain('href="/fund"');
-    expect(html).not.toContain('href="/gifts"');
-
-    // Route cấm biến mất hoàn toàn (bao gồm lịch sử, nhập liệu, chia sẻ quyền)
+    // Removed unnecessary menus
     expect(html).not.toContain('href="/history"');
-    expect(html).not.toContain('href="/data/import"');
-    expect(html).not.toContain('href="/sharing"');
-    expect(html).not.toContain('Chia sẻ quyền');
-
-    // Các route công bố vẫn hiển thị bình thường
-    expect(html).toContain('href="/overview"');
-    expect(html).toContain('href="/guests"');
-    expect(html).toContain('href="/tasks"');
-    expect(html).toContain('href="/data/export"');
+    expect(html).not.toContain('href="/attendance"');
+    expect(html).not.toContain('href="/handovers"');
+    expect(html).not.toContain('href="/after-wedding"');
   });
 
   it('highlights the active link with aria-current="page" and primary background', () => {
@@ -132,7 +105,6 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
 
     const html = renderToStaticMarkup(tree);
 
-    // Active item '/guests' has aria-current="page" and primary dark green #23483E
     expect(html).toContain('href="/guests"');
     expect(html).toContain('aria-current="page"');
     expect(html).toContain('nav-link--active');

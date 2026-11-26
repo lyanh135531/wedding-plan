@@ -67,6 +67,7 @@ export const weddingSettings = pgTable(
     }),
     budgetTarget: bigint("budget_target", { mode: "bigint" }),
     contingencyBudget: bigint("contingency_budget", { mode: "bigint" }),
+    pinHash: text("pin_hash"),
     isArchived: boolean("is_archived").notNull().default(false),
     archivedAt: timestamp("archived_at", { withTimezone: true, mode: "date" }),
     archivedByUserId: text("archived_by_user_id"),

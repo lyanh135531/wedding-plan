@@ -3,7 +3,6 @@
 import React, { ReactNode } from 'react';
 import Link from 'next/link';
 import { Menu, Bell } from 'lucide-react';
-import { useRole } from '@/context/RoleContext';
 import { useEventScope } from '@/context/EventScopeContext';
 
 export interface HeaderProps {
@@ -21,7 +20,6 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebarMobile,
   showScopeSelector = true,
 }) => {
-  const { isFamily, isOwner, role, setRoleForPreview } = useRole();
   const { currentScope, availableEvents, setScope } = useEventScope();
   const h = React.createElement;
 
@@ -31,7 +29,6 @@ export const Header: React.FC<HeaderProps> = ({
       className:
         'app-header h-16 fixed top-0 right-0 left-0 lg:left-[240px] border-b border-border-subtle z-20 flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-9',
     },
-    // Khối bên trái: Nút Menu di động + Tiêu đề H1 + Badge vai trò
     h(
       'div',
       { className: 'flex items-center gap-3 min-w-0' },
@@ -61,18 +58,6 @@ export const Header: React.FC<HeaderProps> = ({
           title
         ),
 
-        // Huy hiệu vai trò Người nhà
-        isFamily
-          ? h(
-              'span',
-              {
-                className:
-                  'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF] shrink-0',
-              },
-              'Chỉ xem'
-            )
-          : null,
-
         badge
           ? h(
               'span',
@@ -86,7 +71,6 @@ export const Header: React.FC<HeaderProps> = ({
       )
     ),
 
-    // Khối ở giữa / phải: EventScopeSelector
     showScopeSelector
       ? h(
           'div',
@@ -106,9 +90,7 @@ export const Header: React.FC<HeaderProps> = ({
                 'scope-selector-pill h-10 max-w-[200px] lg:max-w-[260px] focus:outline-none focus:ring-2 focus:ring-[#BFA16E]/40',
             },
             h('option', { value: 'all' }, 'Tất cả buổi (Tổng hợp)'),
-            isOwner
-              ? h('option', { value: 'common' }, 'Chi phí / Việc chung')
-              : null,
+            h('option', { value: 'common' }, 'Chi phí / Việc chung'),
             availableEvents.map((ev) =>
               h(
                 'option',
@@ -122,24 +104,9 @@ export const Header: React.FC<HeaderProps> = ({
         )
       : null,
 
-    // Khối bên phải: Chuyển vai trò preview, Thông báo, Primary CTA
     h(
       'div',
       { className: 'flex items-center gap-2 sm:gap-3 shrink-0' },
-      // Toggle Role Switcher
-      process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_ENABLE_PROTOTYPE_TOOLS === 'true' && h(
-        'button',
-        {
-          type: 'button',
-          onClick: () => setRoleForPreview(isOwner ? 'family_view' : 'owner'),
-          title: 'Chuyển vai trò giả lập (Dev Test)',
-          className:
-            'text-[11px] px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-300 font-medium transition-colors',
-        },
-        `Vai trò: ${role}`
-      ),
-
-      // Nút Chuông thông báo
       h(
         Link,
         {
@@ -148,13 +115,13 @@ export const Header: React.FC<HeaderProps> = ({
             'relative p-2 rounded-full border border-border-subtle/70 bg-surface/80 text-text-muted hover:text-text-main hover:bg-page min-w-[44px] min-h-[44px] flex items-center justify-center transition-all hover:shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20',
           'aria-label': 'Thông báo',
         },
-        h(Bell, { className: 'w-4 h-4 text-text-muted transition-transform hover:scale-105', 'aria-hidden': 'true' })
+        h(Bell, {
+          className: 'w-4 h-4 text-text-muted transition-transform hover:scale-105',
+          'aria-hidden': 'true',
+        })
       ),
 
-      // Đúng 01 nút Primary CTA: Chỉ hiển thị cho Chủ sở hữu
-      isOwner && primaryAction
-        ? h('div', { className: 'ml-1 sm:ml-2' }, primaryAction)
-        : null
+      primaryAction ? h('div', { className: 'ml-1 sm:ml-2' }, primaryAction) : null
     )
   );
 };

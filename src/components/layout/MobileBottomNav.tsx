@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link.js';
 import { usePathname } from 'next/navigation.js';
 import { LayoutDashboard, Users, Wallet, CheckSquare, Menu as MenuIcon } from 'lucide-react';
-import { useRole } from '@/context/RoleContext';
 import { useNavVisibility } from '@/hooks/useNavVisibility';
 
 export interface MobileBottomNavProps {
@@ -12,30 +11,20 @@ export interface MobileBottomNavProps {
   isModalOpen?: boolean;
 }
 
+const NAV_TABS = [
+  { label: 'Tổng quan', href: '/overview', Icon: LayoutDashboard },
+  { label: 'Khách', href: '/guests', Icon: Users },
+  { label: 'Ngân sách', href: '/budget', Icon: Wallet },
+  { label: 'Công việc', href: '/tasks', Icon: CheckSquare },
+] as const;
+
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onOpenMobileMenu,
   isModalOpen = false,
 }) => {
   const pathname = usePathname() || '';
-  const { isOwner } = useRole();
   const isVisible = useNavVisibility(isModalOpen);
   const h = React.createElement;
-
-  // Tabs cho Chủ sở hữu: 5 tabs (4 link + 1 Menu button)
-  const ownerTabs = [
-    { label: 'Tổng quan', href: '/overview', Icon: LayoutDashboard },
-    { label: 'Khách', href: '/guests', Icon: Users },
-    { label: 'Ngân sách', href: '/budget', Icon: Wallet },
-    { label: 'Công việc', href: '/tasks', Icon: CheckSquare },
-  ];
-
-  // Tabs cho Người nhà: 3 tabs chính trong R1 (không có Ngân sách) + 1 Menu button
-  const familyTabs = [
-    { label: 'Tổng quan', href: '/overview', Icon: LayoutDashboard },
-    { label: 'Khách', href: '/guests', Icon: Users },
-  ];
-
-  const activeTabs = isOwner ? ownerTabs : familyTabs;
 
   return h(
     'nav',
@@ -48,7 +37,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     h(
       'div',
       { className: 'flex h-full items-center justify-around px-2' },
-      activeTabs.map((tab) => {
+      NAV_TABS.map((tab) => {
         const isActive =
           pathname === tab.href || pathname.startsWith(`${tab.href}/`);
         const TabIcon = tab.Icon;
@@ -67,22 +56,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             'aria-current': isActive ? 'page' : undefined,
           },
           h(TabIcon, {
-            className: `w-5 h-5 mb-0.5 ${
-              isActive ? 'text-primary' : 'text-text-muted'
-            }`,
+            className: `w-5 h-5 mb-0.5 ${isActive ? 'text-primary' : 'text-text-muted'}`,
             'aria-hidden': 'true',
           }),
           h(
             'span',
-            {
-              className: 'text-[12px] leading-tight text-center truncate max-w-[64px]',
-            },
+            { className: 'text-[12px] leading-tight text-center truncate max-w-[64px]' },
             tab.label
           )
         );
       }),
 
-      // Nút Menu mở toàn bộ phân hệ còn lại
       h(
         'button',
         {
