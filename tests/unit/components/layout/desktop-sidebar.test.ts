@@ -83,6 +83,8 @@ describe('DesktopSidebar Component (PLAN §4.1 & UI/UX Spec §2.3, §3.1, §3.2)
     expect(html).toContain('href="/payments"');
     expect(html).toContain('href="/fund"');
     expect(html).toContain('href="/gifts"');
+    expect(html).toContain('href="/music"');
+    expect(html).toContain('Chọn nhạc');
     expect(html).toContain('href="/data/import"');
     expect(html).toContain('href="/data/export"');
     expect(html).toContain('href="/settings"');

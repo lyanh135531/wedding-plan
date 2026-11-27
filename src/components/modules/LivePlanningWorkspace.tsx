@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { ResourceWorkspace, EventWorkspace, Field, RecordData, RecordEditor } from '@/components/common/ResourceWorkspace';
 import { api, allPages, jsonBody } from '@/lib/api/request';
 import { useRole } from '@/context/RoleContext';
@@ -29,9 +30,24 @@ function ShotHandover({ record, reload }: { record: RecordData; reload: () => vo
 
 function Preparation({ eventId }: { eventId: string }) {
   const [tab, setTab] = useState('items');
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const requested = new URLSearchParams(window.location.search).get('tab');
+    if (requested === 'items' || requested === 'music' || requested === 'shots') {
+      setTab(requested);
+    }
+  }, []);
   const configs = { items: { title: 'Đồ dùng', fields: itemFields }, music: { title: 'Danh sách nhạc', fields: musicFields }, shots: { title: 'Danh sách ảnh', fields: shotFields } };
   const config = configs[tab as keyof typeof configs];
-  return <><div className="flex flex-wrap gap-2 print:hidden" role="tablist">{Object.entries(configs).map(([key, value]) => <Button key={key} variant={tab === key ? 'primary' : 'secondary'} role="tab" aria-selected={tab === key} onClick={() => setTab(key)}>{value.title}</Button>)}</div><ResourceWorkspace key={tab} title={config.title} endpoint={`/api/v1/preparation/${tab}`} eventId={eventId} fields={config.fields} actions={tab === 'shots' ? (r, reload) => <ShotHandover record={r} reload={reload} /> : undefined} /></>;
+  return <>
+    <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
+      <div className="flex flex-wrap gap-2" role="tablist">
+        {Object.entries(configs).map(([key, value]) => <Button key={key} variant={tab === key ? 'primary' : 'secondary'} role="tab" aria-selected={tab === key} onClick={() => setTab(key)}>{value.title}</Button>)}
+      </div>
+      {tab === 'music' && <Link href="/music" className="text-xs font-medium text-primary hover:underline">Mở trang Chọn nhạc chuyên biệt →</Link>}
+    </div>
+    <ResourceWorkspace key={tab} title={config.title} endpoint={`/api/v1/preparation/${tab}`} eventId={eventId} fields={config.fields} actions={tab === 'shots' ? (r, reload) => <ShotHandover record={r} reload={reload} /> : undefined} />
+  </>;
 }
 
 function IdeaPromotion({ record, reload }: { record: RecordData; reload: () => void }) {

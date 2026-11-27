@@ -23,6 +23,7 @@ import {
   Gift,
   Clock,
   HeartHandshake,
+  Music,
   Package,
   Settings,
   Upload,
@@ -49,6 +50,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   '/gifts': Gift,
   '/timeline': Clock,
   '/support': HeartHandshake,
+  '/music': Music,
   '/preparation': Package,
   '/settings': Settings,
   '/data/import': Upload,
@@ -109,6 +111,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroupConfig[] = [
     items: [
       { name: 'Lịch trình ngày cưới', href: '/timeline' },
       { name: 'Đội hỗ trợ', href: '/support' },
+      { name: 'Chọn nhạc', href: '/music' },
       { name: 'Đồ dùng cần chuẩn bị', href: '/preparation' },
       { name: 'Cài đặt chung', href: '/settings' },
       { name: 'Nhập dữ liệu', href: '/data/import' },
